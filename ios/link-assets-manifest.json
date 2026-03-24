@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Aeonik-Bold.ttf",
+      "sha1": "2472b3180dc7dcf9b2b29d7be336db79ee339b4f"
+    },
+    {
+      "path": "src/assets/fonts/Aeonik-Medium.ttf",
+      "sha1": "b6f63715fe6d720b0ed9b2aa50ad72f9f4cdcd37"
+    },
+    {
+      "path": "src/assets/fonts/Aeonik-Regular.ttf",
+      "sha1": "99b47cbb8b77be9142179e4b25d27276767583c2"
+    },
+    {
+      "path": "src/assets/fonts/Aeonik-Thin.ttf",
+      "sha1": "2e9416e689f07646f37e95cfb0e191453e535383"
+    }
+  ]
+}
