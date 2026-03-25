@@ -34,7 +34,7 @@ const Consignors = () => {
   return (
     <View style={styles.innerContainer}>
       <WebViewScreen
-        url="https://staging.bidbuyzoom.com/company-te/client?mobile=true"
+        url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/client?mobile=true`}
         injectedJavaScript={injectedJavaScript}
       />
     </View>

@@ -186,6 +186,7 @@ const HomeDashBoard = () => {
             currentSales.map((sale: any) => {
               const startDate = formatDate(sale.multiStartDate[0]?.startDate);
               const endDate = formatDate(sale.multiStartDate[1]?.startDate);
+              const saleId = sale._id;
               return (
                 <View key={sale._id} style={styles.saleItem}>
                   <View style={styles.saleHeader}>
@@ -243,7 +244,7 @@ const HomeDashBoard = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.saleActionBtn, styles.manageBtn]}
-                      onPress={() => navigation.navigate(routes.salesTab)}>
+                      onPress={() => navigation.navigate(routes.salesTab,{from:'manage',saleId:saleId})}>
                       <AppText
                         title="Manage"
                         fontySize="px12"

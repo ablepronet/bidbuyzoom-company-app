@@ -59,7 +59,7 @@ const ConsignmentRequests = () => {
         showBorder={false}
       />
       <WebViewScreen
-        url="https://staging.bidbuyzoom.com/company-te/consignment-requests?mobile=true"
+        url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/consignment-requests?mobile=true`}
         injectedJavaScript={injectedJavaScript}
       />
     </View>

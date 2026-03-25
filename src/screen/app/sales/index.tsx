@@ -1,11 +1,12 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useMemo} from 'react';
 import WebViewScreen from '../webview';
 import {vs} from '../../../utils/responsive';
 import {useAppSelector} from '../../../redux/hooks';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
 
-const Sales = () => {
+const Sales = ({route}: {route: any}) => {
+  const {from, saleId} = route.params || {};
   const {data, isLoading} = useGetUserProfile();
   const {token, userId} = useAppSelector(state => state.auth);
   const userData = data?.datas || null;
@@ -32,12 +33,16 @@ const Sales = () => {
     })();
     true;
   `;
+
+  const url = useMemo(() => {
+    if (from === 'manage' && saleId) {
+      return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales-information?id=${saleId}?mobile=true`;
+    }
+    return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales?mobile=true`;
+  }, [saleId, userData?.companySlug]);
   return (
     <View style={styles.innerContainer}>
-      <WebViewScreen
-        url="https://staging.bidbuyzoom.com/company-te/sales?mobile=true"
-        injectedJavaScript={injectedJavaScript}
-      />
+      <WebViewScreen url={url} injectedJavaScript={injectedJavaScript} />
     </View>
   );
 };

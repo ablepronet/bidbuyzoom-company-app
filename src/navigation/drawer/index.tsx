@@ -22,6 +22,11 @@ const Drawer = createDrawerNavigator<drawerParamsList>();
 const AppDrawer = () => {
   return (
     <>
+      <StatusBar
+        backgroundColor={colors.primary}
+        barStyle="dark-content"
+        translucent={true}
+      />
       <Drawer.Navigator
         screenOptions={{
           headerShown: false,

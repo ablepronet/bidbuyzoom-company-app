@@ -35,7 +35,7 @@ const BidBuyers = () => {
   return (
     <View style={styles.innerContainer}>
       <WebViewScreen
-        url="https://staging.bidbuyzoom.com/company-te/bidders?mobile=true"
+        url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/bidders?mobile=true`}
         injectedJavaScript={injectedJavaScript}
       />
     </View>

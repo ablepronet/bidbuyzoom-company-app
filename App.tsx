@@ -1,15 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
-import { Provider } from 'react-redux';
-import { persister, store } from './src/redux/store';
-import { PersistGate } from 'redux-persist/integration/react';
+import {Provider} from 'react-redux';
+import {persister, store} from './src/redux/store';
+import {PersistGate} from 'redux-persist/integration/react';
 
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 // import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import RootStack from './src/navigation/rootStack';
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
 });
 const App = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <Provider store={store}>
         <PersistGate persistor={persister} loading={null}>
           <QueryClientProvider client={queryClient}>
