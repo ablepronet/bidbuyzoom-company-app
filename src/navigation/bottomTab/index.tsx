@@ -7,49 +7,68 @@ import HomeDashBoard from "../../screen/app/home";
 import Sales from "../../screen/app/sales";
 import BidBuyers from "../../screen/app/bidBuyers";
 import Setting from "../../screen/app/setting";
-import Catalog from "../../screen/app/catalog";
+import Catalog from "../../screen/app/Consignors";
 import Icon from "react-native-vector-icons/Ionicons";
-import { ms, vs } from "../../utils/responsive";
+import { ms, vs, scale } from "../../utils/responsive";
 import {
   View,
   StyleSheet,
   Platform,
   Dimensions,
   TouchableOpacity,
+  Pressable,
+  GestureResponderEvent,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import AppHeader from "../../components/appHeader";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { AppText } from "../../components/AppText";
 import { ImageComponent } from "../../components/AppImage";
+import appImages from "../../constants/appImages";
+import Consignors from "../../screen/app/Consignors";
 
 const Tab = createBottomTabNavigator<bottomTabParamsList>();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TAB_COUNT = 5;
 const TAB_WIDTH = SCREEN_WIDTH / TAB_COUNT;
 
+// ── No-ripple tab button (from Doc 2) ─────────────────────────────────────────
+interface NoFeedbackTabButtonProps {
+  children: React.ReactNode;
+  onPress?: (event: GestureResponderEvent) => void;
+  style?: StyleProp<ViewStyle>;
+}
+
+const NoFeedbackTabButton: React.FC<NoFeedbackTabButtonProps> = ({
+  children,
+  onPress,
+  style,
+}) => (
+  <Pressable onPress={onPress} android_ripple={null} style={style}>
+    {children}
+  </Pressable>
+);
+
+// ── Icon renderer ─────────────────────────────────────────────────────────────
 const renderIcon =
   (iconName: string, focusedIconName: string) =>
   ({ focused, color }: { focused: boolean; color: string; size: number }) => {
     return (
       <View style={styles.iconContainer}>
-        <View
-          style={[
-            styles.topBorder,
-            {
-              backgroundColor: focused ? colors.primary : colors.border,
-              height: focused ? vs(3) : vs(1),
-            },
-          ]}
-        />
+        {/* Active top border — only rendered when focused (Doc 2 pattern) */}
+        {focused && <View style={styles.activeTopBorder} />}
+
         <Icon
           name={focused ? focusedIconName : iconName}
-          size={ms(22)}
+          size={scale(22)}
           color={color}
         />
       </View>
     );
   };
 
+// ── Navigator ─────────────────────────────────────────────────────────────────
 const BottomTabNavigator = () => {
   const navigation = useNavigation();
 
@@ -63,7 +82,7 @@ const BottomTabNavigator = () => {
         <View>
           <Icon
             name="notifications-outline"
-            size={ms(22)}
+            size={scale(22)}
             color={colors.textPrimary}
           />
           <View style={styles.badge}>
@@ -79,7 +98,7 @@ const BottomTabNavigator = () => {
       <TouchableOpacity style={styles.headerIcon}>
         <Icon
           name="chatbubble-outline"
-          size={ms(22)}
+          size={scale(22)}
           color={colors.textPrimary}
         />
       </TouchableOpacity>
@@ -88,7 +107,7 @@ const BottomTabNavigator = () => {
 
   const renderHeaderCenter = () => (
     <ImageComponent
-      source={require("../../assets/images/appLogo.png")}
+      source={appImages.splashLogo}
       style={styles.headerLogo}
       resizeMode="contain"
     />
@@ -114,6 +133,7 @@ const BottomTabNavigator = () => {
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: { width: TAB_WIDTH },
+        tabBarButton: (props) => <NoFeedbackTabButton {...props} />,
       })}
     >
       <Tab.Screen
@@ -133,11 +153,11 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name={routes.catalogTab}
-        component={Catalog}
+        name={routes.consignorsTab}
+        component={Consignors}
         options={{
-          tabBarLabel: "Catalog",
-          tabBarIcon: renderIcon("grid-outline", "grid"),
+          tabBarLabel: "Consignors",
+          tabBarIcon: renderIcon("person-outline", "person"),
         }}
       />
       <Tab.Screen
@@ -155,7 +175,7 @@ const BottomTabNavigator = () => {
           tabBarLabel: "More",
           tabBarIcon: renderIcon(
             "ellipsis-horizontal-outline",
-            "ellipsis-horizontal",
+            "ellipsis-horizontal"
           ),
         }}
       />
@@ -163,54 +183,63 @@ const BottomTabNavigator = () => {
   );
 };
 
+// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   tabBar: {
     height: Platform.OS === "ios" ? vs(85) : vs(70),
     backgroundColor: colors.white,
-    borderTopWidth: 0,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
+
   iconContainer: {
     flex: 1,
-    width: TAB_WIDTH,
+    width: "100%",           // fills full tab cell (Doc 2)
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: vs(5),
+    paddingTop: vs(5),      // pushes icon down so border sits at very top
+    marginTop: -6,
   },
-  topBorder: {
+
+  // Always vs(3) tall, conditionally rendered (Doc 2 pattern)
+  activeTopBorder: {
     position: "absolute",
     top: 0,
     width: TAB_WIDTH,
+    height: vs(3),
+    backgroundColor: colors.primary,
     alignSelf: "center",
-    zIndex: 1,
   },
+
   label: {
-    fontSize: ms(12),
+    fontSize: scale(10),     // scale instead of ms (Doc 2)
     fontFamily: "Aeonik-Medium",
-    marginTop: vs(4),
-    paddingBottom: Platform.OS === "ios" ? vs(5) : vs(10),
+    fontWeight: "600",
+    paddingTop: vs(3),      // Doc 2 pattern, replaces marginTop + paddingBottom
     textAlign: "center",
   },
+
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
   },
   headerIcon: {
-    marginLeft: ms(12),
+    marginLeft: scale(12),
   },
   badge: {
     position: "absolute",
-    right: -ms(4),
+    right: -scale(4),
     top: -vs(4),
     backgroundColor: colors.red,
     borderRadius: 10,
-    width: ms(16),
-    height: ms(16),
+    width: scale(16),
+    height: scale(16),
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
   },
   headerLogo: {
-    width: ms(80),
+    width: scale(80),
     height: vs(30),
   },
 });

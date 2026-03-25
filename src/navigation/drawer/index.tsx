@@ -11,8 +11,9 @@ import BidBuyers from '../../screen/app/bidBuyers';
 import Marketing from '../../screen/app/marketing';
 import Sales from '../../screen/app/sales';
 import Setting from '../../screen/app/setting';
-import Profile from '../../screen/app/profile';
-import CreateScreen from '../../screen/app/create';
+import ConsignmentRequests from '../../screen/app/consignmentRequests';
+import CompanyReport from '../../screen/app/companyReport';
+import CommonWebView from '../../screen/app/commonWebView';
 import { routes } from '../route';
 import BottomTabNavigator from '../bottomTab';
 
@@ -34,9 +35,10 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.sale} component={Sales} />
         <Drawer.Screen name={routes.bidBuyser} component={BidBuyers} />
         <Drawer.Screen name={routes.marketing} component={Marketing} />
-        <Drawer.Screen name={routes.create} component={CreateScreen} />
         <Drawer.Screen name={routes.setting} component={Setting} />
-        <Drawer.Screen name={routes.profile} component={Profile} />
+        <Drawer.Screen name={routes.consignmentRequests} component={ConsignmentRequests} />
+        <Drawer.Screen name={routes.companyReport} component={CompanyReport} />
+        <Drawer.Screen name={routes.commonWebView} component={CommonWebView} />
       </Drawer.Navigator>
     </>
   );

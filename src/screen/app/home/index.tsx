@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,31 +6,33 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { useGetUserProfile } from '../../../services/queries/app/Profile';
+import {DrawerActions, useNavigation} from '@react-navigation/native';
+import {useGetUserProfile} from '../../../services/queries/app/Profile';
 import Loader from '../../../components/loader';
-import { AppText } from '../../../components/AppText';
-import { ImageComponent } from '../../../components/AppImage';
-import { colors } from '../../../constants';
-import { ms, vs } from '../../../utils/responsive';
+import {AppText} from '../../../components/AppText';
+import {ImageComponent} from '../../../components/AppImage';
+import {colors} from '../../../constants';
+import {ms, vs} from '../../../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AppHeader from '../../../components/appHeader';
 import Modal from 'react-native-modal';
-import { useAppDispatch } from '../../../redux/hooks';
-import { setUserLogout } from '../../../redux/slices/auth';
+import {useAppDispatch} from '../../../redux/hooks';
+import {setUserLogout} from '../../../redux/slices/auth';
 import PerformanceAnalytics from '../../../components/PerformanceAnalytics';
 import AccountSetup from '../../../components/AccountSetup';
-import { useGetDashBoardData } from '../../../services/queries/app/dashboard';
-import { formatDate } from '../../../helper/getTodayDate';
+import {useGetDashBoardData} from '../../../services/queries/app/dashboard';
+import {formatDate} from '../../../helper/getTodayDate';
 
-const { width } = Dimensions.get('window');
+import {routes} from '../../../navigation/route';
+
+const {width} = Dimensions.get('window');
 
 const HomeDashBoard = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const { data, isLoading } = useGetUserProfile();
+  const {data, isLoading} = useGetUserProfile();
   const [selectedYear, setSelectedYear] = useState('2026');
-  const { data: dashboardData, isLoading: isDashboardLoading } =
+  const {data: dashboardData, isLoading: isDashboardLoading} =
     useGetDashBoardData(selectedYear);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
 
@@ -108,11 +110,10 @@ const HomeDashBoard = () => {
       <ScrollView
         style={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollInner}
-      >
+        contentContainerStyle={styles.scrollInner}>
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          <View style={[styles.statsCard, { backgroundColor: colors.primary }]}>
+          <View style={[styles.statsCard, {backgroundColor: colors.primary}]}>
             <View style={styles.statsCardContent}>
               <AppText title="Yearly Revenue" color="white" fontySize="px14" />
               <AppText
@@ -127,7 +128,7 @@ const HomeDashBoard = () => {
               <View style={styles.circleOverlay} />
             </View>
           </View>
-          <View style={[styles.statsCard, { backgroundColor: '#282a42' }]}>
+          <View style={[styles.statsCard, {backgroundColor: '#282a42'}]}>
             <View style={styles.statsCardContent}>
               <AppText title="Items Sold" color="white" fontySize="px14" />
               <AppText
@@ -142,7 +143,7 @@ const HomeDashBoard = () => {
               <View
                 style={[
                   styles.circleOverlay,
-                  { backgroundColor: 'rgba(255,255,255,0.08)' },
+                  {backgroundColor: 'rgba(255,255,255,0.08)'},
                 ]}
               />
             </View>
@@ -169,13 +170,15 @@ const HomeDashBoard = () => {
               fontFamily="bold"
               color="primary"
             />
-            <TouchableOpacity style={styles.viewAllBtn}>
+            <TouchableOpacity
+              style={styles.viewAllBtn}
+              onPress={() => navigation.navigate(routes.salesTab)}>
               <AppText title="View all" fontySize="px12" color="primary" />
               <Icon
                 name="arrow-forward-outline"
                 size={ms(14)}
                 color={colors.primary}
-                style={{ marginLeft: ms(4) }}
+                style={{marginLeft: ms(4)}}
               />
             </TouchableOpacity>
           </View>
@@ -229,7 +232,9 @@ const HomeDashBoard = () => {
                   </View>
 
                   <View style={styles.saleActionRow}>
-                    <TouchableOpacity style={styles.saleActionBtn}>
+                    <TouchableOpacity
+                      style={styles.saleActionBtn}
+                      onPress={() => navigation.navigate(routes.salesTab)}>
                       <AppText
                         title="View"
                         fontySize="px12"
@@ -238,10 +243,16 @@ const HomeDashBoard = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.saleActionBtn, styles.manageBtn]}
-                    >
-                      <AppText title="Manage" fontySize="px12" color="primary" />
+                      onPress={() => navigation.navigate(routes.salesTab)}>
+                      <AppText
+                        title="Manage"
+                        fontySize="px12"
+                        color="primary"
+                      />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.saleActionBtn}>
+                    <TouchableOpacity
+                      style={styles.saleActionBtn}
+                      onPress={() => navigation.navigate(routes.salesTab)}>
                       <AppText
                         title="Monitor"
                         fontySize="px12"
@@ -286,8 +297,7 @@ const HomeDashBoard = () => {
                   styles.yearTab,
                   selectedYear === '2026' && styles.yearTabActive,
                 ]}
-                onPress={() => setSelectedYear('2026')}
-              >
+                onPress={() => setSelectedYear('2026')}>
                 <AppText
                   title="2026"
                   fontySize="px12"
@@ -299,8 +309,7 @@ const HomeDashBoard = () => {
                   styles.yearTab,
                   selectedYear === '2025' && styles.yearTabActive,
                 ]}
-                onPress={() => setSelectedYear('2025')}
-              >
+                onPress={() => setSelectedYear('2025')}>
                 <AppText
                   title="2025"
                   fontySize="px12"
@@ -312,7 +321,7 @@ const HomeDashBoard = () => {
 
           <PerformanceAnalytics data={performanceData} year={selectedYear} />
         </View>
-        <View style={{ height: vs(30) }} />
+        <View style={{height: vs(30)}} />
       </ScrollView>
 
       {/* Profile Dropdown Modal */}
@@ -323,8 +332,7 @@ const HomeDashBoard = () => {
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0.3}
-        style={styles.modalContainer}
-      >
+        style={styles.modalContainer}>
         <View style={styles.profileModal}>
           <View style={styles.modalHeader}>
             <View style={styles.modalAvatar}>
@@ -419,9 +427,9 @@ const HomeDashBoard = () => {
       </Modal>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      {/* <TouchableOpacity style={styles.fab}>
         <Icon name="add" size={ms(30)} color={colors.white} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
@@ -593,7 +601,7 @@ const styles = StyleSheet.create({
     width: width * 0.65,
     padding: ms(15),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
@@ -643,7 +651,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,

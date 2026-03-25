@@ -17,7 +17,7 @@ export default {
   },
   staging: {
     base_url: 'https://staging-api.bidbuyzoom.com/api/',
-    image_base_url: 'https://global-ride.devtechnosys.tech/storage/',
+    image_base_url: 'https://staging-api.bidbuyzoom.com/',
     socketUrl: 'https://global-ride.devtechnosys.tech/',
     tearm:
       'https://global-ride.devtechnosys.tech/api/cms/terms-and-conditions',

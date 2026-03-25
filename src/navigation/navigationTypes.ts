@@ -26,15 +26,19 @@ export type drawerParamsList = {
   [routes.sale]: undefined;
   [routes.marketing]: undefined;
   [routes.setting]: undefined;
-  [routes.profile]: undefined;
-  [routes.create]: undefined;
+  [routes.consignmentRequests]: undefined;
+  [routes.companyReport]: undefined;
+  [routes.commonWebView]: {
+    url: string;
+    title: string;
+  };
   DashboardTabs: undefined; // New tab navigator entry
 };
 
 export type bottomTabParamsList = {
   [routes.dashboardTab]: undefined;
   [routes.salesTab]: undefined;
-  [routes.catalogTab]: undefined;
+  [routes.consignorsTab]: undefined;
   [routes.biddersTab]: undefined;
   [routes.moreTab]: undefined;
 };

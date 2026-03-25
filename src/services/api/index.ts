@@ -69,7 +69,7 @@ export const get = async (
 ) => {
   const token = store.getState().auth.token;
   //   const lang = store.getState().languageSlice.appLanguage;
-  logs('token', token);
+  logs('token==', token);
   const options: AxiosRequestConfig = {
     headers: {
       Accept: 'application/json',

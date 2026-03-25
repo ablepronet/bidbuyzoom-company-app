@@ -29,7 +29,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   centerContent,
   containerStyle,
   backgroundColor = colors.white,
-  titleColor = 'red',
+  titleColor = 'primary',
   showBorder = true,
 }) => {
   const insets = useSafeAreaInsets();
@@ -87,7 +87,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: ms(15),
-    paddingBottom: vs(15),
+    paddingBottom: vs(10),
     borderBottomColor: colors.border,
   },
   content: {

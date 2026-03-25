@@ -77,7 +77,6 @@ interface PerformanceAnalyticsProps {
 }
 
 const PerformanceAnalytics = ({ data, year }: PerformanceAnalyticsProps) => {
-  console.log(data, 'PerformanceAnalytics data');
   const chartItems = [
     { label: 'Number of Lots', value: data.lots, maxValue: 340 },
     { label: 'Number of Bidders', value: data.bidders, maxValue: 340 },

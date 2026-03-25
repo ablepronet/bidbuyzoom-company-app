@@ -9,18 +9,19 @@ export const routes = {
 
   // Drawer Screens
   homeTab: 'HomeTab',
-  profile: 'Profile',
   bidBuyser: 'BidBuyser',
   company: 'Company',
   marketing: 'Marketing',
   sale: 'Sale',
   setting: 'Setting',
-  create: 'Create',
+  consignmentRequests: 'ConsignmentRequests',
+  companyReport: 'CompanyReport',
+  commonWebView: 'CommonWebView',
 
   // Bottom Tab Screens
   dashboardTab: 'DashboardTab',
   salesTab: 'SalesTab',
-  catalogTab: 'CatalogTab',
+  consignorsTab: 'ConsignorsTab',
   biddersTab: 'BiddersTab',
   moreTab: 'MoreTab',
 };

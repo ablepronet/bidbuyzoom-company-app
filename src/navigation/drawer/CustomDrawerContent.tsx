@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,20 +6,21 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import { DrawerContentScrollView } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
-import { colors } from '../../constants';
-import { AppText } from '../../components/AppText';
-import { ImageComponent } from '../../components/AppImage';
+import {DrawerContentScrollView} from '@react-navigation/drawer';
+import {useNavigation, useNavigationState} from '@react-navigation/native';
+import {colors} from '../../constants';
+import {AppText} from '../../components/AppText';
+import {ImageComponent} from '../../components/AppImage';
 import appImages from '../../constants/appImages';
-import { ms, vs } from '../../utils/responsive';
+import {ms, vs} from '../../utils/responsive';
 import AppButton from '../../components/appButton';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setUserLogout } from '../../redux/slices/auth';
-import { persister } from '../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../redux/hooks';
+import {setUserLogout} from '../../redux/slices/auth';
+import {persister} from '../../redux/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import { routes } from '../route';
+import {routes} from '../route';
+import {useGetUserProfile} from '../../services/queries/app/Profile';
 
 // Types
 type MenuItemType = {
@@ -49,10 +50,10 @@ const menuItems: MenuItemType[] = [
   },
   {
     id: '3',
-    title: 'Catalog',
-    icon: 'grid-outline',
+    title: 'Consignors',
+    icon: 'person-outline',
     route: 'DashboardTabs',
-    tabScreen: routes.catalogTab,
+    tabScreen: routes.consignorsTab,
   },
   {
     id: '4',
@@ -61,31 +62,37 @@ const menuItems: MenuItemType[] = [
     route: 'DashboardTabs',
     tabScreen: routes.biddersTab,
   },
-  {
-    id: '5',
-    title: 'Invoices',
-    icon: 'document-text-outline',
-    route: routes.sale, // Map to existing drawer route if not in tabs
-  },
+  // {
+  //   id: '5',
+  //   title: 'Invoices',
+  //   icon: 'document-text-outline',
+  //   route: routes.sale, // Map to existing drawer route if not in tabs
+  // },
   {
     id: '6',
-    title: 'Settlements',
-    icon: 'cash-outline',
-    route: routes.sale, // Placeholder
+    title: 'Consignment Requests',
+    icon: 'mail-outline',
+    route: routes.consignmentRequests,
   },
   {
     id: '7',
-    title: 'Reports',
+    title: 'Company Report',
     icon: 'bar-chart-outline',
-    route: routes.sale, // Placeholder
+    route: routes.companyReport,
   },
   {
-    id: '8',
-    title: 'Notifications',
-    icon: 'notifications-outline',
-    route: routes.setting, // Placeholder
-    badge: 3,
+    id: '10',
+    title: 'Marketing',
+    icon: 'megaphone-outline',
+    route: routes.marketing,
   },
+  // {
+  //   id: '8',
+  //   title: 'Notifications',
+  //   icon: 'notifications-outline',
+  //   route: routes.setting, // Placeholder
+  //   badge: 3,
+  // },
   {
     id: '9',
     title: 'Settings',
@@ -98,16 +105,28 @@ const menuItems: MenuItemType[] = [
 export const CustomDrawerContent = (props: any) => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector(state => state.auth);
-  const [selectedMenu, setSelectedMenu] = useState<string>('1');
+  const {user} = useAppSelector(state => state.auth);
+  const {data, isLoading} = useGetUserProfile();
 
   const userData = user || null;
 
+  const activeRouteName = useNavigationState(state => {
+    const getActiveRouteName = (state: any): string | undefined => {
+      if (!state || !state.routes || state.index === undefined)
+        return undefined;
+      const route = state.routes[state.index];
+      if (route.state) {
+        return getActiveRouteName(route.state);
+      }
+      return route.name;
+    };
+    return getActiveRouteName(state);
+  });
+
   const handleNavigate = (item: MenuItemType) => {
-    setSelectedMenu(item.id);
     if (item.tabScreen) {
       // @ts-ignore
-      navigation.navigate(item.route, { screen: item.tabScreen });
+      navigation.navigate(item.route, {screen: item.tabScreen});
     } else if (item.route) {
       // @ts-ignore
       navigation.navigate(item.route);
@@ -115,14 +134,15 @@ export const CustomDrawerContent = (props: any) => {
   };
 
   const renderMenuItem = (item: MenuItemType, index: number) => {
-    const isSelected = selectedMenu === item.id;
+    const isSelected = item.tabScreen
+      ? activeRouteName === item.tabScreen
+      : activeRouteName === item.route;
 
     return (
       <TouchableOpacity
         key={item.id}
         style={[styles.menuItem, isSelected && styles.menuItemSelected]}
-        onPress={() => handleNavigate(item)}
-      >
+        onPress={() => handleNavigate(item)}>
         {isSelected && <View style={styles.activeIndicator} />}
         <View style={styles.menuItemLeft}>
           <Icon
@@ -169,7 +189,11 @@ export const CustomDrawerContent = (props: any) => {
         />
         <View style={styles.profileContainer}>
           <View style={styles.avatarContainer}>
-            <Icon name="person" size={ms(40)} color={colors.border} />
+            <ImageComponent
+              uri={data?.datas.logo}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
           <AppText
             title={userData?.companyName || 'company test'}
@@ -182,7 +206,7 @@ export const CustomDrawerContent = (props: any) => {
             title={userData?.email || 'test@company.com'}
             color="white"
             fontySize="px12"
-            style={{ opacity: 0.8 }}
+            style={{opacity: 0.8}}
           />
         </View>
       </View>
@@ -190,8 +214,7 @@ export const CustomDrawerContent = (props: any) => {
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {menuItems.map((item, index) => renderMenuItem(item, index))}
 
         <View style={styles.footerSection}>
@@ -230,7 +253,7 @@ export const CustomDrawerContent = (props: any) => {
   );
 };
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -247,7 +270,7 @@ const styles = StyleSheet.create({
   logo: {
     width: ms(100),
     height: vs(40),
-    marginBottom: vs(15),
+    marginVertical: vs(15),
   },
   profileContainer: {
     alignItems: 'center',
