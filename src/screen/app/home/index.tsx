@@ -244,7 +244,12 @@ const HomeDashBoard = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.saleActionBtn, styles.manageBtn]}
-                      onPress={() => navigation.navigate(routes.salesTab,{from:'manage',saleId:saleId})}>
+                      onPress={() =>
+                        navigation.navigate(routes.salesTab, {
+                          from: 'manage',
+                          saleId: saleId,
+                        })
+                      }>
                       <AppText
                         title="Manage"
                         fontySize="px12"

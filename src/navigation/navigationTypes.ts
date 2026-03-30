@@ -1,6 +1,6 @@
-import { RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { routes } from './route';
+import {RouteProp} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {routes} from './route';
 
 export type authStackParamsList = {
   [routes.WelcomeScreen]: undefined;
@@ -9,9 +9,10 @@ export type authStackParamsList = {
   [routes.OtpVerification]: {
     from: 'login' | 'signUp' | 'forgot';
     type: 'phone' | 'email';
-    contactNumber?: string;
-    countryCode?: string;
+    userDetails?: null | any;
     email?: string;
+    password?: string;
+    rememberMe?: boolean;
   };
   [routes.ForgotPass]: undefined;
   [routes.ResetPassword]: {
@@ -43,10 +44,8 @@ export type bottomTabParamsList = {
   [routes.moreTab]: undefined;
 };
 
-export type authNavigationType<
-  RouteName extends keyof authStackParamsList
-> = NativeStackNavigationProp<authStackParamsList, RouteName>;
+export type authNavigationType<RouteName extends keyof authStackParamsList> =
+  NativeStackNavigationProp<authStackParamsList, RouteName>;
 
-export type authRouteType<
-  RouteName extends keyof authStackParamsList
-> = RouteProp<authStackParamsList, RouteName>;
+export type authRouteType<RouteName extends keyof authStackParamsList> =
+  RouteProp<authStackParamsList, RouteName>;

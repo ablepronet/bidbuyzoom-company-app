@@ -7,6 +7,7 @@ import Login from '../../screen/auth/login';
 import SignUp from '../../screen/auth/signup';
 import ForgotPassword from '../../screen/auth/forgotPassword';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Verification from '../../screen/auth/Verification';
 
 const Stack = createNativeStackNavigator<authStackParamsList>();
 const AuthStack = () => {
@@ -20,6 +21,7 @@ const AuthStack = () => {
     //   initialRouteName={routes.WelcomeScreen}
     >
       <Stack.Screen name={routes.LoginScreen} component={Login} />
+      <Stack.Screen name={routes.OtpVerification} component={Verification} />
       <Stack.Screen name={routes.SignUp} component={SignUp} />
       <Stack.Screen name={routes.ForgotPass} component={ForgotPassword} />
     </Stack.Navigator>

@@ -1,4 +1,4 @@
-import { get } from 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
+import {get} from 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
 import config from '../utils/config';
 
 export const BASE_URL = config?.base_url;
@@ -9,10 +9,11 @@ export const PRIVACY_POLICY = config.privacy;
 
 const apiEndPoints = {
   login: 'login',
-  signup:'sign-up',
-  forgotPassword:'forgot-password',
-  getUserProfile:'profile',
-  getDashboardData:'mobile/dashboard'
+  signup: 'sign-up',
+  forgotPassword: 'forgot-password',
+  getUserProfile: 'profile',
+  getDashboardData: 'mobile/dashboard',
+  verification: 'verify-login-2fa',
 };
 
 export default apiEndPoints;

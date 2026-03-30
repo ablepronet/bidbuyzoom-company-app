@@ -18,20 +18,27 @@ import {routes} from '../../../navigation/route';
 import {useLogin} from '../../../services/queries/auth/login';
 import {
   setIsLogin,
+  setRememberData,
   setTokens,
   setUserData,
   setUserId,
 } from '../../../redux/slices/auth';
 import {useAppDispatch, useAppSelector} from '../../../redux/hooks';
+import AppCheckbox from '../../../components/AppCheckbox';
 const Login = () => {
   const navigation = useNavigation<any>();
   const {mutate: login, isPending} = useLogin();
   const {loginValidation} = ValidationSchemas();
+  const {email, password, rememberMe} = useAppSelector(state => state.auth);
   const emailRef = useRef<any>(null);
   const {token} = useAppSelector(state => state.auth);
   const passwordRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const onEmailSubmit = (values: {email: string; password: string}) => {
+  const onEmailSubmit = (values: {
+    email: string;
+    password: string;
+    remember: boolean;
+  }) => {
     const body = {
       email: values.email.trim(),
       password: values.password.trim(),
@@ -40,12 +47,27 @@ const Login = () => {
     };
     login(body, {
       onSuccess: res => {
-        console.log(res, 'Login response');
-        if (res?.status) {
+        if (res?.requires2FA) {
+          navigation.navigate(routes.OtpVerification, {
+            from: 'login',
+            userDetails: res,
+            email: values.email,
+            password: values.password,
+            rememberMe: values.remember,
+          });
+        } else {
           dispatch(setTokens(res?.token || null));
           dispatch(setUserId(res?.data?._id));
           dispatch(setUserData(res?.data || null));
           dispatch(setIsLogin(true));
+
+          dispatch(
+            setRememberData({
+              email: values.email,
+              password: values.password,
+              rememberMe: values.remember,
+            }),
+          );
         }
       },
     });
@@ -87,8 +109,9 @@ const Login = () => {
           <View style={styles.formContainer}>
             <Formik
               initialValues={{
-                email: '',
-                password: '',
+                email: email || '',
+                password: password || '',
+                remember: rememberMe || false,
               }}
               validationSchema={loginValidation}
               onSubmit={onEmailSubmit}>
@@ -96,6 +119,7 @@ const Login = () => {
                 handleChange,
                 handleBlur,
                 handleSubmit,
+                setFieldValue,
                 values,
                 errors,
                 touched,
@@ -135,12 +159,11 @@ const Login = () => {
                     }}
                   />
                   <View style={styles.forgotPasswordContainer}>
-                    {/* <AppCheckbox
-                      value={rememberMe}
-                      onChange={val => dispatch(setRememberMe(val))}
-                      label={appString.login.rememberMe}
-                      containerStyle={{ marginTop: vs(10) }}
-                    /> */}
+                    <AppCheckbox
+                      value={values.remember}
+                      onChange={val => setFieldValue('remember', val)}
+                      label="Remember me"
+                    />
                     <AppPressable
                       onPress={() => {
                         navigation.navigate(routes.ForgotPass);
@@ -150,7 +173,6 @@ const Login = () => {
                         fontySize="px16"
                         color="primary"
                         fontFamily="medium"
-                        marginTop={vs(5)}
                       />
                     </AppPressable>
                   </View>
@@ -211,7 +233,9 @@ const styles = StyleSheet.create({
     marginTop: vs(30),
   },
   forgotPasswordContainer: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   continueButton: {
     marginTop: vs(20),
