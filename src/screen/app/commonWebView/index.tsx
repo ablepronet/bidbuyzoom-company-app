@@ -51,6 +51,7 @@ const CommonWebView = () => {
         key={url}
         url={url}
         injectedJavaScript={injectedJavaScript}
+        enableWebBack={true}
       />
     </View>
   );

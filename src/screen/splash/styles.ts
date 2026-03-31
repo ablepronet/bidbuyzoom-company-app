@@ -5,7 +5,7 @@ import {scale, vs} from '../../utils/responsive';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.lightPrimary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },

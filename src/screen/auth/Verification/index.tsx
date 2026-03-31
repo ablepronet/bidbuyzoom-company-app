@@ -191,7 +191,7 @@ const Verification = () => {
               style={styles.button}
               disabled={!isComplete}
               onPress={handleVerifyOtp}
-              //   loading={isPending}
+              loading={isPending}
             />
           </View>
         </Card>

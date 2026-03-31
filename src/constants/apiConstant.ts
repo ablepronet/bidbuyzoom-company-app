@@ -6,6 +6,7 @@ export const IMAGE_BASE_URL = config.image_base_url;
 export const SOCKET_URL = config.socketUrl;
 export const TEARM_CONDITION = config.tearm;
 export const PRIVACY_POLICY = config.privacy;
+export const HELP = 'https://staging.bidbuyzoom.com/help'
 
 const apiEndPoints = {
   login: 'login',

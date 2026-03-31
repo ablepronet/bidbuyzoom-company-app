@@ -21,6 +21,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import {routes} from '../route';
 import {useGetUserProfile} from '../../services/queries/app/Profile';
+import ConfirmationModal from '../../components/ConfirmationModal';
+import {HELP} from '../../constants/apiConstant';
 
 // Types
 type MenuItemType = {
@@ -74,18 +76,18 @@ const menuItems: MenuItemType[] = [
     icon: 'mail-outline',
     route: routes.consignmentRequests,
   },
-  {
-    id: '7',
-    title: 'Company Report',
-    icon: 'bar-chart-outline',
-    route: routes.companyReport,
-  },
-  {
-    id: '10',
-    title: 'Marketing',
-    icon: 'megaphone-outline',
-    route: routes.marketing,
-  },
+  // {
+  //   id: '7',
+  //   title: 'Company Report',
+  //   icon: 'bar-chart-outline',
+  //   route: routes.companyReport,
+  // },
+  // {
+  //   id: '10',
+  //   title: 'Marketing',
+  //   icon: 'megaphone-outline',
+  //   route: routes.marketing,
+  // },
   // {
   //   id: '8',
   //   title: 'Notifications',
@@ -107,6 +109,8 @@ export const CustomDrawerContent = (props: any) => {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.auth);
   const {data, isLoading} = useGetUserProfile();
+
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   const userData = user || null;
 
@@ -178,12 +182,20 @@ export const CustomDrawerContent = (props: any) => {
     dispatch(setUserLogout());
   };
 
+  const handleNavigateToHelp = () => {
+    //@ts-ignore
+    navigation.navigate(routes.commonWebView, {
+      title: 'Bidbuyzoom',
+      url: `https://staging.bidbuyzoom.com/help`,
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.headerSection}>
         <ImageComponent
-          source={appImages.splashLogo}
+          source={appImages.logo2}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -218,7 +230,9 @@ export const CustomDrawerContent = (props: any) => {
         {menuItems.map((item, index) => renderMenuItem(item, index))}
 
         <View style={styles.footerSection}>
-          <TouchableOpacity style={styles.footerItem}>
+          <TouchableOpacity
+            style={styles.footerItem}
+            onPress={() => handleNavigateToHelp()}>
             <Icon
               name="megaphone"
               size={ms(20)}
@@ -233,7 +247,9 @@ export const CustomDrawerContent = (props: any) => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.footerItem} onPress={handleLogout}>
+          <TouchableOpacity
+            style={styles.footerItem}
+            onPress={() => setIsLogoutModalVisible(true)}>
             <Icon
               name="log-out-outline"
               size={ms(20)}
@@ -249,6 +265,17 @@ export const CustomDrawerContent = (props: any) => {
           </TouchableOpacity>
         </View>
       </DrawerContentScrollView>
+      <ConfirmationModal
+        visible={isLogoutModalVisible}
+        onClose={() => setIsLogoutModalVisible(false)}
+        onConfirm={() => {
+          setIsLogoutModalVisible(false);
+          handleLogout();
+        }}
+        title="Logout"
+        message="Are you sure you want to log out?"
+        confirmText="Logout"
+      />
     </View>
   );
 };

@@ -18,7 +18,7 @@ const SplashScreen = () => {
       />
 
       <View style={styles.centerLogoWrapper}>
-        <ImageComponent source={appImages.splashLogo} style={styles.logo} />
+        <ImageComponent source={appImages.logo2} style={styles.logo} />
       </View>
     </View>
   );

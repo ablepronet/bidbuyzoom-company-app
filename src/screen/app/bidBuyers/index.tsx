@@ -37,6 +37,7 @@ const BidBuyers = () => {
       <WebViewScreen
         url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/bidders?mobile=true`}
         injectedJavaScript={injectedJavaScript}
+        enableWebBack={true}
       />
     </View>
   );

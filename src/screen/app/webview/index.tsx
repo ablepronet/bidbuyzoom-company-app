@@ -155,14 +155,15 @@
 //   },
 // });
 
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import WebView from 'react-native-webview';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Loader from '../../../components/loader';
-import {colors} from '../../../constants';
-import {vs} from '../../../utils/responsive';
+import {appIcons, colors} from '../../../constants';
+import {scale, vs} from '../../../utils/responsive';
 import AppHeader from '../../../components/appHeader';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface WebViewScreenProps {
   url: string;
@@ -171,6 +172,7 @@ interface WebViewScreenProps {
   onNavigationStateChange?: (navState: any) => void;
   headers?: Record<string, string>;
   showLoader?: boolean;
+  enableWebBack?: boolean;
   javaScriptEnabled?: boolean;
   domStorageEnabled?: boolean;
   sharedCookiesEnabled?: boolean;
@@ -193,11 +195,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   thirdPartyCookiesEnabled = true,
   onLoadEnd: customOnLoadEnd,
   onError: customOnError,
+  enableWebBack = false,
   headerTitle,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
+
+  const [canGoBack, setCanGoBack] = useState(false);
   //@ts-ignore
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const webViewRef = useRef<WebView>(null);
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -241,35 +247,46 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     const {nativeEvent} = syntheticEvent;
     console.log('HTTP Error:', nativeEvent.statusCode);
   };
+
+  const handleNavigationStateChange = (navState: any) => {
+    setCanGoBack(navState.canGoBack);
+    onNavigationStateChange?.(navState);
+  };
   return (
     // <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
-        {/* <AppHeader title={headerTitle} containerStyle={styles.header} /> */}
-
-        <WebView
-          source={{
-            uri: url,
-            headers: headers, // Added headers here
-          }}
-          style={styles.webview}
-          onLoadStart={() => setIsLoading(true)}
-          onLoadEnd={handleLoadEnd}
-          onError={handleError}
-          onHttpError={handleHttpError}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          onNavigationStateChange={onNavigationStateChange}
-          onMessage={onMessage}
-          injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
-          javaScriptEnabled={javaScriptEnabled}
-          domStorageEnabled={domStorageEnabled}
-          sharedCookiesEnabled={sharedCookiesEnabled}
-          thirdPartyCookiesEnabled={thirdPartyCookiesEnabled}
-          startInLoadingState={true}
-          
-        />
+    <View style={styles.innerContainer}>
+      {/* <AppHeader title={headerTitle} containerStyle={styles.header} /> */}
+      {enableWebBack && canGoBack && (
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => webViewRef.current?.goBack()}>
+          <Icon name="chevron-back" size={22} color="#000" />
+        </TouchableOpacity>
+      )}
+      <WebView
+        source={{
+          uri: url,
+          headers: headers, // Added headers here
+        }}
+        ref={webViewRef}
+        style={styles.webview}
+        onLoadStart={() => setIsLoading(true)}
+        onLoadEnd={handleLoadEnd}
+        onError={handleError}
+        onHttpError={handleHttpError}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        onNavigationStateChange={handleNavigationStateChange}
+        onMessage={onMessage}
+        injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
+        javaScriptEnabled={javaScriptEnabled}
+        domStorageEnabled={domStorageEnabled}
+        sharedCookiesEnabled={sharedCookiesEnabled}
+        thirdPartyCookiesEnabled={thirdPartyCookiesEnabled}
+        startInLoadingState={true}
+      />
       {showLoader && <Loader isLoading={isLoading} />}
-      </View>
+    </View>
 
     // </SafeAreaView>
   );
@@ -290,5 +307,15 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+  },
+  backButton: {
+    position: 'absolute',
+    top: vs(5),
+    left: scale(15),
+    zIndex: 999,
+    backgroundColor: '#fff',
+    padding: 8,
+    borderRadius: 20,
+    elevation: 5,
   },
 });

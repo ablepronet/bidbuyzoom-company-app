@@ -7,7 +7,6 @@ import HomeDashBoard from '../../screen/app/home';
 import Sales from '../../screen/app/sales';
 import BidBuyers from '../../screen/app/bidBuyers';
 import Setting from '../../screen/app/setting';
-import Catalog from '../../screen/app/Consignors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {ms, vs, scale} from '../../utils/responsive';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -129,9 +128,9 @@ const BottomTabNavigator = () => {
             leftIcon="menu-outline"
             onLeftPress={handleOpenDrawer}
             centerContent={renderHeaderCenter()}
-            rightContent={
-              route.name === routes.dashboardTab ? renderHeaderRight() : null
-            }
+            // rightContent={
+            //   route.name === routes.dashboardTab ? renderHeaderRight() : null
+            // }
             showBorder={false}
           />
         ),

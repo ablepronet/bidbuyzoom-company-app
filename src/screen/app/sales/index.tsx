@@ -39,10 +39,14 @@ const Sales = ({route}: {route: any}) => {
       return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales-information?id=${saleId}?mobile=true`;
     }
     return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales?mobile=true`;
-  }, [saleId, userData?.companySlug]);
+  }, [saleId, userData?.companySlug, from]);
   return (
     <View style={styles.innerContainer}>
-      <WebViewScreen url={url} injectedJavaScript={injectedJavaScript} />
+      <WebViewScreen 
+      url={url} 
+      injectedJavaScript={injectedJavaScript} 
+      enableWebBack={true}
+      />
     </View>
   );
 };
