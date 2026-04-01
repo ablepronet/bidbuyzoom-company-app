@@ -47,27 +47,28 @@ const Login = () => {
     };
     login(body, {
       onSuccess: res => {
-        if (res?.requires2FA) {
-          navigation.navigate(routes.OtpVerification, {
-            from: 'login',
-            userDetails: res,
-            email: values.email,
-            password: values.password,
-            rememberMe: values.remember,
-          });
-        } else {
-          dispatch(setTokens(res?.token || null));
-          dispatch(setUserId(res?.data?._id));
-          dispatch(setUserData(res?.data || null));
-          dispatch(setIsLogin(true));
-
-          dispatch(
-            setRememberData({
+        if (res.status) {
+          if (res?.requires2FA) {
+            navigation.navigate(routes.OtpVerification, {
+              from: 'login',
+              userDetails: res,
               email: values.email,
               password: values.password,
               rememberMe: values.remember,
-            }),
-          );
+            });
+          } else {
+            dispatch(setTokens(res?.token || null));
+            dispatch(setUserId(res?.data?._id));
+            dispatch(setUserData(res?.data || null));
+            dispatch(setIsLogin(true));
+            dispatch(
+              setRememberData({
+                email: values.email,
+                password: values.password,
+                rememberMe: values.remember,
+              }),
+            );
+          }
         }
       },
     });

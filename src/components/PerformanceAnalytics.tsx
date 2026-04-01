@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { AppText } from './AppText';
-import { colors } from '../constants';
-import { ms, vs } from '../utils/responsive';
+import {View, StyleSheet, Dimensions, ScrollView} from 'react-native';
+import {AppText} from './AppText';
+import {colors} from '../constants';
+import {ms, vs} from '../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 interface ChartItem {
   label: string;
@@ -14,11 +14,11 @@ interface ChartItem {
   maxValue: number;
 }
 
-const ChartBar = ({ label, value, formattedValue, maxValue }: ChartItem) => {
+const ChartBar = ({label, value, formattedValue, maxValue}: ChartItem) => {
   // Calculate bar width percentage
   const barWidthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
   const barWidth = (barWidthPercent / 100) * (width - ms(140));
-  
+
   const displayValue = formattedValue || value.toString();
   const hasValue = value > 0;
 
@@ -36,10 +36,10 @@ const ChartBar = ({ label, value, formattedValue, maxValue }: ChartItem) => {
       <View style={styles.barWrapper}>
         {/* Dotted line background */}
         <View style={styles.dottedLine} />
-        
+
         {/* Only show blue bar if value > 0 */}
         {hasValue && (
-          <View style={[styles.bar, { width: Math.max(barWidth, ms(50)) }]}>
+          <View style={[styles.bar, {width: Math.max(barWidth, ms(50))}]}>
             <AppText
               title={displayValue}
               fontySize="px10"
@@ -49,7 +49,7 @@ const ChartBar = ({ label, value, formattedValue, maxValue }: ChartItem) => {
             />
           </View>
         )}
-        
+
         {/* Show value text for zero values */}
         {!hasValue && (
           <AppText
@@ -76,10 +76,10 @@ interface PerformanceAnalyticsProps {
   year: string;
 }
 
-const PerformanceAnalytics = ({ data, year }: PerformanceAnalyticsProps) => {
+const PerformanceAnalytics = ({data, year}: PerformanceAnalyticsProps) => {
   const chartItems = [
-    { label: 'Number of Lots', value: data.lots, maxValue: 340 },
-    { label: 'Number of Bidders', value: data.bidders, maxValue: 340 },
+    {label: 'Number of Lots', value: data.lots, maxValue: 340},
+    {label: 'Number of Bidders', value: data.bidders, maxValue: 340},
     {
       label: 'Total Sales',
       value: data.sales,

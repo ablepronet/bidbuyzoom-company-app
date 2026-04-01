@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Platform,
   Dimensions,
+  Linking,
 } from 'react-native';
 import {DrawerContentScrollView} from '@react-navigation/drawer';
 import {useNavigation, useNavigationState} from '@react-navigation/native';
@@ -182,12 +183,17 @@ export const CustomDrawerContent = (props: any) => {
     dispatch(setUserLogout());
   };
 
-  const handleNavigateToHelp = () => {
+  const handleNavigateToHelp =async () => {
     //@ts-ignore
-    navigation.navigate(routes.commonWebView, {
-      title: 'Bidbuyzoom',
-      url: `https://staging.bidbuyzoom.com/help`,
-    });
+    // navigation.navigate(routes.commonWebView, {
+    //   title: 'Bidbuyzoom',
+    //   url: `https://staging.bidbuyzoom.com/help`,
+    // });
+    try {
+      await Linking.openURL(`https://staging.bidbuyzoom.com/help`);
+    } catch (error) {
+      console.log('Error opening link:', error);
+    }
   };
 
   return (

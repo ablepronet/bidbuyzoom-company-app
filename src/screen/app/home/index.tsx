@@ -186,6 +186,7 @@ const HomeDashBoard = () => {
             currentSales.map((sale: any) => {
               const startDate = formatDate(sale.multiStartDate[0]?.startDate);
               const endDate = formatDate(sale.multiStartDate[1]?.startDate);
+              const disabled = !sale?.isDisabledData || !sale?.isPublished;
               const saleId = sale._id;
               return (
                 <View key={sale._id} style={styles.saleItem}>
@@ -234,12 +235,16 @@ const HomeDashBoard = () => {
 
                   <View style={styles.saleActionRow}>
                     <TouchableOpacity
-                      style={styles.saleActionBtn}
+                      style={[
+                        styles.saleActionBtn,
+                        !disabled && styles.manageBtn,
+                      ]}
+                      disabled={disabled}
                       onPress={() => navigation.navigate(routes.salesTab)}>
                       <AppText
                         title="View"
                         fontySize="px12"
-                        color="textSecondary"
+                        color={!disabled ? 'primary' : 'textSecondary'}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -257,12 +262,16 @@ const HomeDashBoard = () => {
                       />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.saleActionBtn}
+                      style={[
+                        styles.saleActionBtn,
+                        !disabled && styles.manageBtn,
+                      ]}
+                      disabled={disabled}
                       onPress={() => navigation.navigate(routes.salesTab)}>
                       <AppText
                         title="Monitor"
                         fontySize="px12"
-                        color="textSecondary"
+                        color={!disabled ? 'primary' : 'textSecondary'}
                       />
                     </TouchableOpacity>
                   </View>
@@ -568,6 +577,9 @@ const styles = StyleSheet.create({
   },
   manageBtn: {
     borderColor: colors.primary,
+  },
+  disabledBtn: {
+    borderColor: colors.border,
   },
   viewAllBtn: {
     flexDirection: 'row',

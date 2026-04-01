@@ -220,42 +220,111 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     };
   }, []);
 
-  const handleLoadEnd = () => {
+  const stopLoading = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
     timerRef.current = setTimeout(() => {
       if (isMounted.current) {
         setIsLoading(false);
       }
-    }, 500);
+    }, 2000); // 2 seconds, as requested
+  };
 
-    // Call the custom onLoadEnd if provided
+  const handleLoadEnd = () => {
+    stopLoading();
     customOnLoadEnd?.();
   };
 
   const handleError = (syntheticEvent: any) => {
     const {nativeEvent} = syntheticEvent;
     console.log('WebView Error:', nativeEvent);
-
-    if (isMounted.current) {
-      setIsLoading(false);
-    }
-
-    // Call the custom onError if provided
+    stopLoading();
     customOnError?.(nativeEvent);
   };
 
   const handleHttpError = (syntheticEvent: any) => {
     const {nativeEvent} = syntheticEvent;
     console.log('HTTP Error:', nativeEvent.statusCode);
+    stopLoading();
   };
 
   const handleNavigationStateChange = (navState: any) => {
     setCanGoBack(navState.canGoBack);
     onNavigationStateChange?.(navState);
+    if (!navState.loading) {
+      stopLoading();
+    }
   };
+
+  // Handle navigation requests - prevent opening in external browser
+  const onShouldStartLoadWithRequest = (event: any) => {
+    // Only allow navigation within the same domain to prevent opening external browser
+    const isSameDomain =
+      event.url.includes('staging.bidbuyzoom.com') ||
+      event.url.includes('bidbuyzoom.com') ||
+      event.url.startsWith('about:blank');
+
+    // If it's not the same domain, prevent the WebView from loading it
+    // This keeps the navigation within the WebView
+    return isSameDomain;
+  };
+
+  // JavaScript to hide website headers and fix styling for mobile app
+  const hideHeaderJavaScript = `
+    (function() {
+      // Hide website headers and fix mobile styling
+      try {
+        // Hide header elements that might conflict with app header
+        const headerSelectors = [
+          'header',
+          '.header',
+          '#header',
+          '.navbar',
+          '.nav-bar',
+          '.main-header',
+          '.site-header',
+          '[role="banner"]'
+        ];
+        
+        headerSelectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.height = '0';
+            el.style.padding = '0';
+            el.style.margin = '0';
+            el.style.opacity = '0';
+            el.style.position = 'absolute';
+            el.style.zIndex = '-9999';
+          });
+        });
+
+        // Add mobile app specific styling
+        const style = document.createElement('style');
+        style.innerHTML = 'body { padding-top: 0 !important; margin-top: 0 !important; } .mobile-app-container { padding-top: env(safe-area-inset-top) !important; } html, body { overflow-x: hidden !important; width: 100% !important; }';
+        document.head.appendChild(style);
+
+        // Add mobile app class to body
+        document.body.classList.add('mobile-app-container');
+
+        return true;
+      } catch (error) {
+        console.log('Error hiding headers:', error);
+        return false;
+      }
+    })();
+    true;
+  `;
+
+  // Combine injected JavaScript
+  const combinedJavaScript = injectedJavaScript
+    ? `${injectedJavaScript}\n${hideHeaderJavaScript}`
+    : hideHeaderJavaScript;
+
   return (
-    // <SafeAreaView style={styles.container}>
     <View style={styles.innerContainer}>
-      {/* <AppHeader title={headerTitle} containerStyle={styles.header} /> */}
       {enableWebBack && canGoBack && (
         <TouchableOpacity
           style={styles.backButton}
@@ -266,11 +335,17 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       <WebView
         source={{
           uri: url,
-          headers: headers, // Added headers here
+          headers: headers,
         }}
         ref={webViewRef}
         style={styles.webview}
-        onLoadStart={() => setIsLoading(true)}
+        onLoadStart={() => {
+          setIsLoading(true);
+          // Clear any previous timeout to prevent multiple loaders
+          if (timerRef.current) {
+            clearTimeout(timerRef.current);
+          }
+        }}
         onLoadEnd={handleLoadEnd}
         onError={handleError}
         onHttpError={handleHttpError}
@@ -278,12 +353,24 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         showsHorizontalScrollIndicator={false}
         onNavigationStateChange={handleNavigationStateChange}
         onMessage={onMessage}
-        injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
+        injectedJavaScriptBeforeContentLoaded={combinedJavaScript}
         javaScriptEnabled={javaScriptEnabled}
         domStorageEnabled={domStorageEnabled}
         sharedCookiesEnabled={sharedCookiesEnabled}
         thirdPartyCookiesEnabled={thirdPartyCookiesEnabled}
         startInLoadingState={true}
+        // Android specific props to prevent opening in external browser
+        setSupportMultipleWindows={false}
+        setBuiltInZoomControls={false}
+        setDisplayZoomControls={false}
+        // Handle navigation requests to prevent opening external browser
+        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+        // Additional props for better Android handling
+        allowsBackForwardNavigationGestures={true}
+        allowsInlineMediaPlayback={true}
+        mediaPlaybackRequiresUserAction={false}
+        // Timeout for loading state
+        renderLoading={() => <Loader isLoading={true} />}
       />
       {showLoader && <Loader isLoading={isLoading} />}
     </View>

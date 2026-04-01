@@ -42,10 +42,10 @@ const Sales = ({route}: {route: any}) => {
   }, [saleId, userData?.companySlug, from]);
   return (
     <View style={styles.innerContainer}>
-      <WebViewScreen 
-      url={url} 
-      injectedJavaScript={injectedJavaScript} 
-      enableWebBack={true}
+      <WebViewScreen
+        url={url}
+        injectedJavaScript={injectedJavaScript}
+        enableWebBack={true}
       />
     </View>
   );
