@@ -183,7 +183,7 @@ export const CustomDrawerContent = (props: any) => {
     dispatch(setUserLogout());
   };
 
-  const handleNavigateToHelp =async () => {
+  const handleNavigateToHelp = async () => {
     //@ts-ignore
     // navigation.navigate(routes.commonWebView, {
     //   title: 'Bidbuyzoom',

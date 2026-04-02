@@ -92,6 +92,14 @@ const Setting = () => {
             path="card-payment/details"
           />
           <View style={styles.divider} />
+          <SettingItem icon="pricetag-outline" title="Plan" path="plans" />
+          <View style={styles.divider} />
+          <SettingItem
+            icon="card-outline"
+            title="Payment Information"
+            path="card-payment"
+          />
+          <View style={styles.divider} />
           <SettingItem
             icon="shield-checkmark-outline"
             title="SMS & Security"
