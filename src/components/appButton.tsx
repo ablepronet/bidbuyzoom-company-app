@@ -73,7 +73,7 @@ const AppButton: React.FC<Props> = ({
           <AppText
             title={title}
             fontFamily="medium"
-            fontySize="px18"
+            fontySize="px16"
             textAlign="center"
             color={textColor}
             style={textStyle}

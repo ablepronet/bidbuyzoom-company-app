@@ -26,6 +26,140 @@ export const ValidationSchemas = () => {
         .matches(/[@$!%*?&#^()_\-+=]/, appString.validationError.passwordRule),
     }),
 
+    // Catalog validation schemas
+    addNewLotValidation: yup.object({
+      lotNumber: yup
+        .string()
+        .required('Lot number is required')
+        .matches(/^\d+$/, 'Lot number must contain only digits'),
+      
+      title: yup
+        .string()
+        .required('Title is required')
+        .min(3, 'Title must be at least 3 characters long')
+        .max(200, 'Title must not exceed 200 characters'),
+      
+      description: yup
+        .string()
+        .max(1000, 'Description must not exceed 1000 characters'),
+      
+      quantity: yup
+        .string()
+        .required('Quantity is required')
+        .matches(/^\d+$/, 'Quantity must be a valid number')
+        .test('min-quantity', 'Quantity must be at least 1', value => {
+          const num = parseInt(value);
+          return !isNaN(num) && num >= 1;
+        })
+        .test('max-quantity', 'Quantity must not exceed 9999', value => {
+          const num = parseInt(value);
+          return !isNaN(num) && num <= 9999;
+        }),
+      
+      startPrice: yup
+        .string()
+        .required('Start price is required')
+        .matches(/^\d+(\.\d{1,2})?$/, 'Start price must be a valid number')
+        .test('min-price', 'Start price cannot be negative', value => {
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+      
+      buyNowPrice: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'Buy now price must be a valid number')
+        .test('min-price', 'Buy now price cannot be negative', value => {
+          if (!value) return true;
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+      
+      reserve: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'Reserve price must be a valid number')
+        .test('min-price', 'Reserve price cannot be negative', value => {
+          if (!value) return true;
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+    }),
+
+    lotDetailsValidation: yup.object({
+      lotNumber: yup
+        .string()
+        .required('Lot number is required')
+        .matches(/^\d+$/, 'Lot number must contain only digits'),
+      
+      title: yup
+        .string()
+        .required('Title is required')
+        .min(3, 'Title must be at least 3 characters long')
+        .max(200, 'Title must not exceed 200 characters'),
+      
+      description: yup
+        .string()
+        .max(1000, 'Description must not exceed 1000 characters'),
+      
+      startPrice: yup
+        .string()
+        .required('Start price is required')
+        .matches(/^\d+(\.\d{1,2})?$/, 'Start price must be a valid number')
+        .test('min-price', 'Start price cannot be negative', value => {
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+      
+      buyNowPrice: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'Buy now price must be a valid number')
+        .test('min-price', 'Buy now price cannot be negative', value => {
+          if (!value) return true;
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+      
+      reserve: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'Reserve price must be a valid number')
+        .test('min-price', 'Reserve price cannot be negative', value => {
+          if (!value) return true;
+          const num = parseFloat(value);
+          return !isNaN(num) && num >= 0;
+        }),
+      
+      lowEstimate: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'Low estimate must be a valid number'),
+      
+      highEstimate: yup
+        .string()
+        .optional()
+        .matches(/^\d+(\.\d{1,2})?$/, 'High estimate must be a valid number'),
+      
+      mainCategory: yup
+        .string()
+        .required('Category is required'),
+      
+      subCategory: yup
+        .string()
+        .required('Sub-category is required'),
+    }),
+
+    lotImagesValidation: yup.object({
+      images: yup
+        .array()
+        .of(yup.object().shape({
+          uri: yup.string().nullable().required('Image is required'),
+          id: yup.string().required(),
+        }))
+        .min(1, 'At least one image is required'),
+    }),
+
     personalInformationValidation: yup.object({
       fullName: yup
         .string()

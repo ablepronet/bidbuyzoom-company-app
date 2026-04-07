@@ -14,6 +14,7 @@ import { AppText } from './AppText';
 const {height} = Dimensions.get('window');
 
 class AppToast extends Component<AppToastProps, AppToastState> {
+  //@ts-ignore
   private timer: NodeJS.Timeout;
   private slideAnim = new Animated.Value(-100); // NEW → Slide animation
   static defaultProps = defaultProps;
@@ -113,7 +114,7 @@ class AppToast extends Component<AppToastProps, AppToastState> {
           style={[
             styles.mainContainer,
             {
-              top: Platform.OS == 'ios' ? vs(30) : vs(0),
+              top: Platform.OS == 'ios' ? vs(30) : vs(30),
               transform: [{translateY: this.slideAnim}],
               backgroundColor:
                 icon === 'success'

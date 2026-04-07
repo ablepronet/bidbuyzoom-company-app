@@ -14,6 +14,11 @@ import Setting from '../../screen/app/setting';
 import ConsignmentRequests from '../../screen/app/consignmentRequests';
 import CompanyReport from '../../screen/app/companyReport';
 import CommonWebView from '../../screen/app/commonWebView';
+import SalesHub from '../../screen/app/sales/SaleHub';
+import CatalogScreen from '../../screen/app/sales/CatalogScreen';
+import AddNewLotScreen from '../../screen/app/sales/AddNewLotScreen';
+import LotImagesScreen from '../../screen/app/sales/LotImagesScreen';
+import LotDetailsScreen from '../../screen/app/sales/LotDetailsScreen';
 import { routes } from '../route';
 import BottomTabNavigator from '../bottomTab';
 
@@ -28,6 +33,7 @@ const AppDrawer = () => {
         translucent={true}
       />
       <Drawer.Navigator
+        backBehavior="history"
         screenOptions={{
           headerShown: false,
           drawerType: 'slide',
@@ -44,6 +50,11 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.consignmentRequests} component={ConsignmentRequests} />
         <Drawer.Screen name={routes.companyReport} component={CompanyReport} />
         <Drawer.Screen name={routes.commonWebView} component={CommonWebView} />
+        <Drawer.Screen name={routes.saleHubScreen} component={SalesHub} />
+        <Drawer.Screen name={routes.catalogScreen} component={CatalogScreen} />
+        <Drawer.Screen name={routes.addNewLotScreen} component={AddNewLotScreen} />
+        <Drawer.Screen name={routes.lotImagesScreen} component={LotImagesScreen} />
+        <Drawer.Screen name={routes.lotDetailsScreen} component={LotDetailsScreen} />
       </Drawer.Navigator>
     </>
   );

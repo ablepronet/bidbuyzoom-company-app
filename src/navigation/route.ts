@@ -17,6 +17,7 @@ export const routes = {
   consignmentRequests: 'ConsignmentRequests',
   companyReport: 'CompanyReport',
   commonWebView: 'CommonWebView',
+  saleHubScreen: 'SaleHubScreen',
 
   // Bottom Tab Screens
   dashboardTab: 'DashboardTab',
@@ -24,4 +25,10 @@ export const routes = {
   consignorsTab: 'ConsignorsTab',
   biddersTab: 'BiddersTab',
   moreTab: 'MoreTab',
+
+  // Catalog Screens
+  catalogScreen: 'CatalogScreen',
+  addNewLotScreen: 'AddNewLotScreen',
+  lotImagesScreen: 'LotImagesScreen',
+  lotDetailsScreen: 'LotDetailsScreen',
 };

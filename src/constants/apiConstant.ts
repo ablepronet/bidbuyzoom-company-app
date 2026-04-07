@@ -15,6 +15,7 @@ const apiEndPoints = {
   getUserProfile: 'profile',
   getDashboardData: 'mobile/dashboard',
   verification: 'verify-login-2fa',
+  catalogData: 'mobile/catalog-list',
 };
 
 export default apiEndPoints;

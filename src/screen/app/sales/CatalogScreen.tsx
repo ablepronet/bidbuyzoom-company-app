@@ -1,0 +1,482 @@
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+  Image,
+} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {AppText} from '../../../components/AppText';
+import {colors} from '../../../constants';
+import {ms, vs} from '../../../utils/responsive';
+import {routes} from '../../../navigation/route';
+import AppHeader from '../../../components/appHeader';
+import {useGetCatalogDetails} from '../../../services/queries/app/catlog';
+import {useDebounce} from '../../../utils/debounce';
+import {ImageComponent} from '../../../components/AppImage';
+import Loader from '../../../components/loader';
+
+const CatalogScreen = () => {
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
+  const route = useRoute<any>();
+  const {sale} = route.params || {};
+
+  // State for API parameters
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDebounce(searchText, 500);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(
+    undefined,
+  ); // empty for now
+
+  // Use the real hook
+  const {data, isLoading, isFetching, error, refetch} = useGetCatalogDetails({
+    saleId: sale?.saleId,
+    templateId: selectedTemplate,
+    page,
+    perPage,
+    search: debouncedSearch,
+  });
+
+  // Extract data from response
+  const lots = data?.data || [];
+  const pagination = data?.pagination;
+  const totalItems = pagination?.totalItems || 0;
+  const totalPages = pagination?.totalPages || 1;
+  const hasNextPage = pagination?.hasNextPage || false;
+  const hasPrevPage = pagination?.hasPrevPage || false;
+
+  // Reset page when search changes
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+    setPage(1);
+  };
+
+  // Pagination handlers
+  const goToNextPage = () => {
+    if (hasNextPage) setPage(prev => prev + 1);
+  };
+
+  const goToPrevPage = () => {
+    if (hasPrevPage) setPage(prev => prev - 1);
+  };
+
+  // Per page change (simple cycle for demo, you can replace with modal)
+  const changePerPage = () => {
+    const options = [10, 20, 50, 100];
+    const currentIndex = options.indexOf(perPage);
+    const nextIndex = (currentIndex + 1) % options.length;
+    setPerPage(options[nextIndex]);
+    setPage(1);
+  };
+
+  const handleAddLot = () => {
+    navigation.navigate(routes.addNewLotScreen);
+  };
+
+  const handleLotPress = (lot: any) => {
+    navigation.navigate(routes.lotDetailsScreen, {lot});
+  };
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  // Render each lot item
+  const renderLotItem = ({item}: any) => (
+    <TouchableOpacity
+      style={styles.lotItem}
+      onPress={() => handleLotPress(item)}>
+      <View style={styles.lotImagePlaceholder}>
+        {item?.firstPhoto ? (
+          <ImageComponent uri={item.firstPhoto} style={styles.lotImage} />
+        ) : (
+          // <Image source={{uri: item.firstPhoto}} style={styles.lotImage} />
+          <Icon name="camera-outline" size={ms(20)} color="#9CA3AF" />
+        )}
+      </View>
+      <View style={styles.lotContent}>
+        <AppText
+          title={`Lot ${item.lotNumber} | ${item.title}`}
+          fontySize="px12"
+          fontFamily="bold"
+          color="textPrimary"
+        />
+        <AppText
+          title={item.description}
+          fontySize="px12"
+          color="textPrimary"
+          marginTop={vs(2)}
+          numberOfLines={1}
+        />
+        <View style={styles.lotMeta}>
+          <View style={styles.categoryTag}>
+            <AppText
+              title={item.category || 'Uncategorized'}
+              fontySize="px10"
+              color="primary"
+            />
+          </View>
+          <View style={styles.statusContainer}>
+            <AppText
+              title={item.isComplete ? 'Complete' : 'Draft'}
+              fontySize="px10"
+              color={item.isComplete ? 'success' : 'warning'}
+              fontFamily="bold"
+            />
+            {item.isComplete && (
+              <Icon name="checkmark" size={ms(10)} color={colors.success} />
+            )}
+          </View>
+        </View>
+      </View>
+      <Icon name="chevron-forward-outline" size={ms(16)} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
+
+  // List empty component
+  const ListEmptyComponent = () => {
+    if (isLoading) return null;
+    return (
+      <View style={styles.emptyContainer}>
+        <Icon name="folder-open-outline" size={ms(48)} color="#9CA3AF" />
+        <AppText
+          title="No lots found"
+          fontySize="px14"
+          color="textSecondary"
+          marginTop={vs(8)}
+        />
+        <AppText
+          title="Try adjusting your search"
+          fontySize="px12"
+          color="textSecondary"
+        />
+      </View>
+    );
+  };
+
+  // List footer loader (for pagination)
+  const ListFooterComponent = () => {
+    if (!isFetching || isLoading) return null;
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color={colors.primary} />
+      </View>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* App Header */}
+      <AppHeader
+        title="Catalog"
+        subtitle={sale?.saleName || 'Select Sale'}
+        leftIcon="chevron-back"
+        onLeftPress={handleBack}
+      />
+      <Loader isLoading={isLoading} />
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Icon name="search-outline" size={ms(16)} color="#9CA3AF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by lot, title..."
+            placeholderTextColor="#9CA3AF"
+            value={searchText}
+            onChangeText={handleSearchChange}
+          />
+          <TouchableOpacity style={styles.filterBtn}>
+            <Icon name="funnel-outline" size={ms(16)} color="primary" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Template and Items Count */}
+        <View style={styles.templateRow}>
+          <TouchableOpacity style={styles.templateDropdown}>
+            <AppText
+              title={`Template: ${selectedTemplate || 'Default'}`}
+              fontySize="px12"
+            />
+            <Icon name="chevron-down-outline" size={ms(14)} color="#6B7280" />
+          </TouchableOpacity>
+          <AppText
+            title={`${totalItems} items`}
+            fontySize="px12"
+            color="textSecondary"
+          />
+        </View>
+      </View>
+
+      {/* Quick Action Buttons */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity style={styles.quickActionBtn} onPress={handleAddLot}>
+          <Icon name="add-outline" size={ms(20)} color="primary" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionBtn}>
+          <AppText title="CSV" fontySize="px8" color="primary" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.quickActionBtn}
+          onPress={() => navigation.navigate(routes.lotImagesScreen)}>
+          <Icon name="camera-outline" size={ms(20)} color="primary" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionBtn}>
+          <Icon name="download-outline" size={ms(20)} color="primary" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionBtn}>
+          <Icon name="print-outline" size={ms(20)} color="primary" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Content Area */}
+      <View style={styles.contentArea}>
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Icon name="alert-circle-outline" size={ms(40)} color="error" />
+            <AppText
+              title="Failed to load catalog"
+              fontySize="px14"
+              color="error"
+              marginTop={vs(8)}
+            />
+            <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
+              <AppText title="Retry" fontySize="px12" color="primary" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={lots}
+            renderItem={renderLotItem}
+            keyExtractor={item => item._id}
+            style={styles.lotsList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={
+              lots.length === 0 ? styles.emptyListContent : styles.listContent
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading && !isFetching}
+                onRefresh={refetch}
+                colors={[colors.primary]}
+              />
+            }
+            ListEmptyComponent={ListEmptyComponent}
+            ListFooterComponent={ListFooterComponent}
+          />
+        )}
+      </View>
+
+      {/* Pagination Footer */}
+      {!error && totalItems > 0 && (
+        <View
+          style={[styles.pagination, {paddingBottom: vs(12) + insets.bottom}]}>
+          <AppText
+            title={`Page ${page} of ${totalPages}`}
+            fontySize="px12"
+            color="textSecondary"
+          />
+          <View style={styles.paginationControls}>
+            <TouchableOpacity
+              style={styles.pageBtn}
+              onPress={goToPrevPage}
+              disabled={!hasPrevPage}>
+              <Icon
+                name="chevron-back-outline"
+                size={ms(16)}
+                color={hasPrevPage ? '#6B7280' : '#D1D5DB'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.pageBtn}
+              onPress={goToNextPage}
+              disabled={!hasNextPage}>
+              <Icon
+                name="chevron-forward-outline"
+                size={ms(16)}
+                color={hasNextPage ? '#6B7280' : '#D1D5DB'}
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.perPageDropdown}
+            onPress={changePerPage}>
+            <AppText title={`Per Page: ${perPage}`} fontySize="px12" />
+            <Icon name="chevron-down-outline" size={ms(14)} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  headerSection: {
+    backgroundColor: colors.white,
+    paddingHorizontal: ms(15),
+    paddingTop: vs(10),
+    paddingBottom: vs(10),
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: ms(12),
+    paddingVertical: vs(8),
+    borderRadius: 6,
+    marginBottom: vs(10),
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: ms(8),
+    fontSize: ms(12),
+    color: '#1F2937',
+    padding: 0,
+  },
+  filterBtn: {
+    marginLeft: ms(8),
+  },
+  templateRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  templateDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(4),
+  },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: colors.white,
+    paddingVertical: vs(12),
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  quickActionBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentArea: {
+    flex: 1,
+  },
+  lotsList: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: ms(15),
+    paddingVertical: vs(10),
+  },
+  emptyListContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: ms(15),
+  },
+  lotItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    padding: ms(12),
+    marginBottom: vs(8),
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  lotImagePlaceholder: {
+    width: ms(50),
+    height: ms(50),
+    backgroundColor: '#F3F4F6',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: ms(12),
+    overflow: 'hidden',
+  },
+  lotImage: {
+    width: 120,
+    height: 120,
+  },
+  lotContent: {
+    flex: 1,
+  },
+  lotMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: vs(4),
+  },
+  categoryTag: {
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: ms(6),
+    paddingVertical: vs(2),
+    borderRadius: 4,
+    marginRight: ms(8),
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(4),
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    paddingHorizontal: ms(15),
+    paddingTop: vs(12),
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  paginationControls: {
+    flexDirection: 'row',
+    gap: ms(8),
+  },
+  pageBtn: {
+    padding: ms(4),
+  },
+  perPageDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(4),
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: vs(40),
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: ms(20),
+  },
+  retryBtn: {
+    marginTop: vs(12),
+    paddingVertical: vs(8),
+    paddingHorizontal: ms(16),
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+  },
+  footerLoader: {
+    paddingVertical: vs(16),
+    alignItems: 'center',
+  },
+});
+
+export default CatalogScreen;

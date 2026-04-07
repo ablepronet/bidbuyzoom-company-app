@@ -36,6 +36,7 @@ const Consignors = () => {
       <WebViewScreen
         url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/client?mobile=true`}
         injectedJavaScript={injectedJavaScript}
+        enableWebBack={true}
       />
     </View>
   );

@@ -33,7 +33,17 @@ export type drawerParamsList = {
     url: string;
     title: string;
   };
+  [routes.saleHubScreen]: {
+    saleId: string;
+    selectedSale:any | null;
+  };
   DashboardTabs: undefined; // New tab navigator entry
+  [routes.catalogScreen]: undefined;
+  [routes.addNewLotScreen]: undefined;
+  [routes.lotImagesScreen]: undefined;
+  [routes.lotDetailsScreen]: {
+    lot?: any;
+  };
 };
 
 export type bottomTabParamsList = {

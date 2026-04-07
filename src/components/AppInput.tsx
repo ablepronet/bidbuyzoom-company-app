@@ -1,15 +1,10 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
-import { StyleSheet, TextInput, View, TextInputProps } from 'react-native';
+import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
+import {StyleSheet, TextInput, View, TextInputProps} from 'react-native';
 import AppPressable from './appPressable';
-import { appIcons, colors } from '../constants';
-import { scale, vs } from '../utils/responsive';
-import { AppText } from './AppText';
-import { ImageComponent } from './AppImage';
+import {appIcons, colors} from '../constants';
+import {scale, vs} from '../utils/responsive';
+import {AppText} from './AppText';
+import {ImageComponent} from './AppImage';
 
 export interface AppInputRef {
   focus: () => void;
@@ -69,14 +64,14 @@ export const AppInput = forwardRef<AppInputRef, AppInputProps>(
               title={label}
               fontFamily="medium"
               marginBottom={8}
-              fontySize="px16"
+              fontySize="px14"
             />
             {required && (
               <AppText
                 title="*"
                 fontFamily="medium"
                 marginBottom={8}
-                fontySize="px16"
+                fontySize="px14"
                 color="dangerToastText"
               />
             )}
@@ -88,8 +83,7 @@ export const AppInput = forwardRef<AppInputRef, AppInputProps>(
             styles.inputWrapper,
             error && styles.errorBorder,
             isBlur && styles.disabledWrapper,
-          ]}
-        >
+          ]}>
           <TextInput
             key={secure ? String(isSecure) : 'normal'}
             ref={inputRef}
