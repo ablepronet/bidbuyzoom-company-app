@@ -16,6 +16,8 @@ const apiEndPoints = {
   getDashboardData: 'mobile/dashboard',
   verification: 'verify-login-2fa',
   catalogData: 'mobile/catalog-list',
+  getCatalogDetails:"mobile/catalog-item",
+  updateCatalogDetails: 'mobile/catalog-item/update',
 };
 
 export default apiEndPoints;
