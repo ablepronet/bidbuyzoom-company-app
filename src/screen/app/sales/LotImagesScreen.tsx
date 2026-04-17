@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,7 +8,11 @@ import {
   PermissionsAndroid,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {AppText} from '../../../components/AppText';
@@ -25,6 +29,8 @@ import {
 } from '../../../utils/imagePicker';
 import AppHeader from '../../../components/appHeader';
 import AppToast from '../../../components/toaster';
+import {useAddCatalogData} from '../../../services/queries/app/catlog/addCatalogs';
+import Loader from '../../../components/loader';
 
 const MAX_IMAGES = 6;
 const INITIAL_SLOTS = 2;
@@ -37,7 +43,13 @@ interface ImageSlot {
 const LotImagesScreen = () => {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
+
+  const route = useRoute<any>();
+  const formData = route.params?.data;
+  const sale = route.params?.sale;
+  const templateId = route.params?.templateId;
   const {width: screenWidth} = useWindowDimensions();
+  const {mutateAsync: addCatalogData, isPending} = useAddCatalogData();
 
   const [slots, setSlots] = useState<ImageSlot[]>(
     Array.from({length: INITIAL_SLOTS}, (_, i) => ({
@@ -49,6 +61,19 @@ const LotImagesScreen = () => {
   const horizontalPadding = ms(15) * 2;
   const gap = ms(10);
   const imageWidth = (screenWidth - horizontalPadding - gap) / 2;
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setSlots(
+          Array.from({length: INITIAL_SLOTS}, (_, i) => ({
+            id: i.toString(),
+            uri: null,
+          })),
+        );
+      };
+    }, []),
+  );
 
   useEffect(() => {
     // Request permissions on component mount (especially for Android)
@@ -63,13 +88,61 @@ const LotImagesScreen = () => {
 
   const handleBack = () => navigation.goBack();
 
-  const handleDone = () => {
+  const handleDone = async () => {
     const hasImages = slots.some(slot => slot.uri !== null);
+
     if (!hasImages) {
       AppToast.error('Please add at least one photo');
       return;
     }
-    navigation.navigate(routes.lotDetailsScreen);
+
+    if (!sale?.saleId) {
+      AppToast.error('Missing sale');
+      return;
+    }
+
+    const catalogDataPayload = Object.keys(formData || {}).map(key => ({
+      label: key,
+      value: formData[key],
+    }));
+
+    const multipartData = new FormData();
+    multipartData.append('saleId', sale?.saleId);
+    // multipartData.append('templateId', templateId);
+
+    multipartData.append('catalogData', JSON.stringify(catalogDataPayload));
+
+    // ✅ append images
+    slots
+      ?.filter(slot => slot.uri)
+      ?.forEach((slot, index) => {
+        const uri = slot.uri as string;
+
+        const extension = uri?.split('.').pop()?.toLowerCase();
+
+        const fileType =
+          extension === 'png'
+            ? 'image/png'
+            : extension === 'webp'
+            ? 'image/webp'
+            : 'image/jpeg';
+
+        multipartData.append('Photos', {
+          uri,
+          name: `photo-${Date.now()}-${index}.${extension || 'jpg'}`,
+          type: fileType,
+        } as any);
+      });
+
+    try {
+      const response = await addCatalogData({
+        payload: multipartData,
+      });
+
+      if (response?.status) {
+        navigation.navigate(routes.catalogScreen, {sale: sale});
+      }
+    } catch (error) {}
   };
 
   const addImageToSlot = (uri: string) => {
@@ -171,8 +244,9 @@ const LotImagesScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Loader isLoading={isPending} />
       <AppHeader
-        title="Lot 210 - Images"
+        title={`Lot ${formData?.Lot} - Images`}
         subtitle="Step 3 - Add Photos"
         leftIcon="chevron-back"
         onLeftPress={handleBack}
@@ -247,11 +321,7 @@ const LotImagesScreen = () => {
           borderColor="border"
           transparent={false}
         />
-        <AppButton
-          title="Next"
-          onPress={handleDone}
-          style={styles.nextBtn}
-        />
+        <AppButton title="Save" onPress={handleDone} style={styles.nextBtn} />
       </View>
     </View>
   );

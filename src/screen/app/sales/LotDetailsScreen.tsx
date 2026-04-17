@@ -94,7 +94,7 @@ const LotDetailsScreen = () => {
     getTextValue(lot?.highEstimate),
   );
   const [mainCategory, setMainCategory] = useState(
-    getTextValue(lot?.mainCategory) || 'Art',
+    getTextValue(lot?.mainCategory) || 'Select',
   );
   const [subCategory, setSubCategory] = useState(
     getTextValue(lot?.subCategory) || 'Paintings',

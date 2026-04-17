@@ -79,7 +79,7 @@ const CatalogScreen = () => {
   };
 
   const handleAddLot = () => {
-    navigation.navigate(routes.addNewLotScreen);
+    navigation.navigate(routes.addNewLotScreen, {sale:sale});
   };
 
   const handleLotPress = (lot: any) => {
