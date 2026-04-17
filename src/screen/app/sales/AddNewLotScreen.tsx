@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Keyboard,
 } from 'react-native';
 import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -99,31 +100,42 @@ useFocusEffect(
 
   const subCategoryOptions = selectedCategory?.subcategoryDatas || [];
 
-  const handleSelectCategory = (category: any) => {
-    const value = category?.value || category?._id || '';
+ const handleSelectCategory = (category: any) => {
+  const id = category?._id || category?.value || '';
 
-    setSelectedCategoryValue(value);
-
-    // ✅ update UI
-    setMainCategory(category?.label || 'Select');
-
-    // set in formik
-    formikRef.current?.setFieldValue('Main Category', category?.label || '');
-
-    // ✅ reset properly
-    setSubCategory('Select');
-    formikRef.current?.setFieldValue('Sub Category', '');
-
-    setIsCategoryModalVisible(false);
+  const categoryObj = {
+    label: 'Main Category',
+    id: id,
+    value: category?.label || '',
   };
 
-  const handleSelectSubCategory = (item: any) => {
-    setSubCategory(item?.label || 'Select');
+  setSelectedCategoryValue(id);
+  setMainCategory(category?.label || 'Select');
 
-    formikRef.current?.setFieldValue('Sub Category', item?.label || '');
+  // ✅ store object (NOT string)
+  formikRef.current?.setFieldValue('Main Category', categoryObj);
 
-    setIsSubCategoryModalVisible(false);
+  // reset subcategory
+  setSubCategory('Select');
+  formikRef.current?.setFieldValue('Sub Category', '');
+
+  setIsCategoryModalVisible(false);
+};
+
+const handleSelectSubCategory = (item: any) => {
+  const subCategoryObj = {
+    label: 'Sub Category',
+    id: item?._id || item?.value || '',
+    value: item?.label || '',
   };
+
+  setSubCategory(item?.label || 'Select');
+
+  // ✅ store object
+  formikRef.current?.setFieldValue('Sub Category', subCategoryObj);
+
+  setIsSubCategoryModalVisible(false);
+};
 
   const handleSubmit = (values: Record<string, string>) => {
     const finalData = {
@@ -268,7 +280,9 @@ useFocusEffect(
                   />
                   <TouchableOpacity
                     style={styles.inputContainer}
-                    onPress={() => setIsCategoryModalVisible(true)}>
+                    onPress={() => {
+                      Keyboard.dismiss()
+                      setIsCategoryModalVisible(true)}}>
                     <View style={styles.dropdownContent}>
                       <AppText
                         title={mainCategory}
@@ -292,6 +306,7 @@ useFocusEffect(
                   <TouchableOpacity
                     style={styles.inputContainer}
                     onPress={() => {
+                       Keyboard.dismiss()
                       if (!selectedCategoryValue) {
                         AppToast.error('Select Category first');
                         return;

@@ -8,7 +8,11 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {AppText} from '../../../components/AppText';
@@ -28,6 +32,7 @@ import AppModal from '../../../components/AppModal';
 import AppPressable from '../../../components/appPressable';
 import {showImagePickerAlert, validateImage} from '../../../utils/imagePicker';
 import {useUpdateCatalogDataDetails} from '../../../services/queries/app/catlog/updateCatlogDetails';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface SubcategoryItem {
   label: string;
@@ -179,9 +184,9 @@ const LotDetailsScreen = () => {
         : [],
     );
 
-    return()=>{
-      resetFormState()
-    }
+    return () => {
+      resetFormState();
+    };
   }, [lotDetailsData]);
 
   useEffect(() => {
@@ -266,8 +271,8 @@ const LotDetailsScreen = () => {
           extension === 'png'
             ? 'image/png'
             : extension === 'webp'
-              ? 'image/webp'
-              : 'image/jpeg';
+            ? 'image/webp'
+            : 'image/jpeg';
 
         multipartData.append('Photos', {
           uri: photo,
@@ -410,551 +415,587 @@ const LotDetailsScreen = () => {
         leftIcon="chevron-back"
         onLeftPress={handleBack}
       />
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={60}
+        enableResetScrollToCoords={false}>
+        <ScrollView
+          style={styles.formContainer}
+          showsVerticalScrollIndicator={false}>
+          {hasField('Photos') && (
+            <View style={styles.section}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.imageRow}>
+                {photos?.map((image, index) => renderImage(image, index))}
+                {renderAddImage()}
+              </ScrollView>
+            </View>
+          )}
 
-      <ScrollView
-        style={styles.formContainer}
-        showsVerticalScrollIndicator={false}>
-        {hasField('Photos') && (
-          <View style={styles.section}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.imageRow}>
-              {photos?.map((image, index) => renderImage(image, index))}
-              {renderAddImage()}
-            </ScrollView>
-          </View>
-        )}
+          {(hasField('Lot') ||
+            hasField('Inventory') ||
+            hasField('Quantity') ||
+            hasField('Title') ||
+            hasField('Description')) && (
+            <View style={styles.section}>
+              <AppText
+                title="Basic Information"
+                fontySize="px14"
+                fontFamily="bold"
+                color="textPrimary"
+                marginBottom={vs(15)}
+              />
 
-        {(hasField('Lot') ||
-          hasField('Inventory') ||
-          hasField('Quantity') ||
-          hasField('Title') ||
-          hasField('Description')) && (
-          <View style={styles.section}>
-            <AppText
-              title="Basic Information"
-              fontySize="px14"
-              fontFamily="bold"
-              color="textPrimary"
-              marginBottom={vs(15)}
-            />
-
-            {hasField('Lot') && (
-              <View style={styles.inputGroup}>
-                <AppText title="Lot #" fontySize="px12" color="textPrimary" />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={lotNumber}
-                    onChangeText={setLotNumber}
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Inventory') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Inventory #"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={inventoryNumber}
-                    onChangeText={setInventoryNumber}
-                    placeholder="Enter inventory number..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Quantity') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Quantity"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={quantity}
-                    onChangeText={setQuantity}
-                    placeholder="Enter quantity..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Title') && (
-              <View style={styles.inputGroup}>
-                <AppText title="Title" fontySize="px12" color="textPrimary" />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={title}
-                    onChangeText={setTitle}
-                    placeholder="Enter title..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Description') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Description"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={[styles.inputContainer, styles.textAreaContainer]}>
-                  <TextInput
-                    style={[styles.textInput, styles.textArea]}
-                    value={description}
-                    onChangeText={setDescription}
-                    placeholder="Enter description..."
-                    placeholderTextColor="#9CA3AF"
-                    multiline
-                    numberOfLines={4}
-                  />
-                </View>
-              </View>
-            )}
-          </View>
-        )}
-
-        {(hasField('Start') ||
-          hasField('Buy Now') ||
-          hasField('Reserve') ||
-          hasField('Low Estimate') ||
-          hasField('High Estimate')) && (
-          <View style={styles.section}>
-            <AppText
-              title="Pricing Information"
-              fontySize="px14"
-              fontFamily="bold"
-              color="textPrimary"
-              marginBottom={vs(15)}
-            />
-
-            {(hasField('Start') || hasField('Buy Now')) && (
-              <View style={styles.pricingRow}>
-                {hasField('Start') && (
-                  <View
-                    style={[styles.inputGroup, {flex: 1, marginRight: ms(10)}]}>
-                    <AppText
-                      title="Start Price"
-                      fontySize="px12"
-                      color="textPrimary"
-                    />
-                    <View style={styles.inputContainer}>
-                      <View style={styles.currencyInput}>
-                        <AppText
-                          title="$"
-                          fontySize="px14"
-                          color="textSecondary"
-                        />
-                        <TextInput
-                          style={[
-                            styles.textInput,
-                            {flex: 1, marginLeft: ms(5)},
-                          ]}
-                          value={startPrice}
-                          onChangeText={setStartPrice}
-                          placeholder="0.00"
-                          placeholderTextColor="#9CA3AF"
-                          keyboardType="numeric"
-                        />
-                      </View>
-                    </View>
-                  </View>
-                )}
-
-                {hasField('Buy Now') && (
-                  <View
-                    style={[styles.inputGroup, {flex: 1, marginLeft: ms(10)}]}>
-                    <AppText
-                      title="Buy Now"
-                      fontySize="px12"
-                      color="textPrimary"
-                    />
-                    <View style={styles.inputContainer}>
-                      <View style={styles.currencyInput}>
-                        <AppText
-                          title="$"
-                          fontySize="px14"
-                          color="textSecondary"
-                        />
-                        <TextInput
-                          style={[
-                            styles.textInput,
-                            {flex: 1, marginLeft: ms(5)},
-                          ]}
-                          value={buyNowPrice}
-                          onChangeText={setBuyNowPrice}
-                          placeholder="0.00"
-                          placeholderTextColor="#9CA3AF"
-                          keyboardType="numeric"
-                        />
-                      </View>
-                    </View>
-                  </View>
-                )}
-              </View>
-            )}
-
-            {hasField('Reserve') && (
-              <View style={styles.inputGroup}>
-                <AppText title="Reserve" fontySize="px12" color="textPrimary" />
-                <View style={styles.inputContainer}>
-                  <View style={styles.currencyInput}>
-                    <AppText title="$" fontySize="px14" color="textSecondary" />
+              {hasField('Lot') && (
+                <View style={styles.inputGroup}>
+                  <AppText title="Lot #" fontySize="px12" color="textPrimary" />
+                  <View style={styles.inputContainer}>
                     <TextInput
-                      style={[styles.textInput, {flex: 1, marginLeft: ms(5)}]}
-                      value={reserve}
-                      onChangeText={setReserve}
-                      placeholder="0.00"
+                      style={styles.textInput}
+                      value={lotNumber}
+                      onChangeText={setLotNumber}
+                    />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Inventory') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Inventory #"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={inventoryNumber}
+                      onChangeText={setInventoryNumber}
+                      placeholder="Enter inventory number..."
                       placeholderTextColor="#9CA3AF"
-                      keyboardType="numeric"
                     />
                   </View>
                 </View>
-              </View>
-            )}
+              )}
 
-            {(hasField('Low Estimate') || hasField('High Estimate')) && (
-              <View style={styles.pricingRow}>
-                {hasField('Low Estimate') && (
-                  <View
-                    style={[styles.inputGroup, {flex: 1, marginRight: ms(10)}]}>
-                    <AppText
-                      title="Low Estimate"
-                      fontySize="px12"
-                      color="textPrimary"
+              {hasField('Quantity') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Quantity"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={quantity}
+                      onChangeText={setQuantity}
+                      placeholder="Enter quantity..."
+                      placeholderTextColor="#9CA3AF"
                     />
-                    <View style={styles.inputContainer}>
-                      <View style={styles.currencyInput}>
-                        <AppText
-                          title="$"
-                          fontySize="px14"
-                          color="textSecondary"
-                        />
-                        <TextInput
-                          style={[
-                            styles.textInput,
-                            {flex: 1, marginLeft: ms(5)},
-                          ]}
-                          value={lowEstimate}
-                          onChangeText={setLowEstimate}
-                          placeholder="0.00"
-                          placeholderTextColor="#9CA3AF"
-                          keyboardType="numeric"
-                        />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Title') && (
+                <View style={styles.inputGroup}>
+                  <AppText title="Title" fontySize="px12" color="textPrimary" />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={title}
+                      onChangeText={setTitle}
+                      placeholder="Enter title..."
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Description') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Description"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View
+                    style={[styles.inputContainer, styles.textAreaContainer]}>
+                    <TextInput
+                      style={[styles.textInput, styles.textArea]}
+                      value={description}
+                      onChangeText={setDescription}
+                      placeholder="Enter description..."
+                      placeholderTextColor="#9CA3AF"
+                      multiline
+                      numberOfLines={4}
+                    />
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {(hasField('Start') ||
+            hasField('Buy Now') ||
+            hasField('Reserve') ||
+            hasField('Low Estimate') ||
+            hasField('High Estimate')) && (
+            <View style={styles.section}>
+              <AppText
+                title="Pricing Information"
+                fontySize="px14"
+                fontFamily="bold"
+                color="textPrimary"
+                marginBottom={vs(15)}
+              />
+
+              {(hasField('Start') || hasField('Buy Now')) && (
+                <View style={styles.pricingRow}>
+                  {hasField('Start') && (
+                    <View
+                      style={[
+                        styles.inputGroup,
+                        {flex: 1, marginRight: ms(10)},
+                      ]}>
+                      <AppText
+                        title="Start Price"
+                        fontySize="px12"
+                        color="textPrimary"
+                      />
+                      <View style={styles.inputContainer}>
+                        <View style={styles.currencyInput}>
+                          <AppText
+                            title="$"
+                            fontySize="px14"
+                            color="textSecondary"
+                          />
+                          <TextInput
+                            style={[
+                              styles.textInput,
+                              {flex: 1, marginLeft: ms(5)},
+                            ]}
+                            value={startPrice}
+                            onChangeText={setStartPrice}
+                            placeholder="0.00"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
                       </View>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {hasField('High Estimate') && (
-                  <View
-                    style={[styles.inputGroup, {flex: 1, marginLeft: ms(10)}]}>
-                    <AppText
-                      title="High Estimate"
-                      fontySize="px12"
-                      color="textPrimary"
-                    />
-                    <View style={styles.inputContainer}>
-                      <View style={styles.currencyInput}>
-                        <AppText
-                          title="$"
-                          fontySize="px14"
-                          color="textSecondary"
-                        />
-                        <TextInput
-                          style={[
-                            styles.textInput,
-                            {flex: 1, marginLeft: ms(5)},
-                          ]}
-                          value={highEstimate}
-                          onChangeText={setHighEstimate}
-                          placeholder="0.00"
-                          placeholderTextColor="#9CA3AF"
-                          keyboardType="numeric"
-                        />
+                  {hasField('Buy Now') && (
+                    <View
+                      style={[
+                        styles.inputGroup,
+                        {flex: 1, marginLeft: ms(10)},
+                      ]}>
+                      <AppText
+                        title="Buy Now"
+                        fontySize="px12"
+                        color="textPrimary"
+                      />
+                      <View style={styles.inputContainer}>
+                        <View style={styles.currencyInput}>
+                          <AppText
+                            title="$"
+                            fontySize="px14"
+                            color="textSecondary"
+                          />
+                          <TextInput
+                            style={[
+                              styles.textInput,
+                              {flex: 1, marginLeft: ms(5)},
+                            ]}
+                            value={buyNowPrice}
+                            onChangeText={setBuyNowPrice}
+                            placeholder="0.00"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
                       </View>
                     </View>
+                  )}
+                </View>
+              )}
+
+              {hasField('Reserve') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Reserve"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <View style={styles.currencyInput}>
+                      <AppText
+                        title="$"
+                        fontySize="px14"
+                        color="textSecondary"
+                      />
+                      <TextInput
+                        style={[styles.textInput, {flex: 1, marginLeft: ms(5)}]}
+                        value={reserve}
+                        onChangeText={setReserve}
+                        placeholder="0.00"
+                        placeholderTextColor="#9CA3AF"
+                        keyboardType="numeric"
+                      />
+                    </View>
                   </View>
-                )}
-              </View>
-            )}
-          </View>
-        )}
+                </View>
+              )}
 
-        {(hasField('Main Category') || hasField('Sub Category')) && (
-          <View style={styles.section}>
-            <AppText
-              title="Category Information"
-              fontySize="px14"
-              fontFamily="bold"
-              color="textPrimary"
-              marginBottom={vs(15)}
-            />
+              {(hasField('Low Estimate') || hasField('High Estimate')) && (
+                <View style={styles.pricingRow}>
+                  {hasField('Low Estimate') && (
+                    <View
+                      style={[
+                        styles.inputGroup,
+                        {flex: 1, marginRight: ms(10)},
+                      ]}>
+                      <AppText
+                        title="Low Estimate"
+                        fontySize="px12"
+                        color="textPrimary"
+                      />
+                      <View style={styles.inputContainer}>
+                        <View style={styles.currencyInput}>
+                          <AppText
+                            title="$"
+                            fontySize="px14"
+                            color="textSecondary"
+                          />
+                          <TextInput
+                            style={[
+                              styles.textInput,
+                              {flex: 1, marginLeft: ms(5)},
+                            ]}
+                            value={lowEstimate}
+                            onChangeText={setLowEstimate}
+                            placeholder="0.00"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  )}
 
-            {hasField('Main Category') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Main Category"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <TouchableOpacity
-                  style={styles.inputContainer}
-                  onPress={() => setIsCategoryModalVisible(true)}>
-                  <View style={styles.dropdownContent}>
-                    <AppText
-                      title={mainCategory}
-                      fontySize="px14"
-                      color="textPrimary"
-                    />
-                    <Icon
-                      name="chevron-down-outline"
-                      size={ms(16)}
-                      color="#6B7280"
+                  {hasField('High Estimate') && (
+                    <View
+                      style={[
+                        styles.inputGroup,
+                        {flex: 1, marginLeft: ms(10)},
+                      ]}>
+                      <AppText
+                        title="High Estimate"
+                        fontySize="px12"
+                        color="textPrimary"
+                      />
+                      <View style={styles.inputContainer}>
+                        <View style={styles.currencyInput}>
+                          <AppText
+                            title="$"
+                            fontySize="px14"
+                            color="textSecondary"
+                          />
+                          <TextInput
+                            style={[
+                              styles.textInput,
+                              {flex: 1, marginLeft: ms(5)},
+                            ]}
+                            value={highEstimate}
+                            onChangeText={setHighEstimate}
+                            placeholder="0.00"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+
+          {(hasField('Main Category') || hasField('Sub Category')) && (
+            <View style={styles.section}>
+              <AppText
+                title="Category Information"
+                fontySize="px14"
+                fontFamily="bold"
+                color="textPrimary"
+                marginBottom={vs(15)}
+              />
+
+              {hasField('Main Category') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Main Category"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <TouchableOpacity
+                    style={styles.inputContainer}
+                    onPress={() => setIsCategoryModalVisible(true)}>
+                    <View style={styles.dropdownContent}>
+                      <AppText
+                        title={mainCategory}
+                        fontySize="px14"
+                        color="textPrimary"
+                      />
+                      <Icon
+                        name="chevron-down-outline"
+                        size={ms(16)}
+                        color="#6B7280"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {hasField('Sub Category') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Sub Category"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <TouchableOpacity
+                    style={styles.inputContainer}
+                    onPress={() => {
+                      if (subCategoryOptions?.length) {
+                        setIsSubCategoryModalVisible(true);
+                      } else {
+                        setIsCategoryModalVisible(true);
+                      }
+                    }}>
+                    <View style={styles.dropdownContent}>
+                      <AppText
+                        title={subCategory}
+                        fontySize="px14"
+                        color="textPrimary"
+                      />
+                      <Icon
+                        name="chevron-down-outline"
+                        size={ms(16)}
+                        color="#6B7280"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
+
+          {(hasField('Seller') ||
+            hasField('Shipping') ||
+            hasField('Tax Exempt') ||
+            hasField('Not Sold') ||
+            hasField('Notes')) && (
+            <View style={styles.section}>
+              <AppText
+                title="Additional Information"
+                fontySize="px14"
+                fontFamily="bold"
+                color="textPrimary"
+                marginBottom={vs(15)}
+              />
+
+              {hasField('Seller') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Seller"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={seller}
+                      onChangeText={setSeller}
+                      placeholder="Enter seller..."
+                      placeholderTextColor="#9CA3AF"
                     />
                   </View>
-                </TouchableOpacity>
-              </View>
-            )}
+                </View>
+              )}
 
-            {hasField('Sub Category') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Sub Category"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <TouchableOpacity
-                  style={styles.inputContainer}
-                  onPress={() => {
-                    if (subCategoryOptions?.length) {
-                      setIsSubCategoryModalVisible(true);
-                    } else {
-                      setIsCategoryModalVisible(true);
-                    }
-                  }}>
-                  <View style={styles.dropdownContent}>
-                    <AppText
-                      title={subCategory}
-                      fontySize="px14"
-                      color="textPrimary"
-                    />
-                    <Icon
-                      name="chevron-down-outline"
-                      size={ms(16)}
-                      color="#6B7280"
+              {hasField('Shipping') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Shipping"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={shipping}
+                      onChangeText={setShipping}
+                      placeholder="Enter shipping..."
+                      placeholderTextColor="#9CA3AF"
                     />
                   </View>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-
-        {(hasField('Seller') ||
-          hasField('Shipping') ||
-          hasField('Tax Exempt') ||
-          hasField('Not Sold') ||
-          hasField('Notes')) && (
-          <View style={styles.section}>
-            <AppText
-              title="Additional Information"
-              fontySize="px14"
-              fontFamily="bold"
-              color="textPrimary"
-              marginBottom={vs(15)}
-            />
-
-            {hasField('Seller') && (
-              <View style={styles.inputGroup}>
-                <AppText title="Seller" fontySize="px12" color="textPrimary" />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={seller}
-                    onChangeText={setSeller}
-                    placeholder="Enter seller..."
-                    placeholderTextColor="#9CA3AF"
-                  />
                 </View>
-              </View>
-            )}
+              )}
 
-            {hasField('Shipping') && (
-              <View style={styles.inputGroup}>
+              {hasField('Tax Exempt') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Tax Exempt"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={taxExempt}
+                      onChangeText={setTaxExempt}
+                      placeholder="Enter tax exempt..."
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Not Sold') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Not Sold"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={notSold}
+                      onChangeText={setNotSold}
+                      placeholder="Enter not sold..."
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Notes') && (
+                <View style={styles.inputGroup}>
+                  <AppText title="Notes" fontySize="px12" color="textPrimary" />
+                  <View
+                    style={[styles.inputContainer, styles.textAreaContainer]}>
+                    <TextInput
+                      style={[styles.textInput, styles.textArea]}
+                      value={notes}
+                      onChangeText={setNotes}
+                      placeholder="Enter notes..."
+                      placeholderTextColor="#9CA3AF"
+                      multiline
+                      numberOfLines={4}
+                    />
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {(hasField('Date Added') || hasField('Date Edited')) && (
+            <View style={styles.section}>
+              <AppText
+                title="Audit Information"
+                fontySize="px14"
+                fontFamily="bold"
+                color="textPrimary"
+                marginBottom={vs(15)}
+              />
+
+              {hasField('Date Added') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Date Added"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={[styles.textInput, styles.readOnlyInput]}
+                      value={dateAdded}
+                      onChangeText={setDateAdded}
+                      placeholder="Enter date added..."
+                      placeholderTextColor="#9CA3AF"
+                      editable={false}
+                    />
+                  </View>
+                </View>
+              )}
+
+              {hasField('Date Edited') && (
+                <View style={styles.inputGroup}>
+                  <AppText
+                    title="Date Edited"
+                    fontySize="px12"
+                    color="textPrimary"
+                  />
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={[styles.textInput, styles.readOnlyInput]}
+                      value={dateEdited}
+                      onChangeText={setDateEdited}
+                      placeholder="Enter date edited..."
+                      placeholderTextColor="#9CA3AF"
+                      editable={false}
+                    />
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {hasField('Complete') && (
+            <View style={styles.section}>
+              <View style={styles.statusRow}>
                 <AppText
-                  title="Shipping"
-                  fontySize="px12"
+                  title="Complete"
+                  fontySize="px14"
                   color="textPrimary"
                 />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={shipping}
-                    onChangeText={setShipping}
-                    placeholder="Enter shipping..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Tax Exempt') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Tax Exempt"
-                  fontySize="px12"
-                  color="textPrimary"
+                <Switch
+                  value={isComplete}
+                  onValueChange={setIsComplete}
+                  trackColor={{false: '#E5E7EB', true: colors.primary}}
+                  thumbColor={colors.white}
                 />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={taxExempt}
-                    onChangeText={setTaxExempt}
-                    placeholder="Enter tax exempt..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
               </View>
-            )}
-
-            {hasField('Not Sold') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Not Sold"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={notSold}
-                    onChangeText={setNotSold}
-                    placeholder="Enter not sold..."
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Notes') && (
-              <View style={styles.inputGroup}>
-                <AppText title="Notes" fontySize="px12" color="textPrimary" />
-                <View style={[styles.inputContainer, styles.textAreaContainer]}>
-                  <TextInput
-                    style={[styles.textInput, styles.textArea]}
-                    value={notes}
-                    onChangeText={setNotes}
-                    placeholder="Enter notes..."
-                    placeholderTextColor="#9CA3AF"
-                    multiline
-                    numberOfLines={4}
-                  />
-                </View>
-              </View>
-            )}
-          </View>
-        )}
-
-        {(hasField('Date Added') || hasField('Date Edited')) && (
-          <View style={styles.section}>
-            <AppText
-              title="Audit Information"
-              fontySize="px14"
-              fontFamily="bold"
-              color="textPrimary"
-              marginBottom={vs(15)}
-            />
-
-            {hasField('Date Added') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Date Added"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={[styles.textInput, styles.readOnlyInput]}
-                    value={dateAdded}
-                    onChangeText={setDateAdded}
-                    placeholder="Enter date added..."
-                    placeholderTextColor="#9CA3AF"
-                    editable={false}
-                  />
-                </View>
-              </View>
-            )}
-
-            {hasField('Date Edited') && (
-              <View style={styles.inputGroup}>
-                <AppText
-                  title="Date Edited"
-                  fontySize="px12"
-                  color="textPrimary"
-                />
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={[styles.textInput, styles.readOnlyInput]}
-                    value={dateEdited}
-                    onChangeText={setDateEdited}
-                    placeholder="Enter date edited..."
-                    placeholderTextColor="#9CA3AF"
-                    editable={false}
-                  />
-                </View>
-              </View>
-            )}
-          </View>
-        )}
-
-        {hasField('Complete') && (
-          <View style={styles.section}>
-            <View style={styles.statusRow}>
-              <AppText title="Complete" fontySize="px14" color="textPrimary" />
-              <Switch
-                value={isComplete}
-                onValueChange={setIsComplete}
-                trackColor={{false: '#E5E7EB', true: colors.primary}}
-                thumbColor={colors.white}
+              <AppText
+                title={isComplete ? 'On' : 'Off'}
+                fontySize="px12"
+                color="textSecondary"
+                textAlign="center"
+                marginTop={vs(5)}
               />
             </View>
-            <AppText
-              title={isComplete ? 'On' : 'Off'}
-              fontySize="px12"
-              color="textSecondary"
-              textAlign="center"
-              marginTop={vs(5)}
-            />
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
 
-      <View
-        style={[
-          styles.bottomButtonContainer,
-          {paddingBottom: vs(5) + insets.bottom},
-        ]}>
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <AppText title="Save Changes" fontySize="px14" color="white" />
-        </TouchableOpacity>
-      </View>
-
+        <View
+          style={[
+            styles.bottomButtonContainer,
+            {paddingBottom: vs(5) + insets.bottom},
+          ]}>
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+            <AppText title="Save Changes" fontySize="px14" color="white" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAwareScrollView>
       {isCategoryModalVisible && (
         <AppModal
           visible={isCategoryModalVisible}
@@ -1200,6 +1241,9 @@ const styles = StyleSheet.create({
   selectedModalOption: {
     backgroundColor: colors.light100,
     borderRadius: 8,
+  },
+  scrollContent: {
+    flex: 1,
   },
 });
 

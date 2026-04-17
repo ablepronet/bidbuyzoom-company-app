@@ -101,10 +101,23 @@ const LotImagesScreen = () => {
       return;
     }
 
-    const catalogDataPayload = Object.keys(formData || {}).map(key => ({
-      label: key,
-      value: formData[key],
-    }));
+    const catalogDataPayload = Object.keys(formData || {}).map(key => {
+      const field = formData[key];
+
+      if (typeof field === 'object' && field !== null) {
+        return {
+          label: field.label,
+          id: field.id,
+          value: field.value,
+        };
+      }
+
+      // normal fields
+      return {
+        label: key,
+        value: field,
+      };
+    });
 
     const multipartData = new FormData();
     multipartData.append('saleId', sale?.saleId);
