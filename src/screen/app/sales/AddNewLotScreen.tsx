@@ -235,6 +235,7 @@ const handleSelectSubCategory = (item: any) => {
                       'Buy Now',
                       'Low Estimate',
                       'High Estimate',
+                      'Reserve',
                     ].includes(field.label);
 
                     return (
@@ -255,7 +256,7 @@ const handleSelectSubCategory = (item: any) => {
                           label={field.label}
                           multiline={field.type === 'textarea'}
                           numberOfLines={field.type === 'textarea' ? 4 : 1}
-                          keyboardType={isNumberField ? 'numeric' : 'default'}
+                          keyboardType={isNumberField ? 'number-pad' : 'default'}
                           style={
                             field.type === 'textarea'
                               ? styles.textAreaInput
