@@ -1,6 +1,12 @@
-import { Alert, Platform } from 'react-native';
-import { launchImageLibrary, launchCamera, ImagePickerResponse, MediaType, PhotoQuality } from 'react-native-image-picker';
-
+import {Alert, Platform} from 'react-native';
+import {
+  launchImageLibrary,
+  launchCamera,
+  ImagePickerResponse,
+  MediaType,
+  PhotoQuality,
+} from 'react-native-image-picker';
+import {pick, types} from '@react-native-documents/picker';
 export interface ImagePickerOptions {
   includeBase64?: boolean;
   includeExtra?: boolean;
@@ -27,13 +33,22 @@ const defaultOptions: ImagePickerOptions = {
   quality: 0.8 as PhotoQuality,
   mediaType: 'photo',
 };
+export interface FilePickerResult {
+  uri: string | null;
+  name?: string;
+  size?: number;
+  type?: string;
+  error?: string;
+}
 
 /**
  * Launch image library to pick photo from gallery
  */
-export const pickImageFromLibrary = async (options?: ImagePickerOptions): Promise<ImagePickerResult> => {
-  return new Promise((resolve) => {
-    const pickerOptions = { ...defaultOptions, ...options };
+export const pickImageFromLibrary = async (
+  options?: ImagePickerOptions,
+): Promise<ImagePickerResult> => {
+  return new Promise(resolve => {
+    const pickerOptions = {...defaultOptions, ...options};
 
     launchImageLibrary(pickerOptions, (response: ImagePickerResponse) => {
       handleImagePickerResponse(response, resolve);
@@ -44,10 +59,12 @@ export const pickImageFromLibrary = async (options?: ImagePickerOptions): Promis
 /**
  * Launch camera to take photo
  */
-export const takePhotoWithCamera = async (options?: ImagePickerOptions): Promise<ImagePickerResult> => {
-  return new Promise((resolve) => {
-    const pickerOptions = { 
-      ...defaultOptions, 
+export const takePhotoWithCamera = async (
+  options?: ImagePickerOptions,
+): Promise<ImagePickerResult> => {
+  return new Promise(resolve => {
+    const pickerOptions = {
+      ...defaultOptions,
       ...options,
       saveToPhotos: false,
     };
@@ -62,17 +79,17 @@ export const takePhotoWithCamera = async (options?: ImagePickerOptions): Promise
  * Handle image picker response and return standardized result
  */
 const handleImagePickerResponse = (
-  response: ImagePickerResponse, 
-  resolve: (value: ImagePickerResult) => void
+  response: ImagePickerResponse,
+  resolve: (value: ImagePickerResult) => void,
 ) => {
   if (response.didCancel) {
-    resolve({ uri: null });
+    resolve({uri: null});
     return;
   }
 
   if (response.errorCode) {
     let errorMessage = 'Unknown error occurred';
-    
+
     switch (response.errorCode) {
       case 'camera_unavailable':
         errorMessage = 'Camera is not available on this device';
@@ -84,14 +101,14 @@ const handleImagePickerResponse = (
         errorMessage = response.errorMessage || 'Unknown error occurred';
         break;
     }
-    
-    resolve({ uri: null, error: errorMessage });
+
+    resolve({uri: null, error: errorMessage});
     return;
   }
 
   if (response.assets && response.assets[0]) {
     const asset = response.assets[0];
-    
+
     resolve({
       uri: asset.uri || null,
       base64: asset.base64,
@@ -100,7 +117,7 @@ const handleImagePickerResponse = (
       type: asset.type,
     });
   } else {
-    resolve({ uri: null, error: 'No image selected' });
+    resolve({uri: null, error: 'No image selected'});
   }
 };
 
@@ -108,9 +125,9 @@ const handleImagePickerResponse = (
  * Show alert to choose between camera and gallery
  */
 export const showImagePickerAlert = async (
-  options?: ImagePickerOptions
+  options?: ImagePickerOptions,
 ): Promise<ImagePickerResult> => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     Alert.alert(
       'Select Photo',
       'Choose an option to select photo',
@@ -132,10 +149,10 @@ export const showImagePickerAlert = async (
         {
           text: 'Cancel',
           style: 'cancel',
-          onPress: () => resolve({ uri: null }),
+          onPress: () => resolve({uri: null}),
         },
       ],
-      { cancelable: true }
+      {cancelable: true},
     );
   });
 };
@@ -143,21 +160,27 @@ export const showImagePickerAlert = async (
 /**
  * Validate image file
  */
-export const validateImage = (result: ImagePickerResult): { isValid: boolean; error?: string } => {
+export const validateImage = (
+  result: ImagePickerResult,
+): {isValid: boolean; error?: string} => {
   if (!result.uri) {
-    return { isValid: false, error: result.error || 'No image selected' };
+    return {isValid: false, error: result.error || 'No image selected'};
   }
 
-  if (result.fileSize && result.fileSize > 5 * 1024 * 1024) { // 5MB limit
-    return { isValid: false, error: 'Image size should be less than 5MB' };
+  if (result.fileSize && result.fileSize > 5 * 1024 * 1024) {
+    // 5MB limit
+    return {isValid: false, error: 'Image size should be less than 5MB'};
   }
 
   const supportedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
   if (result.type && !supportedTypes.includes(result.type)) {
-    return { isValid: false, error: 'Unsupported image format. Please use JPEG, PNG, or WebP' };
+    return {
+      isValid: false,
+      error: 'Unsupported image format. Please use JPEG, PNG, or WebP',
+    };
   }
 
-  return { isValid: true };
+  return {isValid: true};
 };
 
 /**
@@ -172,4 +195,54 @@ export const requestImagePermissions = async (): Promise<boolean> => {
     console.error('Permission request failed:', error);
     return false;
   }
+};
+
+export const pickCSVFile = async (): Promise<FilePickerResult> => {
+  try {
+    const res = await pick({
+      type: [types.csv],
+      allowMultiSelection: false,
+    });
+
+    const file = res[0];
+
+    // fallback validation (important)
+    if (!file.name?.toLowerCase().endsWith('.csv')) {
+      return {uri: null, error: 'Only CSV file allowed'};
+    }
+
+    return {
+      uri: file.uri,
+      name: file.name ?? undefined,
+      size: file.size ?? undefined,
+      type: file.type ?? undefined,
+    };
+  } catch (err: any) {
+    if (err?.code === 'DOCUMENT_PICKER_CANCELED') {
+      return {uri: null};
+    }
+
+    return {
+      uri: null,
+      error: 'Failed to pick file',
+    };
+  }
+};
+
+export const validateCSV = (
+  file: FilePickerResult,
+): {isValid: boolean; error?: string} => {
+  if (!file.uri) {
+    return {isValid: false, error: file.error || 'No file selected'};
+  }
+
+  if (file.size && file.size > 2 * 1024 * 1024) {
+    return {isValid: false, error: 'CSV must be under 2MB'};
+  }
+
+  if (!file.name?.toLowerCase().endsWith('.csv')) {
+    return {isValid: false, error: 'Invalid file format'};
+  }
+
+  return {isValid: true};
 };

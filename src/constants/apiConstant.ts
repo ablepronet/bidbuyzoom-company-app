@@ -20,6 +20,8 @@ const apiEndPoints = {
   getCatalogFields: 'mobile/catalog-fields',
   updateCatalogDetails: 'mobile/catalog-item/update',
   addCatalogData: 'mobile/catalog-item/add',
+  lotImport:"lot-import",
+  mobileBulkUpload:"catalog/mobile-bulk-upload"
 };
 
 export default apiEndPoints;
