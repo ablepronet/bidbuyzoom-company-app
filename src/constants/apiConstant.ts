@@ -16,6 +16,12 @@ const apiEndPoints = {
   getDashboardData: 'mobile/dashboard',
   verification: 'verify-login-2fa',
   catalogData: 'mobile/catalog-list',
+  getCatalogDetails:"mobile/catalog-item",
+  getCatalogFields: 'mobile/catalog-fields',
+  updateCatalogDetails: 'mobile/catalog-item/update',
+  addCatalogData: 'mobile/catalog-item/add',
+  lotImport:"lot-import",
+  mobileBulkUpload:"catalog/mobile-bulk-upload"
 };
 
 export default apiEndPoints;

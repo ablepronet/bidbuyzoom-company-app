@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Image,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -21,6 +22,19 @@ import {useGetCatalogDetails} from '../../../services/queries/app/catlog';
 import {useDebounce} from '../../../utils/debounce';
 import {ImageComponent} from '../../../components/AppImage';
 import Loader from '../../../components/loader';
+import AppModal from '../../../components/AppModal';
+import AppButton from '../../../components/appButton';
+import {
+  FilePickerResult,
+  ImagePickerResult,
+  pickCSVFile,
+  showImagePickerAlert,
+  validateCSV,
+  validateImage,
+} from '../../../utils/imagePicker';
+import AppToast from '../../../components/toaster';
+import {useUploadLotCSV} from '../../../services/queries/app/catlog/ImportCSVFile';
+import {useImportImages} from '../../../services/queries/app/catlog/ImportImages';
 
 const CatalogScreen = () => {
   const navigation = useNavigation<any>();
@@ -45,8 +59,13 @@ const CatalogScreen = () => {
     perPage,
     search: debouncedSearch,
   });
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [file, setFile] = useState<FilePickerResult | null>(null);
+  const [image, setImage] = useState<ImagePickerResult | null>(null);
+  const {mutate: uploadCSV, isPending} = useUploadLotCSV();
+  const {mutate: mobileBulkUpload, isPending: isUploadingImages} =
+    useImportImages();
 
-  // Extract data from response
   const lots = data?.data || [];
   const pagination = data?.pagination;
   const totalItems = pagination?.totalItems || 0;
@@ -79,7 +98,7 @@ const CatalogScreen = () => {
   };
 
   const handleAddLot = () => {
-    navigation.navigate(routes.addNewLotScreen);
+    navigation.navigate(routes.addNewLotScreen, {sale: sale});
   };
 
   const handleLotPress = (lot: any) => {
@@ -174,6 +193,142 @@ const CatalogScreen = () => {
     );
   };
 
+  const handleDownlaod = () => {
+    setShowImportModal(true);
+  };
+
+  const handlePickCSV = async () => {
+    const res = await pickCSVFile();
+
+    const validation = validateCSV(res);
+
+    if (!validation.isValid) {
+      AppToast.error(validation.error as string);
+      return;
+    }
+
+    setFile(res);
+  };
+
+  const handleUploadCSV = () => {
+    if (!file) {
+      AppToast.error('Please select a CSV file');
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append('lotFile', {
+      uri:
+        Platform.OS === 'android' ? file.uri : file.uri?.replace('file://', ''),
+      name: file.name || 'file.csv',
+      type: file.type || 'text/csv',
+    } as any);
+
+    formData.append('saleId', sale?.saleId);
+    formData.append('templateId', selectedTemplate || '');
+    formData.append('lotValue', '0');
+    uploadCSV(
+      {payload: formData},
+      {
+        onSuccess: () => {
+          setFile(null);
+          setShowImportModal(false);
+          refetch();
+        },
+      },
+    );
+  };
+
+  const handlePickImage = async () => {
+    const res = await showImagePickerAlert();
+
+    const validation = validateImage(res);
+
+    if (!validation.isValid) {
+      AppToast.error(validation.error as string);
+      return;
+    }
+
+    uploadSingleImage(res);
+  };
+
+  const uploadSingleImage = (img: ImagePickerResult) => {
+    const formData = new FormData();
+
+    formData.append('saleId', sale?.saleId);
+
+    formData.append('images', {
+      uri:
+        Platform.OS === 'android' ? img.uri : img.uri?.replace('file://', ''),
+      name: img.fileName || 'image.jpg',
+      type: img.type || 'image/jpeg',
+    } as any);
+    setShowImportModal(false);
+
+    mobileBulkUpload(
+      {payload: formData},
+      {
+        onSuccess: res => {
+          const unmatched = res?.data?.unmatchedImages || [];
+
+          if (unmatched.length > 0) {
+            AppToast.error(
+              `Discarded Images (Not in Catalog) : ${unmatched.join(', ')}`,
+            );
+            // setTimeout(() => {
+            //   setShowImportModal(true);
+            // }, 2000);
+            return;
+          }
+
+          AppToast.success('Image uploaded successfully');
+          setShowImportModal(false);
+        },
+      },
+    );
+  };
+
+  // const handleUploadImage = () => {
+  //   if (!image) {
+  //     AppToast.error('Please select image');
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+
+  //   formData.append('saleId', sale?.saleId);
+
+  //   formData.append('images', {
+  //     uri:
+  //       Platform.OS === 'android'
+  //         ? image.uri
+  //         : image.uri?.replace('file://', ''),
+  //     name: image.fileName || 'image.jpg',
+  //     type: image.type || 'image/jpeg',
+  //   } as any);
+
+  //   mobileBulkUpload(
+  //     {payload: formData},
+  //     {
+  //       onSuccess: res => {
+  //         console.log('UPLOAD RESPONSE =>', res);
+
+  //         const unmatched = res?.data?.unmatchedImages || [];
+
+  //         if (unmatched.length > 0) {
+  //           AppToast.error(`Image name not matched: ${unmatched.join(', ')}`);
+  //           return; // ❗ stop success flow
+  //         }
+
+  //         // ✅ success case
+  //         AppToast.success('Image uploaded successfully');
+  //         setImage(null);
+  //         setShowImportModal(false);
+  //       },
+  //     },
+  //   );
+  // };
   return (
     <View style={styles.container}>
       {/* App Header */}
@@ -183,7 +338,7 @@ const CatalogScreen = () => {
         leftIcon="chevron-back"
         onLeftPress={handleBack}
       />
-      <Loader isLoading={isLoading} />
+      <Loader isLoading={isLoading || isUploadingImages} />
       {/* Header Section */}
       <View style={styles.headerSection}>
         {/* Search Bar */}
@@ -231,7 +386,9 @@ const CatalogScreen = () => {
           onPress={() => navigation.navigate(routes.lotImagesScreen)}>
           <Icon name="camera-outline" size={ms(20)} color="primary" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.quickActionBtn}>
+        <TouchableOpacity
+          style={styles.quickActionBtn}
+          onPress={handleDownlaod}>
           <Icon name="download-outline" size={ms(20)} color="primary" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.quickActionBtn}>
@@ -316,6 +473,119 @@ const CatalogScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+      {showImportModal && (
+        <AppModal
+          visible={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          position="center"
+          containerStyle={{margin: 10}}>
+          <ImportModalContent
+            onClose={() => {
+              setFile(null);
+              setShowImportModal(false);
+            }}
+            onPickCSV={handlePickCSV}
+            onSubmit={handleUploadCSV}
+            file={file}
+            isLoading={isPending}
+            // ✅ add these
+            image={image}
+            onPickImage={handlePickImage}
+            // onUploadImage={handleUploadImage}
+          />
+        </AppModal>
+      )}
+    </View>
+  );
+};
+
+type ImportModalProps = {
+  onClose: () => void;
+  onPickCSV: () => void;
+  onSubmit: () => void;
+  file: FilePickerResult | null;
+  isLoading: boolean;
+
+  image: ImagePickerResult | null;
+  onPickImage: () => void;
+  onUploadImage?: () => void;
+};
+
+const ImportModalContent = ({
+  onClose,
+  onPickCSV,
+  file,
+  isLoading,
+  onSubmit,
+  image,
+  onPickImage,
+  onUploadImage,
+}: ImportModalProps) => {
+  return (
+    <View style={styles.modalWrapper}>
+      <View style={styles.modalHeader}>
+        <AppText title="Import Sales" fontFamily="bold" fontySize="px14" />
+        <TouchableOpacity onPress={onClose}>
+          <Icon name="close" size={20} color="#6B7280" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <AppText title="Import CSV file" fontFamily="bold" fontySize="px12" />
+
+        <TouchableOpacity style={styles.fileInput} onPress={onPickCSV}>
+          <AppText
+            title={file?.name || 'Choose CSV file'}
+            fontySize="px14"
+            color={file ? 'textPrimary' : 'textSecondary'}
+          />
+
+          <Icon
+            name="cloud-upload-outline"
+            size={16}
+            color="#6B7280"
+            style={{marginRight: ms(6)}}
+          />
+        </TouchableOpacity>
+
+        <AppButton
+          title={isLoading ? 'Uploading...' : 'Submit'}
+          style={styles.addBtn}
+          onPress={onSubmit}
+          disabled={!file || isLoading}
+        />
+
+        {/* <AppText
+          title="Download sample collection_sample_import.csv"
+          fontySize="px10"
+          color="primary"
+          marginTop={vs(6)}
+        /> */}
+      </View>
+
+      {/* Photo Section */}
+      <View style={styles.card}>
+        <AppText title="Import Photos" fontFamily="bold" fontySize="px12" />
+
+        <View style={styles.infoBox}>
+          <AppText
+            title="NOTE: Photos should be named in accordance with settings for this Collection. Examples: 20256_1.jpg, 20256_2.jpg, 20256_3.jpg, ... etc."
+            fontySize="px12"
+            fontFamily="medium"
+          />
+        </View>
+
+        <AppButton
+          title="+ Add Photos"
+          style={styles.addBtn}
+          onPress={onPickImage}
+        />
+        {/* <AppButton
+          title="Upload Image"
+          style={styles.addBtn}
+          onPress={onUploadImage}
+        /> */}
+      </View>
     </View>
   );
 };
@@ -477,6 +747,56 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingVertical: vs(16),
     alignItems: 'center',
+  },
+  modalWrapper: {},
+
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: vs(12),
+  },
+
+  card: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 10,
+    padding: ms(12),
+    marginBottom: vs(12),
+  },
+
+  fileInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    paddingVertical: vs(10),
+    paddingHorizontal: ms(10),
+    borderRadius: 6,
+    marginTop: vs(8),
+    justifyContent: 'space-between',
+  },
+
+  submitBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: vs(10),
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: vs(10),
+  },
+
+  infoBox: {
+    backgroundColor: '#E0F2FE',
+    padding: vs(10),
+    borderRadius: 6,
+    marginTop: vs(8),
+  },
+
+  addBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: vs(10),
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: vs(10),
   },
 });
 
