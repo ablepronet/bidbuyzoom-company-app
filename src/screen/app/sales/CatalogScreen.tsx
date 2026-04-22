@@ -83,7 +83,8 @@ const CatalogScreen = () => {
   };
 
   const handleLotPress = (lot: any) => {
-    navigation.navigate(routes.lotDetailsScreen, {lot});
+    // navigation.navigate(routes.lotDetailsScreen, {lot});
+    console.log(lot,'lot')
   };
 
   const handleBack = () => {

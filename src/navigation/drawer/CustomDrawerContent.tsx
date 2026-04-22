@@ -24,6 +24,7 @@ import {routes} from '../route';
 import {useGetUserProfile} from '../../services/queries/app/Profile';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import {HELP} from '../../constants/apiConstant';
+import {useQueryClient} from '@tanstack/react-query';
 
 // Types
 type MenuItemType = {
@@ -110,6 +111,7 @@ export const CustomDrawerContent = (props: any) => {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.auth);
   const {data, isLoading} = useGetUserProfile();
+  const queryClient = useQueryClient();
 
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
@@ -180,6 +182,7 @@ export const CustomDrawerContent = (props: any) => {
 
   const handleLogout = async () => {
     await persister.purge();
+    queryClient.clear();
     dispatch(setUserLogout());
   };
 

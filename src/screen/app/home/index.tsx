@@ -90,7 +90,7 @@ const HomeDashBoard = () => {
   };
 
   if (isLoading || isDashboardLoading) {
-    return <Loader isLoading={true} />;
+    return <Loader isLoading={isLoading || isDashboardLoading} />;
   }
 
   const performanceData = {
