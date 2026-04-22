@@ -370,7 +370,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
         // Timeout for loading state
-        renderLoading={() => <Loader isLoading={true} />}
+        // renderLoading={() => <Loader isLoading={true} />}
       />
       {showLoader && <Loader isLoading={isLoading} />}
     </View>

@@ -59,6 +59,7 @@ const CatalogScreen = () => {
     perPage,
     search: debouncedSearch,
   });
+
   const [showImportModal, setShowImportModal] = useState(false);
   const [file, setFile] = useState<FilePickerResult | null>(null);
   const [image, setImage] = useState<ImagePickerResult | null>(null);
@@ -102,8 +103,8 @@ const CatalogScreen = () => {
   };
 
   const handleLotPress = (lot: any) => {
-    // navigation.navigate(routes.lotDetailsScreen, {lot});
-    console.log(lot,'lot')
+    navigation.navigate(routes.lotDetailsScreen, {lot});
+    // console.log(lot,'lot')
   };
 
   const handleBack = () => {
@@ -373,7 +374,7 @@ const CatalogScreen = () => {
         </View>
       </View>
 
-      {/* Quick Action Buttons */}
+      {/* Quick Action Buttons*/}
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.quickActionBtn} onPress={handleAddLot}>
           <Icon name="add-outline" size={ms(20)} color="primary" />

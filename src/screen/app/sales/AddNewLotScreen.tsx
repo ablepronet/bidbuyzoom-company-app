@@ -7,7 +7,11 @@ import {
   Alert,
   Keyboard,
 } from 'react-native';
-import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import AppButton from '../../../components/appButton';
@@ -39,7 +43,6 @@ const AddNewLotScreen = () => {
   const formikRef = useRef<FormikProps<Record<string, string>>>(null);
   const sale = route.params?.sale;
 
-  
   const {data: catalogFieldsData, isPending} = useGetCatalogFields({
     templateId: String(sale?.saleId || ''),
   });
@@ -64,24 +67,21 @@ const AddNewLotScreen = () => {
   const [mainCategory, setMainCategory] = useState('Select');
   const [subCategory, setSubCategory] = useState('Select');
 
-useFocusEffect(
-  useCallback(() => {
-    return () => {
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        formikRef.current?.resetForm();
 
-      formikRef.current?.resetForm();
+        setSelectedCategoryValue('');
+        setMainCategory('Select');
+        setSubCategory('Select');
 
-      setSelectedCategoryValue('');
-      setMainCategory('Select');
-      setSubCategory('Select');
-
-      // close modals
-      setIsCategoryModalVisible(false);
-      setIsSubCategoryModalVisible(false);
-    };
-  }, []),
-);
-
-
+        // close modals
+        setIsCategoryModalVisible(false);
+        setIsSubCategoryModalVisible(false);
+      };
+    }, []),
+  );
 
   useEffect(() => {
     if (catalogFieldsData?.categories) {
@@ -100,42 +100,42 @@ useFocusEffect(
 
   const subCategoryOptions = selectedCategory?.subcategoryDatas || [];
 
- const handleSelectCategory = (category: any) => {
-  const id = category?._id || category?.value || '';
+  const handleSelectCategory = (category: any) => {
+    const id = category?._id || category?.value || '';
 
-  const categoryObj = {
-    label: 'Main Category',
-    id: id,
-    value: category?.label || '',
+    const categoryObj = {
+      label: 'Main Category',
+      id: id,
+      value: category?.label || '',
+    };
+
+    setSelectedCategoryValue(id);
+    setMainCategory(category?.label || 'Select');
+
+    // ✅ store object (NOT string)
+    formikRef.current?.setFieldValue('Main Category', categoryObj);
+
+    // reset subcategory
+    setSubCategory('Select');
+    formikRef.current?.setFieldValue('Sub Category', '');
+
+    setIsCategoryModalVisible(false);
   };
 
-  setSelectedCategoryValue(id);
-  setMainCategory(category?.label || 'Select');
+  const handleSelectSubCategory = (item: any) => {
+    const subCategoryObj = {
+      label: 'Sub Category',
+      id: item?._id || item?.value || '',
+      value: item?.label || '',
+    };
 
-  // ✅ store object (NOT string)
-  formikRef.current?.setFieldValue('Main Category', categoryObj);
+    setSubCategory(item?.label || 'Select');
 
-  // reset subcategory
-  setSubCategory('Select');
-  formikRef.current?.setFieldValue('Sub Category', '');
+    // ✅ store object
+    formikRef.current?.setFieldValue('Sub Category', subCategoryObj);
 
-  setIsCategoryModalVisible(false);
-};
-
-const handleSelectSubCategory = (item: any) => {
-  const subCategoryObj = {
-    label: 'Sub Category',
-    id: item?._id || item?.value || '',
-    value: item?.label || '',
+    setIsSubCategoryModalVisible(false);
   };
-
-  setSubCategory(item?.label || 'Select');
-
-  // ✅ store object
-  formikRef.current?.setFieldValue('Sub Category', subCategoryObj);
-
-  setIsSubCategoryModalVisible(false);
-};
 
   const handleSubmit = (values: Record<string, string>) => {
     const finalData = {
@@ -144,12 +144,9 @@ const handleSelectSubCategory = (item: any) => {
       'Sub Category': subCategory,
     };
 
-
-
     navigation.navigate(routes.lotImagesScreen, {
       data: finalData,
       sale: sale,
-
     });
   };
 
@@ -157,29 +154,60 @@ const handleSelectSubCategory = (item: any) => {
     navigation.goBack();
   };
 
+  // const onNextPress = () => {
+  //   if (formikRef.current) {
+  //     formikRef.current.validateForm().then(errors => {
+  //       if (!selectedCategoryValue) {
+  //         AppToast.error('Main Category is required');
+  //         return;
+  //       }
+
+  //       if (!subCategory || subCategory === 'Select') {
+  //         AppToast.error('Sub Category is required');
+  //         return;
+  //       }
+
+  //       if (Object.keys(errors).length > 0) {
+  //         const firstError = Object.values(errors)[0];
+  //         AppToast.error(firstError as string);
+  //         return;
+  //       }
+
+  //       formikRef.current?.handleSubmit();
+  //     });
+  //   }
+  // };
+
   const onNextPress = () => {
     if (formikRef.current) {
+      // Mark all fields as touched
+      const allFieldLabels = dynamicFields.map(f => f.label);
+      const touchedFields: Record<string, boolean> = {};
+      allFieldLabels.forEach(label => {
+        touchedFields[label] = true;
+      });
+      formikRef.current.setTouched(touchedFields);
+
+      // Run validation
       formikRef.current.validateForm().then(errors => {
-        if (!selectedCategoryValue) {
+        const hasCategoryError = !selectedCategoryValue;
+        const hasSubCategoryError = !subCategory || subCategory === 'Select';
+
+        // Show ONE toast for the first error (categories take priority)
+        if (hasCategoryError) {
           AppToast.error('Main Category is required');
-          return;
-        }
-
-        if (!subCategory || subCategory === 'Select') {
+        } else if (hasSubCategoryError) {
           AppToast.error('Sub Category is required');
-          return;
+        } else if (Object.keys(errors).length > 0) {
+          const firstErrorField = Object.keys(errors)[0];
+          AppToast.error(`${firstErrorField} is required`);
+        } else {
+          formikRef.current?.handleSubmit();
         }
-
-        if (Object.keys(errors).length > 0) {
-          const firstError = Object.values(errors)[0];
-          AppToast.error(firstError as string);
-          return;
-        }
-
-        formikRef.current?.handleSubmit();
       });
     }
   };
+
 
   const validateForm = (values: Record<string, string>) => {
     const errors: Record<string, string> = {};
@@ -256,7 +284,9 @@ const handleSelectSubCategory = (item: any) => {
                           label={field.label}
                           multiline={field.type === 'textarea'}
                           numberOfLines={field.type === 'textarea' ? 4 : 1}
-                          keyboardType={isNumberField ? 'number-pad' : 'default'}
+                          keyboardType={
+                            isNumberField ? 'number-pad' : 'default'
+                          }
                           style={
                             field.type === 'textarea'
                               ? styles.textAreaInput
@@ -282,8 +312,9 @@ const handleSelectSubCategory = (item: any) => {
                   <TouchableOpacity
                     style={styles.inputContainer}
                     onPress={() => {
-                      Keyboard.dismiss()
-                      setIsCategoryModalVisible(true)}}>
+                      Keyboard.dismiss();
+                      setIsCategoryModalVisible(true);
+                    }}>
                     <View style={styles.dropdownContent}>
                       <AppText
                         title={mainCategory}
@@ -307,7 +338,7 @@ const handleSelectSubCategory = (item: any) => {
                   <TouchableOpacity
                     style={styles.inputContainer}
                     onPress={() => {
-                       Keyboard.dismiss()
+                      Keyboard.dismiss();
                       if (!selectedCategoryValue) {
                         AppToast.error('Select Category first');
                         return;

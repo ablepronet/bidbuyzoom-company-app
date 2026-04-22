@@ -33,6 +33,7 @@ import AppPressable from '../../../components/appPressable';
 import {showImagePickerAlert, validateImage} from '../../../utils/imagePicker';
 import {useUpdateCatalogDataDetails} from '../../../services/queries/app/catlog/updateCatlogDetails';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import AppToast from '../../../components/toaster';
 
 interface SubcategoryItem {
   label: string;
@@ -67,14 +68,14 @@ const LotDetailsScreen = () => {
   const hasField = (key: string) =>
     Object.prototype.hasOwnProperty.call(itemData || {}, key);
 
-  useEffect(() => {
-    if (lotDetailsData) {
-      console.log(
-        'catalog item details',
-        JSON.stringify(lotDetailsData, null, 2),
-      );
-    }
-  }, [lotDetailsData]);
+  // useEffect(() => {
+  //   if (lotDetailsData) {
+  //     console.log(
+  //       'catalog item details',
+  //       JSON.stringify(lotDetailsData, null, 2),
+  //     );
+  //   }
+  // }, [lotDetailsData]);
 
   const [lotNumber, setLotNumber] = useState(getTextValue(lot?.lotNumber));
   const [inventoryNumber, setInventoryNumber] = useState(
@@ -221,12 +222,12 @@ const LotDetailsScreen = () => {
 
     const validation = validateLotForm(formData);
     if (!validation.isValid) {
-      Alert.alert('Validation Error', validation.error);
+      AppToast.error(validation.error || 'Validation Error');
       return;
     }
 
     if (!lotId) {
-      Alert.alert('Error', 'Catalog item id is missing');
+      AppToast.error('Catalog item id is missing');
       return;
     }
 
@@ -295,7 +296,7 @@ const LotDetailsScreen = () => {
 
   const handleAddImage = async () => {
     if ((photos?.length || 0) >= MAX_IMAGES) {
-      Alert.alert('Image Limit', `You can upload only ${MAX_IMAGES} images`);
+      AppToast.error(`You can upload only ${MAX_IMAGES} images`);
       return;
     }
 
@@ -304,10 +305,7 @@ const LotDetailsScreen = () => {
 
     if (!validation.isValid) {
       if (result?.uri || result?.error) {
-        Alert.alert(
-          'Image Error',
-          validation.error || 'Unable to select image',
-        );
+        AppToast.error(validation.error || 'Unable to select image');
       }
       return;
     }
@@ -315,10 +313,7 @@ const LotDetailsScreen = () => {
     if (result?.uri) {
       setPhotos(prevPhotos => {
         if (prevPhotos.length >= MAX_IMAGES) {
-          Alert.alert(
-            'Image Limit',
-            `You can upload only ${MAX_IMAGES} images`,
-          );
+          AppToast.error(`You can upload only ${MAX_IMAGES} images`);
           return prevPhotos;
         }
 
