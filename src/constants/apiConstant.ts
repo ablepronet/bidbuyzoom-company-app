@@ -15,6 +15,8 @@ const apiEndPoints = {
   getUserProfile: 'profile',
   getDashboardData: 'mobile/dashboard',
   verification: 'verify-login-2fa',
+  verifyEmailOtp: 'verify-email-otp',
+  resendEmailOtp: 'resend-email-otp',
   catalogData: 'mobile/catalog-list',
   getCatalogDetails:"mobile/catalog-item",
   getCatalogFields: 'mobile/catalog-fields',

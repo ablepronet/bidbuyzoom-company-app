@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import {DrawerActions, useNavigation} from '@react-navigation/native';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
@@ -24,21 +25,23 @@ import {formatDate} from '../../../helper/getTodayDate';
 import {routes} from '../../../navigation/route';
 
 const {width} = Dimensions.get('window');
-
 const HomeDashBoard = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const {data, isLoading} = useGetUserProfile();
+  const {data, isLoading, refetch: refetchUserProfile} = useGetUserProfile();
   const [selectedYear, setSelectedYear] = useState('2026');
-  const {data: dashboardData, isLoading: isDashboardLoading} =
-    useGetDashBoardData(selectedYear);
+  const {
+    data: dashboardData,
+    isLoading: isDashboardLoading,
+    refetch: refetchDashboard,
+  } = useGetDashBoardData(selectedYear);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const userData = data?.datas || null;
   const dashboard = dashboardData?.data || null;
   const stats = dashboard?.statistics || null;
   const setup = dashboard?.accountSetup || null;
-
   const accountSteps = [
     {
       key: 'registration',
@@ -89,6 +92,15 @@ const HomeDashBoard = () => {
     setProfileModalVisible(!isProfileModalVisible);
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refetchUserProfile(), refetchDashboard()]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (isLoading || isDashboardLoading) {
     return <Loader isLoading={isLoading || isDashboardLoading} />;
   }
@@ -108,7 +120,15 @@ const HomeDashBoard = () => {
       <ScrollView
         style={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollInner}>
+        contentContainerStyle={styles.scrollInner}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }>
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={[styles.statsCard, {backgroundColor: colors.primary}]}>

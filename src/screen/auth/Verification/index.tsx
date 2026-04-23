@@ -21,6 +21,8 @@ import {
 import {colors} from '../../../constants';
 import AppButton from '../../../components/appButton';
 import {useVerification} from '../../../services/queries/auth/verification';
+import {useVerifyEmailOtp} from '../../../services/queries/auth/verifyEmailOtp';
+import {useResendEmailOtp} from '../../../services/queries/auth/resendEmailOtp';
 
 const OTP_LENGTH = 6;
 const RESEND_TIME = 120;
@@ -33,15 +35,19 @@ interface OTPVerifyParams {
   email?: string;
   password?: string;
   rememberMe?: boolean;
+  isEmailVerification?: boolean;
 }
 
 const Verification = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const route = useRoute();
-  const {userDetails, email, password, rememberMe} =
+  const {userDetails, email, password, rememberMe, isEmailVerification} =
     (route.params as OTPVerifyParams) || {};
   const {mutate: VerificationOTP, isPending} = useVerification();
+  const {mutate: verifyEmailOtp, isPending: isVerifyingEmail} =
+    useVerifyEmailOtp();
+  const {mutate: resendEmailOtp, isPending: isResending} = useResendEmailOtp();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const inputs = useRef<TextInput[]>([]);
@@ -51,27 +57,59 @@ const Verification = () => {
   const handleVerifyOtp = () => {
     if (otpValue.length !== OTP_LENGTH) return;
 
-    const body = {
-      code: otpValue,
-      tempToken: userDetails?.tempToken,
-    };
+    if (isEmailVerification) {
+      // Email OTP verification
+      const body = {
+        email: email || '',
+        otp: otpValue,
+      };
 
-    VerificationOTP(body, {
-      onSuccess: res => {
-        console.log(res, 'response');
-        dispatch(setTokens(res?.token || null));
-        dispatch(setUserId(res?.data?._id));
-        dispatch(setUserData(res?.data || null));
-        dispatch(setIsLogin(true));
-        dispatch(
-          setRememberData({
-            email: email || '',
-            password: password || '',
-            rememberMe: rememberMe || false,
-          }),
-        );
-      },
-    });
+      verifyEmailOtp(body, {
+        onSuccess: res => {
+          console.log(res, 'response');
+          dispatch(setTokens(res?.token || null));
+          dispatch(setUserId(res?.data?._id));
+          dispatch(setUserData(res?.data || null));
+          dispatch(setIsLogin(true));
+          dispatch(
+            setRememberData({
+              email: email || '',
+              password: password || '',
+              rememberMe: rememberMe || false,
+            }),
+          );
+        },
+      });
+    } else {
+      // Login 2FA verification
+      const body = {
+        code: otpValue,
+        tempToken: userDetails?.tempToken,
+      };
+
+      VerificationOTP(body, {
+        onSuccess: res => {
+          console.log(res, 'response');
+          dispatch(setTokens(res?.token || null));
+          dispatch(setUserId(res?.data?._id));
+          dispatch(setUserData(res?.data || null));
+          dispatch(setIsLogin(true));
+          dispatch(
+            setRememberData({
+              email: email || '',
+              password: password || '',
+              rememberMe: rememberMe || false,
+            }),
+          );
+        },
+      });
+    }
+  };
+
+  const handleResendOtp = () => {
+    if (isEmailVerification && email) {
+      resendEmailOtp({email});
+    }
   };
 
   const handleChange = (text: string, index: number) => {
@@ -143,9 +181,13 @@ const Verification = () => {
           />
 
           <AppText
-            title={`Enter the 6-digit code sent to your phone ending in ${
-              userDetails.phoneLast4 ?? ''
-            }`}
+            title={
+              isEmailVerification
+                ? `Enter the 6-digit code sent to your email ${email || ''}`
+                : `Enter the 6-digit code sent to your phone ending in ${
+                    userDetails.phoneLast4 ?? ''
+                  }`
+            }
             fontySize="px14"
             color="textSecondary"
             textAlign="center"
@@ -191,9 +233,27 @@ const Verification = () => {
               style={styles.button}
               disabled={!isComplete}
               onPress={handleVerifyOtp}
-              loading={isPending}
+              loading={isPending || isVerifyingEmail}
             />
           </View>
+
+          {isEmailVerification && (
+            <View style={styles.resendContainer}>
+              <AppText
+                title="Didn't receive the code?"
+                fontySize="px12"
+                color="textSecondary"
+              />
+              <AppButton
+                title="Resend"
+                textColor="primary"
+                style={styles.resendButton}
+                onPress={handleResendOtp}
+                loading={isResending}
+                bgColor="transparent"
+              />
+            </View>
+          )}
         </Card>
         {/* </View> */}
       </KeyboardAwareScrollView>
@@ -261,6 +321,7 @@ const styles = StyleSheet.create({
     marginTop: vs(16),
     borderRadius: ms(10),
     width: '49%',
+    flex: 1,
   },
   backButton: {
     marginTop: vs(16),
@@ -268,18 +329,22 @@ const styles = StyleSheet.create({
     width: '49%',
     borderWidth: scale(1),
     borderColor: colors.darkGray,
+    flex: 1,
   },
   resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    // flexDirection: 'row',
+    // justifyContent: 'center',
     alignItems: 'center',
-    marginTop: vs(20),
+    marginTop: vs(16),
+  },
+  resendButton: {
+    marginLeft: ms(8),
+    paddingVertical: vs(4),
   },
   buttonContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: vs(5),
+    marginTop: vs(24),
+    gap: scale(12),
   },
   otpFocused: {
     borderColor: colors.blue || '#3B82F6',

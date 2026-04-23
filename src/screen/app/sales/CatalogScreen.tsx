@@ -374,6 +374,8 @@ const CatalogScreen = () => {
         </View>
       </View>
 
+     
+
       {/* Quick Action Buttons*/}
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.quickActionBtn} onPress={handleAddLot}>

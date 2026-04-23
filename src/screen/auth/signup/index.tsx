@@ -17,8 +17,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import AppPhoneInput from '../../../components/AppPhoneInput';
 import { useNavigation } from '@react-navigation/native';
 import { useSingUP } from '../../../services/queries/auth/singup';
-// import AppPhoneInput from '../../../components/AppPhoneInput';
-// import { CountryItem } from 'react-native-country-codes-picker';
+import { routes } from '../../../navigation/route';
 
 const SignUp = () => {
   const navigation = useNavigation<any>();
@@ -26,8 +25,8 @@ const SignUp = () => {
   const { mutate: signUp, isPending } = useSingUP();
   const instest = useSafeAreaInsets();
 
-  const [countryCode, setCountryCode] = React.useState<any>('IN');
-  const [callingCode, setCallingCode] = React.useState('91');
+  const [countryCode, setCountryCode] = React.useState<any>('US');
+  const [callingCode, setCallingCode] = React.useState('1');
   const [isLinkSent, setIsLinkSent] = React.useState(false);
   const [submittedEmail, setSubmittedEmail] = React.useState('');
   const handleCountryChange = (country: any) => {
@@ -56,7 +55,11 @@ const SignUp = () => {
     };
     signUp(body, {
       onSuccess: res => {
-        setIsLinkSent(true);
+        // Navigate to email verification screen
+        navigation.navigate(routes.OtpVerification, {
+          email: values.email,
+          isEmailVerification: true,
+        });
       },
     });
   };

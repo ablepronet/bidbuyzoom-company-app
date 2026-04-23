@@ -10,12 +10,16 @@ import {navigationRef} from '../navigationService';
 import AuthStack from '../authStack';
 import {useAppSelector} from '../../redux/hooks';
 import AppDrawer from '../drawer';
+import WebViewDashboard from '../../screen/app/webviewDashboard';
+import {useGetUserProfile} from '../../services/queries/app/Profile';
 
 const RootStack = () => {
   const insets = useSafeAreaInsets();
   const {isLogin} = useAppSelector(state => state.auth);
   const [showSplash, setShowSplash] = useState(true);
   const toastPosition = useMemo(() => insets.top, [insets.top]);
+  const {data} = useGetUserProfile();
+  const userData = data?.datas || null;
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2000);
@@ -25,6 +29,22 @@ const RootStack = () => {
   if (showSplash) {
     return <SplashScreen />;
   }
+
+  // Show WebView dashboard if planSelected is false
+  if (isLogin && userData && !userData?.isPaid) {
+    return (
+      <NavigationContainer ref={navigationRef}>
+        <StatusBar
+          backgroundColor="#FFFFFF"
+          barStyle="dark-content"
+          translucent={false}
+        />
+        <WebViewDashboard />
+        <ToastManager positionValue={toastPosition} />
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer ref={navigationRef}>
       <StatusBar
@@ -32,7 +52,7 @@ const RootStack = () => {
         barStyle="dark-content"
         translucent={false}
       />
-      {showSplash ? <SplashScreen /> : isLogin ? <AppDrawer /> : <AuthStack />}
+      {isLogin ? <AppDrawer /> : <AuthStack />}
 
       <ToastManager positionValue={toastPosition} />
     </NavigationContainer>

@@ -6,6 +6,7 @@ export const routes = {
   ResetPassword: 'ResetPassword',
   SignUp: 'SignUp',
   HomeScreen: 'HomeScreen',
+  WebViewDashboard: 'WebViewDashboard',
 
   // Drawer Screens
   homeTab: 'HomeTab',
