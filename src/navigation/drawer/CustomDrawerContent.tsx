@@ -13,7 +13,7 @@ import {colors} from '../../constants';
 import {AppText} from '../../components/AppText';
 import {ImageComponent} from '../../components/AppImage';
 import appImages from '../../constants/appImages';
-import {ms, vs} from '../../utils/responsive';
+import {ms, scale, vs} from '../../utils/responsive';
 import AppButton from '../../components/appButton';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
 import {setUserLogout} from '../../redux/slices/auth';
@@ -212,8 +212,8 @@ export const CustomDrawerContent = (props: any) => {
           <View style={styles.avatarContainer}>
             <ImageComponent
               uri={data?.datas.logo}
-              style={styles.logo}
-              resizeMode="contain"
+              style={styles.userImageStyle}
+              resizeMode="cover"
             />
           </View>
           <AppText
@@ -308,16 +308,23 @@ const styles = StyleSheet.create({
     height: vs(40),
     marginVertical: vs(15),
   },
+
   profileContainer: {
     alignItems: 'center',
   },
   avatarContainer: {
     width: ms(70),
     height: ms(70),
-    borderRadius: ms(35),
+    borderRadius: ms(100),
     backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  userImageStyle: {
+    width: ms(60),
+    height: vs(60),
+    borderRadius: scale(100),
+    alignSelf: 'center',
   },
   scrollContent: {
     paddingTop: vs(10),

@@ -148,17 +148,17 @@ const WebViewDashboard = () => {
 `;
 
   // Handle messages from WebView
-  const handleWebViewMessage = (event:any) => {
+  const handleWebViewMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       console.log('📱 Message from WebView:', data);
-      
+
       // Check if card was added successfully
       if (data.type === 'CARD_ADDED_SUCCESS') {
         console.log('💳 Card added successfully! Refetching user profile...');
         refetch(); // This will refresh the user profile data
       }
-      
+
       // Log any other messages from website
       if (data.type === 'CONSOLE_LOG') {
         console.log('🌐 Website console:', data.message);

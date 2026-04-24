@@ -1,7 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
-import { post } from '../../../api';
-import { apiEndPoints } from '../../../../constants';
-import { Platform } from 'react-native';
+import {useMutation} from '@tanstack/react-query';
+import {post} from '../../../api';
+import {apiEndPoints} from '../../../../constants';
+import {Platform} from 'react-native';
 import AppToast from '../../../../components/toaster';
 import HandleApiCatch from '../../../../helper/handleCatch';
 
@@ -24,8 +24,14 @@ export const useLogin = () => {
       }
     },
 
-    onError: err => {
-      HandleApiCatch(err);
+    onError: (error: any) => {
+      const err =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        'Something went wrong please try after sometime';
+      // console.log(err, 'errorororooror');
+      AppToast.error(err);
+      // HandleApiCatch(err);
     },
   });
 };

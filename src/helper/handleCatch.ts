@@ -2,13 +2,13 @@ import AppToast from '../components/toaster';
 
 const HandleApiCatch = (error: any, fun?: string) => {
   console.log(
-    'HandleApiCatch in--->',
+    'HandleApiCatch in---dddd>',
     fun ?? '',
     error?.response?.data?.message || error.code,
   );
   AppToast.error(
-    error?.response?.data?.message  ||
-      error.code ||
+    error?.response?.data?.message ||
+      error?.response?.data?.error ||
       'Something went wrong please try after sometime',
   );
 };

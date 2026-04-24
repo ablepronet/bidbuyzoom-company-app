@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-import { post } from '../../../api';
-import { apiEndPoints } from '../../../../constants';
+import {useMutation} from '@tanstack/react-query';
+import {post} from '../../../api';
+import {apiEndPoints} from '../../../../constants';
 import AppToast from '../../../../components/toaster';
 import HandleApiCatch from '../../../../helper/handleCatch';
 
@@ -26,8 +26,15 @@ export const useSingUP = () => {
       }
     },
 
-    onError: err => {
-      HandleApiCatch(err);
+    onError: (error: any) => {
+      const err =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        'Something went wrong please try after sometime';
+      // console.log(err, 'errorororooror');
+      AppToast.error(err);
+      // HandleApiCatch(err);
     },
   });
 };
