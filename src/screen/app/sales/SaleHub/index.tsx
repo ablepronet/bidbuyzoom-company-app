@@ -58,7 +58,7 @@ const SalesHub = () => {
     {
       id: '3',
       title: 'Catalog',
-      subtitle: 'Manage 668 lots',
+      subtitle: 'Manage lots',
       icon: 'view-grid-outline',
       color: '#10B981',
       highlighted: false,
@@ -234,7 +234,7 @@ const SalesHub = () => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      {/* <View style={styles.footer}>
         <AppText
           title="Last updated: 2 min ago"
           color="textSecondary"
@@ -247,7 +247,7 @@ const SalesHub = () => {
             color={colors.textPrimary}
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };

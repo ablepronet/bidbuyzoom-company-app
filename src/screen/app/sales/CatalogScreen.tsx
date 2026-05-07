@@ -10,7 +10,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {AppText} from '../../../components/AppText';
@@ -57,8 +57,14 @@ const CatalogScreen = () => {
     templateId: selectedTemplate,
     page,
     perPage,
-    search: debouncedSearch,
+    search: debouncedSearch.length >= 2 ? debouncedSearch : '',
   });
+  
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [file, setFile] = useState<FilePickerResult | null>(null);
@@ -68,6 +74,8 @@ const CatalogScreen = () => {
     useImportImages();
 
   const lots = data?.data || [];
+  console.log('lotssssssssssss', lots);
+  
   const pagination = data?.pagination;
   const totalItems = pagination?.totalItems || 0;
   const totalPages = pagination?.totalPages || 1;
@@ -126,7 +134,7 @@ const CatalogScreen = () => {
       </View>
       <View style={styles.lotContent}>
         <AppText
-          title={`Lot ${item.lotNumber} | ${item.title}`}
+          title={`Lot ${item.lotNumber}${item.title ? ` | ${item.title}` : ''}`}
           fontySize="px12"
           fontFamily="bold"
           color="textPrimary"
@@ -141,7 +149,7 @@ const CatalogScreen = () => {
         <View style={styles.lotMeta}>
           <View style={styles.categoryTag}>
             <AppText
-              title={item.category || 'Uncategorized'}
+              title={item.category && item.category !== 'none' ? item.category : 'Uncategorized'}
               fontySize="px10"
               color="primary"
             />

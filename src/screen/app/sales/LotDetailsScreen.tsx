@@ -58,6 +58,8 @@ const LotDetailsScreen = () => {
   const {data: lotDetailsData, isLoading} = useGetCatalogDataDetails({
     id: lotId,
   });
+  console.log('dataaaaaaaaa', lotDetailsData);
+  
   const {mutateAsync: updateCatalogItem, isPending: isUpdating} =
     useUpdateCatalogDataDetails();
   const itemData = lotDetailsData?.data;
@@ -252,7 +254,7 @@ const LotDetailsScreen = () => {
       {label: 'Date Added', value: dateAdded},
       {label: 'Date Edited', value: dateEdited},
       {label: 'Complete', value: isComplete},
-    ].filter(item => hasField(item.label));
+    ].filter(item => item.label === 'Complete' || hasField(item.label));
 
     const multipartData = new FormData();
     multipartData.append('catalogData', JSON.stringify(catalogDataPayload));
@@ -955,30 +957,28 @@ const LotDetailsScreen = () => {
             </View>
           )}
 
-          {hasField('Complete') && (
-            <View style={styles.section}>
-              <View style={styles.statusRow}>
-                <AppText
-                  title="Complete"
-                  fontySize="px14"
-                  color="textPrimary"
-                />
-                <Switch
-                  value={isComplete}
-                  onValueChange={setIsComplete}
-                  trackColor={{false: '#E5E7EB', true: colors.primary}}
-                  thumbColor={colors.white}
-                />
-              </View>
+          <View style={styles.section}>
+            <View style={styles.statusRow}>
               <AppText
-                title={isComplete ? 'On' : 'Off'}
-                fontySize="px12"
-                color="textSecondary"
-                textAlign="center"
-                marginTop={vs(5)}
+                title="Complete"
+                fontySize="px14"
+                color="textPrimary"
+              />
+              <Switch
+                value={isComplete}
+                onValueChange={setIsComplete}
+                trackColor={{false: '#E5E7EB', true: colors.primary}}
+                thumbColor={colors.white}
               />
             </View>
-          )}
+            <AppText
+              title={isComplete ? 'On' : 'Off'}
+              fontySize="px12"
+              color="textSecondary"
+              textAlign="center"
+              marginTop={vs(5)}
+            />
+          </View>
         </ScrollView>
 
         <View

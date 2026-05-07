@@ -155,7 +155,7 @@
 //   },
 // });
 
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, PermissionsAndroid, Platform} from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import WebView from 'react-native-webview';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -164,6 +164,9 @@ import {appIcons, colors} from '../../../constants';
 import {scale, vs} from '../../../utils/responsive';
 import AppHeader from '../../../components/appHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
+import RNPrint from 'react-native-print';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
 
 interface WebViewScreenProps {
   url: string;
@@ -254,6 +257,53 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     onNavigationStateChange?.(navState);
     if (!navState.loading) {
       stopLoading();
+    }
+  };
+
+  const handleExportCSV = async (filename: string, content: string) => {
+    try {
+      const path = `${RNFS.CachesDirectoryPath}/${filename}`;
+      await RNFS.writeFile(path, content, 'utf8');
+
+      const shareOptions = {
+        title: 'Export CSV',
+        url: `file://${path}`,
+        type: 'text/csv',
+        failOnCancel: false,
+      };
+
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    }
+  };
+
+  const handleMessage = async (event: any) => {
+    try {
+      const messageData = JSON.parse(event.nativeEvent.data);
+      console.log('📱 WebView Message Received:', messageData.type);
+
+      if (messageData.type === 'PRINT_HTML') {
+        const {html} = messageData.data;
+        if (html) {
+          await RNPrint.print({html});
+        }
+        return;
+      }
+
+      if (messageData.type === 'EXPORT_CSV') {
+        const {filename, content} = messageData.data;
+        if (filename && content) {
+          await handleExportCSV(filename, content);
+        }
+        return;
+      }
+
+      // If it's not our custom events, pass it to the onMessage prop if provided
+      onMessage?.(event);
+    } catch (e) {
+      console.log('Error parsing WebView message:', e);
+      onMessage?.(event);
     }
   };
 
@@ -352,7 +402,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         onNavigationStateChange={handleNavigationStateChange}
-        onMessage={onMessage}
+        onMessage={handleMessage}
         injectedJavaScriptBeforeContentLoaded={combinedJavaScript}
         javaScriptEnabled={javaScriptEnabled}
         domStorageEnabled={domStorageEnabled}
