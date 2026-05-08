@@ -1,29 +1,30 @@
-import React, {useMemo} from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from 'react-native';
-import {Screen} from '../../../../components/Screen';
+import React, {useCallback, useMemo, useState} from 'react';
+import {StyleSheet, View, TouchableOpacity, ScrollView} from 'react-native';
 import {AppText} from '../../../../components/AppText';
 import {colors} from '../../../../constants';
 import {ms, vs} from '../../../../utils/responsive';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import appImages from '../../../../constants/appImages';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import globalStyles from '../../../../styles/globalStyles';
 import AppHeader from '../../../../components/appHeader';
 import {getSaleDates} from '../../../../helper/getTodayDate';
 import {useGetUserProfile} from '../../../../services/queries/app/Profile';
 import {routes} from '../../../../navigation/route';
-import CatalogScreen from '../CatalogScreen';
+import Loader from '../../../../components/loader';
+import {
+  SalesListingItem,
+  useGetSalesListing,
+} from '../../../../services/queries/app/sales/useGetSalesListing';
 
 type RouteParams = {
   saleId?: string;
   selectedSale?: any; // replace with proper type if you have one
+  fromAddSaleFlow?: boolean;
 };
 
 const webBaseUrl = 'https://staging.bidbuyzoom.com';
@@ -31,9 +32,21 @@ const webBaseUrl = 'https://staging.bidbuyzoom.com';
 const SalesHub = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-  const {saleId, selectedSale} = route.params || {};
-  const {data, isLoading} = useGetUserProfile();
+  const {saleId, selectedSale, fromAddSaleFlow} = route.params || {};
+  const [isNavigating, setIsNavigating] = useState(false);
+  const {
+    data: salesListingData,
+    refetch: refetchSalesListing,
+    isFetching: isSalesListingFetching,
+  } = useGetSalesListing();
+  const {data} = useGetUserProfile();
   const userData = data?.datas || null;
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+    }, []),
+  );
   const menuItems = [
     {
       id: '1',
@@ -115,10 +128,19 @@ const SalesHub = () => {
   ];
 
   const handleGoback = () => {
+    if (fromAddSaleFlow) {
+      navigation.navigate('DashboardTabs', {
+        screen: routes.salesTab,
+        params: {refreshAt: Date.now()},
+      });
+      return;
+    }
+
     navigation.goBack();
   };
 
   const isSaleActive = selectedSale?.isPastSale;
+  const saleTitle = selectedSale?.saleName || selectedSale?.title || '';
   const startEndDate = useMemo(() => {
     try {
       const dates = getSaleDates(selectedSale);
@@ -134,12 +156,47 @@ const SalesHub = () => {
       console.log(error, 'error');
       return '';
     }
-  }, [selectedSale?.multiStartDate, selectedSale?.slaeTypeTimeCheck]);
+  }, [selectedSale]);
 
-  const handleNavigation = (item: any) => {
+  const handleNavigation = async (item: any) => {
+    const hubSaleId = saleId || selectedSale?._id || selectedSale?.saleId;
+    const hubSale = {
+      ...(selectedSale || {}),
+      saleId: hubSaleId,
+    };
+
+    if (item.title === 'Sale Info') {
+      setIsNavigating(true);
+      let selectedSales = hubSale;
+
+      try {
+        const latestSalesResponse = await refetchSalesListing();
+        const sales =
+          latestSalesResponse.data?.data || salesListingData?.data || [];
+        selectedSales =
+          sales.find((saleItem: SalesListingItem) => saleItem?._id === hubSaleId) ||
+          hubSale;
+      } catch {}
+
+      navigation.navigate(routes.addNewSaleScreen, {
+        saleId: hubSaleId,
+        selectedSale: selectedSales,
+        mode: 'edit',
+      });
+      return;
+    }
+
+    if (item.title === 'Settings') {
+      navigation.navigate(routes.addSaleSettingsScreen, {
+        saleId: hubSaleId,
+        selectedSale: hubSale,
+      });
+      return;
+    }
+
     if (item.title === 'Catalog') {
       navigation.navigate(routes.catalogScreen, {
-        sale: selectedSale,
+        sale: hubSale,
       });
     } else {
       //@ts-ignore
@@ -164,11 +221,7 @@ const SalesHub = () => {
         {/* Sale Info Card */}
         <View style={styles.saleCard}>
           <View style={styles.saleCardHeader}>
-            <AppText
-              title={selectedSale?.saleName || ''}
-              fontFamily="bold"
-              fontySize="px20"
-            />
+            <AppText title={saleTitle} fontFamily="bold" fontySize="px20" />
             {isSaleActive && (
               <View style={styles.activeBadge}>
                 <AppText title={'Live'} color="green" fontySize="px12" />
@@ -203,6 +256,7 @@ const SalesHub = () => {
           {menuItems.map(item => (
             <TouchableOpacity
               key={item.id}
+              disabled={isNavigating || isSalesListingFetching}
               style={[
                 styles.gridItem,
                 item.highlighted && styles.highlightedItem,
@@ -232,6 +286,7 @@ const SalesHub = () => {
           ))}
         </View>
       </ScrollView>
+      <Loader isLoading={isNavigating || isSalesListingFetching} transparent />
 
       {/* Footer */}
       {/* <View style={styles.footer}>

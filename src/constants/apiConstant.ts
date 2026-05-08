@@ -1,4 +1,3 @@
-import {get} from 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
 import config from '../utils/config';
 
 export const BASE_URL = config?.base_url;
@@ -23,7 +22,15 @@ const apiEndPoints = {
   updateCatalogDetails: 'mobile/catalog-item/update',
   addCatalogData: 'mobile/catalog-item/add',
   lotImport:"lot-import",
-  mobileBulkUpload:"catalog/mobile-bulk-upload"
+  mobileBulkUpload:"catalog/mobile-bulk-upload",
+  category: 'category',
+  saleType: 'sale-type',
+  salesListing: 'sales-listing',
+  sale: 'sale',
+  saleImages: 'sale-images',
+  defaultSetting: 'default-setting',
+  saleSetting: 'sale-setting',
+  templateList: 'template-list',
 };
 
 export default apiEndPoints;

@@ -155,14 +155,12 @@
 //   },
 // });
 
-import {StyleSheet, TouchableOpacity, View, PermissionsAndroid, Platform} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import WebView from 'react-native-webview';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Loader from '../../../components/loader';
-import {appIcons, colors} from '../../../constants';
+import {colors} from '../../../constants';
 import {scale, vs} from '../../../utils/responsive';
-import AppHeader from '../../../components/appHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
 import RNPrint from 'react-native-print';
 import RNFS from 'react-native-fs';
@@ -199,7 +197,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   onLoadEnd: customOnLoadEnd,
   onError: customOnError,
   enableWebBack = false,
-  headerTitle,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -368,10 +365,167 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     true;
   `;
 
+  const exportBridgeJavaScript = `
+    (function() {
+      if (window.__rnExportBridgeInstalled) return true;
+      window.__rnExportBridgeInstalled = true;
+
+      const objectUrlContent = {};
+
+      const getFilename = function(anchor, fallbackUrl) {
+        const downloadName = anchor && anchor.getAttribute('download');
+        if (downloadName) return downloadName;
+
+        try {
+          const cleanUrl = String(fallbackUrl || '').split('?')[0].split('#')[0];
+          const lastPath = cleanUrl.split('/').pop();
+          if (lastPath && lastPath.includes('.')) return lastPath;
+        } catch (error) {}
+
+        return 'export.csv';
+      };
+
+      const postCsvExport = function(filename, content) {
+        if (!content || !window.ReactNativeWebView) return;
+
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            type: 'EXPORT_CSV',
+            data: {
+              filename: filename || 'export.csv',
+              content: content,
+            },
+          }),
+        );
+      };
+
+      const decodeDataUrl = function(url) {
+        const commaIndex = url.indexOf(',');
+        if (commaIndex === -1) return '';
+
+        const meta = url.slice(0, commaIndex);
+        const data = url.slice(commaIndex + 1);
+
+        if (meta.includes(';base64')) {
+          return decodeURIComponent(
+            Array.prototype.map
+              .call(atob(data), function(char) {
+                return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join(''),
+          );
+        }
+
+        return decodeURIComponent(data);
+      };
+
+      const originalCreateObjectURL = URL.createObjectURL;
+      URL.createObjectURL = function(blob) {
+        const objectUrl = originalCreateObjectURL.apply(URL, arguments);
+
+        if (
+          blob &&
+          typeof blob.text === 'function' &&
+          (
+            !blob.type ||
+            blob.type.includes('csv') ||
+            blob.type.includes('text') ||
+            blob.type.includes('octet-stream')
+          )
+        ) {
+          blob.text().then(function(content) {
+            objectUrlContent[objectUrl] = content;
+          });
+        }
+
+        return objectUrl;
+      };
+
+      const exportAnchor = function(anchor) {
+        if (!anchor) return false;
+
+        const href = anchor.href || anchor.getAttribute('href') || '';
+        const hasDownload = anchor.hasAttribute('download');
+        const filename = getFilename(anchor, href);
+
+        if (href.startsWith('data:text/csv') || href.startsWith('data:application/csv')) {
+          postCsvExport(filename, decodeDataUrl(href));
+          return true;
+        }
+
+        if (href.startsWith('blob:')) {
+          const postBlobContent = function() {
+            const content = objectUrlContent[href];
+            if (content) {
+              postCsvExport(filename, content);
+              return;
+            }
+            setTimeout(postBlobContent, 120);
+          };
+
+          postBlobContent();
+          return hasDownload;
+        }
+
+        if (hasDownload && href) {
+          fetch(href, {credentials: 'include'})
+            .then(function(response) {
+              const contentType = response.headers.get('content-type') || '';
+              if (
+                contentType.includes('csv') ||
+                contentType.includes('text') ||
+                filename.toLowerCase().endsWith('.csv')
+              ) {
+                return response.text();
+              }
+              return '';
+            })
+            .then(function(content) {
+              postCsvExport(filename, content);
+            })
+            .catch(function(error) {
+              console.log('RN export bridge fetch failed', error);
+            });
+
+          return true;
+        }
+
+        return false;
+      };
+
+      const originalAnchorClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function() {
+        if (exportAnchor(this)) return;
+        return originalAnchorClick.apply(this, arguments);
+      };
+
+      document.addEventListener(
+        'click',
+        function(event) {
+          const target =
+            event.target && event.target.nodeType === 1
+              ? event.target
+              : event.target?.parentElement;
+          const anchor = target && target.closest && target.closest('a[download]');
+
+          if (anchor && exportAnchor(anchor)) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          }
+        },
+        true,
+      );
+
+      return true;
+    })();
+    true;
+  `;
+
   // Combine injected JavaScript
   const combinedJavaScript = injectedJavaScript
-    ? `${injectedJavaScript}\n${hideHeaderJavaScript}`
-    : hideHeaderJavaScript;
+    ? `${injectedJavaScript}\n${hideHeaderJavaScript}\n${exportBridgeJavaScript}`
+    : `${hideHeaderJavaScript}\n${exportBridgeJavaScript}`;
 
   return (
     <View style={styles.innerContainer}>
@@ -413,6 +567,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         setSupportMultipleWindows={false}
         setBuiltInZoomControls={false}
         setDisplayZoomControls={false}
+        scalesPageToFit={false}
         // Handle navigation requests to prevent opening external browser
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         // Additional props for better Android handling

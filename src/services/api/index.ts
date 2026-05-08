@@ -6,10 +6,27 @@ import instance from './axiosInterceptors';
 import { setUserLogout } from '../../redux/slices/auth';
 import { BASE_URL } from '../../constants/apiConstant';
 
+const getRequestPreview = (payload: any) => {
+  if (typeof FormData !== 'undefined' && payload instanceof FormData) {
+    return '[FormData]';
+  }
+
+  return payload;
+};
+
+const getResponsePreview = (data: any) => ({
+  status: data?.status,
+  message: data?.message,
+  dataType: Array.isArray(data?.data) ? 'array' : typeof data?.data,
+  dataLength: Array.isArray(data?.data) ? data.data.length : undefined,
+  datasType: Array.isArray(data?.datas) ? 'array' : typeof data?.datas,
+  datasLength: Array.isArray(data?.datas) ? data.datas.length : undefined,
+});
+
 export const post = async (url: string, formData: any, type = 0) => {
   const token = store.getState().auth.token;
 
-  logs('token', token);
+  logs('token', token ? '[available]' : '[missing]');
   const options: any = {
     headers: {
       Accept: type ? 'multipart/form-data' : 'application/json',
@@ -21,11 +38,11 @@ export const post = async (url: string, formData: any, type = 0) => {
   if (token) {
     options.headers.Authorization = `Bearer ${token}`;
   }
-  logs('Request', BASE_URL + url, JSON.stringify(formData));
+  logs('Request', BASE_URL + url, getRequestPreview(formData));
   return instance
     .post(url, formData, options)
     .then(function (response: AxiosResponse) {
-      logs('Response ', url, JSON.stringify(response?.data));
+      logs('Response ', url, getResponsePreview(response?.data));
       return response?.data;
     })
     .catch(function (error: any) {
@@ -51,11 +68,11 @@ export const put = async (url: string, formData: any, type = 0) => {
   if (token) {
     options.headers.Authorization = `Bearer ${token}`;
   }
-  logs('Request', BASE_URL + url, JSON.stringify(formData));
+  logs('Request', BASE_URL + url, getRequestPreview(formData));
   return instance
     .put(url, formData, options)
     .then(function (response: any) {
-      logs('Response ', url, JSON.stringify(response?.data));
+      logs('Response ', url, getResponsePreview(response?.data));
       return response?.data;
     })
     .catch(function (error: any) {
@@ -69,7 +86,7 @@ export const get = async (
 ) => {
   const token = store.getState().auth.token;
   //   const lang = store.getState().languageSlice.appLanguage;
-  logs('token==', token);
+  logs('token==', token ? '[available]' : '[missing]');
   const options: AxiosRequestConfig = {
     headers: {
       Accept: 'application/json',
@@ -79,15 +96,15 @@ export const get = async (
     },
     params: params,
   };
-  logs('Request', BASE_URL + url, JSON.stringify(params));
+  logs('Request', BASE_URL + url, params);
   return instance
     .get(url, options)
     .then(function (response) {
-      logs('Response ', url, JSON.stringify(response?.data));
+      logs('Response ', url, getResponsePreview(response?.data));
       return response?.data;
     })
     .catch(function (error: AxiosError) {
-      if (error.code == 'ERR_BAD_REQUEST') {
+      if (error.code === 'ERR_BAD_REQUEST') {
       }
       const status = error?.response?.status;
       if (status === 401) {
@@ -97,7 +114,7 @@ export const get = async (
     });
 };
 
-export const deleteApi = async (url: string, type = 0) => {
+export const deleteApi = async (url: string, _type = 0) => {
   const options: any = {
     headers: {
       Accept: 'application/json',

@@ -21,7 +21,45 @@ export const fontSizes = {
 
 export const paddingHorizontal = s(20);
 
+const MAX_LOG_LENGTH = 800;
+
+const normalizeLogValue = (value: any) => {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value.length > MAX_LOG_LENGTH
+      ? `${value.slice(0, MAX_LOG_LENGTH)}... [truncated]`
+      : value;
+  }
+
+  if (typeof FormData !== 'undefined' && value instanceof FormData) {
+    return '[FormData]';
+  }
+
+  if (value instanceof Error) {
+    return value.message;
+  }
+
+  if (typeof value === 'object') {
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized.length > MAX_LOG_LENGTH
+        ? `${serialized.slice(0, MAX_LOG_LENGTH)}... [truncated]`
+        : serialized;
+    } catch {
+      return '[Object]';
+    }
+  }
+
+  return value;
+};
 
 export const logs = (...args: any) => {
-  console.log(Platform.OS, ...args);
+  if (Platform.OS === 'ios') {
+    return;
+  }
+
+  console.log(Platform.OS, ...args.map(normalizeLogValue));
 };

@@ -1,11 +1,9 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { CustomDrawerContent } from './CustomDrawerContent';
-import { StatusBar } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { colors } from '../../constants';
-import { createStackNavigator } from '@react-navigation/stack';
 import { drawerParamsList } from '../navigationTypes';
-import HomeDashBoard from '../../screen/app/home';
 import Company from '../../screen/app/compnay';
 import BidBuyers from '../../screen/app/bidBuyers';
 import Marketing from '../../screen/app/marketing';
@@ -21,8 +19,52 @@ import LotImagesScreen from '../../screen/app/sales/LotImagesScreen';
 import LotDetailsScreen from '../../screen/app/sales/LotDetailsScreen';
 import { routes } from '../route';
 import BottomTabNavigator from '../bottomTab';
+import Loader from '../../components/loader';
 
 const Drawer = createDrawerNavigator<drawerParamsList>();
+
+const LazyScreenLoader = () => (
+  <View style={styles.lazyLoader}>
+    <Loader isLoading />
+  </View>
+);
+
+const AddNewSaleScreen = React.lazy(
+  () => import('../../screen/app/sales/AddNewSaleScreen'),
+);
+const AddSaleSettingsScreen = React.lazy(
+  () => import('../../screen/app/sales/AddSaleSettingsScreen'),
+);
+const AddSaleTemplateScreen = React.lazy(
+  () => import('../../screen/app/sales/AddSaleTemplateScreen'),
+);
+
+const AddNewSaleRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddNewSaleScreen {...props} />
+  </Suspense>
+);
+
+const AddSaleSettingsRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddSaleSettingsScreen {...props} />
+  </Suspense>
+);
+
+const AddSaleTemplateRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddSaleTemplateScreen {...props} />
+  </Suspense>
+);
+
+const renderDrawerContent = (props: any) => <CustomDrawerContent {...props} />;
+
+const styles = StyleSheet.create({
+  lazyLoader: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+});
 
 const AppDrawer = () => {
   return (
@@ -39,7 +81,7 @@ const AppDrawer = () => {
           drawerType: 'slide',
         
         }}
-        drawerContent={props => <CustomDrawerContent {...props}  />}
+        drawerContent={renderDrawerContent}
       >
         <Drawer.Screen name="DashboardTabs" component={BottomTabNavigator} />
         <Drawer.Screen name={routes.company} component={Company} />
@@ -51,6 +93,9 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.companyReport} component={CompanyReport} />
         <Drawer.Screen name={routes.commonWebView} component={CommonWebView} />
         <Drawer.Screen name={routes.saleHubScreen} component={SalesHub} />
+        <Drawer.Screen name={routes.addNewSaleScreen} component={AddNewSaleRoute} />
+        <Drawer.Screen name={routes.addSaleSettingsScreen} component={AddSaleSettingsRoute} />
+        <Drawer.Screen name={routes.addSaleTemplateScreen} component={AddSaleTemplateRoute} />
         <Drawer.Screen name={routes.catalogScreen} component={CatalogScreen} />
         <Drawer.Screen name={routes.addNewLotScreen} component={AddNewLotScreen} />
         <Drawer.Screen name={routes.lotImagesScreen} component={LotImagesScreen} />

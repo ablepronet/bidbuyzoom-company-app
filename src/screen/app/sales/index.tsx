@@ -1,32 +1,71 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React, { useMemo } from 'react';
+import {StyleSheet, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
 import WebViewScreen from '../webview';
-import { vs } from '../../../utils/responsive';
-import { useAppSelector } from '../../../redux/hooks';
-import { useGetUserProfile } from '../../../services/queries/app/Profile';
+import {useAppSelector} from '../../../redux/hooks';
+import {useGetUserProfile} from '../../../services/queries/app/Profile';
 
-import { routes } from '../../../navigation/route';
-import { useNavigation } from '@react-navigation/native';
+import {routes} from '../../../navigation/route';
+import {useNavigation} from '@react-navigation/native';
 
-const Sales = ({ route }: { route: any }) => {
+const Sales = ({route}: {route: any}) => {
   const navigation = useNavigation<any>();
-  const { from, saleId } = route.params || {};
-  const { data, isLoading } = useGetUserProfile();
-  const { token, userId } = useAppSelector(state => state.auth);
+  const {from, saleId, refreshAt} = route.params || {};
+  const [refreshKey, setRefreshKey] = useState(0);
+  const {data} = useGetUserProfile();
+  const {token} = useAppSelector(state => state.auth);
   const userData = data?.datas || null;
   const injectedJavaScript = `
     (function() {
       try {
         localStorage.setItem("token", JSON.stringify("${token}"));
         localStorage.setItem("user", JSON.stringify(${JSON.stringify(
-    userData,
-  )}));
+          userData,
+        )}));
         localStorage.setItem("companyName", "${userData?.companySlug || ''}");
         const originalClear = localStorage.clear;
         localStorage.clear = function() {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'logout' }));
           originalClear.apply(this, arguments);
         };
+
+        if (!window.__addNewSaleListenerAdded) {
+          window.__addNewSaleListenerAdded = true;
+          document.addEventListener(
+            'click',
+            function(event) {
+              const clickedElement =
+                event.target && event.target.nodeType === 1
+                  ? event.target
+                  : event.target?.parentElement;
+              if (!clickedElement) return;
+              const target = clickedElement.closest(
+                'button, a, [role="button"]',
+              );
+              if (!target) return;
+
+              const buttonText = (target.innerText || target.textContent || '')
+                .replace(/\\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+
+              if (
+                buttonText.includes('add new sale') ||
+                buttonText.includes('add new sales')
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.stopImmediatePropagation) {
+                  event.stopImmediatePropagation();
+                }
+
+                window.ReactNativeWebView.postMessage(
+                  JSON.stringify({type: 'ADD_NEW_SALE_PRESSED'}),
+                );
+              }
+            },
+            true,
+          );
+        }
 
         console.log('Auth data injected');
         return true;
@@ -53,6 +92,10 @@ const Sales = ({ route }: { route: any }) => {
           console.log('navigation SaleHubScreen', message);
           break;
 
+        case 'ADD_NEW_SALE_PRESSED':
+          navigation.navigate(routes.addNewSaleScreen);
+          break;
+
         default:
           break;
       }
@@ -67,9 +110,17 @@ const Sales = ({ route }: { route: any }) => {
     }
     return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales?mobile=true`;
   }, [saleId, userData?.companySlug, from]);
+
+  useEffect(() => {
+    if (refreshAt) {
+      setRefreshKey(prev => prev + 1);
+    }
+  }, [refreshAt]);
+
   return (
     <View style={styles.innerContainer}>
       <WebViewScreen
+        key={`${url}-${refreshKey}`}
         url={url}
         injectedJavaScript={injectedJavaScript}
         enableWebBack={true}

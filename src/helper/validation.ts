@@ -4,8 +4,6 @@ import {appString} from '../constants';
 const emailRegex =
   /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
 
-const passwordRegex = /^(?!.*[<>])[A-Za-z0-9!@#$%^&*()_+=\-.,?/~`]{8,}$/;
-
 export const ValidationSchemas = () => {
   return {
     loginValidation: yup.object({
@@ -48,11 +46,11 @@ export const ValidationSchemas = () => {
         .required('Quantity is required')
         .matches(/^\d+$/, 'Quantity must be a valid number')
         .test('min-quantity', 'Quantity must be at least 1', value => {
-          const num = parseInt(value);
+          const num = parseInt(value, 10);
           return !isNaN(num) && num >= 1;
         })
         .test('max-quantity', 'Quantity must not exceed 9999', value => {
-          const num = parseInt(value);
+          const num = parseInt(value, 10);
           return !isNaN(num) && num <= 9999;
         }),
       
@@ -158,6 +156,47 @@ export const ValidationSchemas = () => {
           id: yup.string().required(),
         }))
         .min(1, 'At least one image is required'),
+    }),
+
+    addNewSaleValidation: yup.object({
+      sale: yup.string().required('Please select sale'),
+      businessName: yup.string().required('Business name is required'),
+      title: yup
+        .string()
+        .trim()
+        .required('Title is required')
+        .max(200, 'Title must not exceed 200 characters'),
+      saleType: yup.string().required('Sale type is required'),
+      categories: yup
+        .array()
+        .of(yup.string())
+        .min(1, 'Please select at least one category'),
+      shortDescription: yup
+        .string()
+        .trim()
+        .required('Short description is required')
+        .max(350, 'Short description must not exceed 350 characters'),
+      fullDescription: yup
+        .string()
+        .trim()
+        .required('Full description is required')
+        .max(4500, 'Full description must not exceed 4500 characters'),
+      dateMode: yup.string().required('Sale type is required'),
+      saleDate: yup.string().when('dateMode', {
+        is: 'One day sale',
+        then: schema => schema.required('Sale date is required'),
+        otherwise: schema => schema.optional(),
+      }),
+      startTime: yup.string().required('Start time is required'),
+      endTime: yup.string().required('End time is required'),
+      userTimeZone: yup.string().required('Your time zone is required'),
+      saleTimeZone: yup.string().required('Sale time zone is required'),
+      uploadTitle: yup.string().optional(),
+      sameAsCompanyAddress: yup.boolean().optional(),
+      address: yup.string().trim().required('Address is required'),
+      state: yup.string().required('State is required'),
+      city: yup.string().required('City is required'),
+      zipCode: yup.string().trim().required('Zip code is required'),
     }),
 
     personalInformationValidation: yup.object({

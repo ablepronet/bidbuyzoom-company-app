@@ -34,9 +34,11 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>We need camera access to take photos of lots</string>
+	<string>EAuction needs camera access so you can take listing and sale photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>EAuction needs permission to save selected listing and sale photos when required.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need photo library access to select images of lots</string>
+	<string>EAuction needs photo library access so you can upload listing and sale images.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

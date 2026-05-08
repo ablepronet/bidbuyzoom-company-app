@@ -19,6 +19,9 @@ export const routes = {
   companyReport: 'CompanyReport',
   commonWebView: 'CommonWebView',
   saleHubScreen: 'SaleHubScreen',
+  addNewSaleScreen: 'AddNewSaleScreen',
+  addSaleSettingsScreen: 'AddSaleSettingsScreen',
+  addSaleTemplateScreen: 'AddSaleTemplateScreen',
 
   // Bottom Tab Screens
   dashboardTab: 'DashboardTab',

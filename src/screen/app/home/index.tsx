@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  RefreshControl,
 } from 'react-native';
 import {DrawerActions, useNavigation} from '@react-navigation/native';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
@@ -23,25 +22,34 @@ import {useGetDashBoardData} from '../../../services/queries/app/dashboard';
 import {formatDate} from '../../../helper/getTodayDate';
 
 import {routes} from '../../../navigation/route';
+import { store } from '../../../redux/store';
 
 const {width} = Dimensions.get('window');
+// https://staging.bidbuyzoom.com/company-te/dashboard
 const HomeDashBoard = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const {data, isLoading, refetch: refetchUserProfile} = useGetUserProfile();
+  const {data, isLoading} = useGetUserProfile();
   const [selectedYear, setSelectedYear] = useState('2026');
-  const {
-    data: dashboardData,
-    isLoading: isDashboardLoading,
-    refetch: refetchDashboard,
-  } = useGetDashBoardData(selectedYear);
+  const {data: dashboardData, isLoading: isDashboardLoading} =
+    useGetDashBoardData(selectedYear);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const userData = data?.datas || null;
   const dashboard = dashboardData?.data || null;
   const stats = dashboard?.statistics || null;
   const setup = dashboard?.accountSetup || null;
+
+  const token = store.getState().auth.token;
+  console.log(token,'=a=dsf=as=df=das')
+
+  // Check planSelected and navigate to WebView dashboard if false
+  useEffect(() => {
+    if (userData && !userData.planSelected) {
+      navigation.replace(routes.WebViewDashboard);
+    }
+  }, [userData, navigation]);
+
   const accountSteps = [
     {
       key: 'registration',
@@ -92,15 +100,6 @@ const HomeDashBoard = () => {
     setProfileModalVisible(!isProfileModalVisible);
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await Promise.all([refetchUserProfile(), refetchDashboard()]);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   if (isLoading || isDashboardLoading) {
     return <Loader isLoading={isLoading || isDashboardLoading} />;
   }
@@ -120,15 +119,7 @@ const HomeDashBoard = () => {
       <ScrollView
         style={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollInner}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }>
+        contentContainerStyle={styles.scrollInner}>
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={[styles.statsCard, {backgroundColor: colors.primary}]}>

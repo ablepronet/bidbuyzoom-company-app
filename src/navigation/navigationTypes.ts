@@ -35,7 +35,23 @@ export type drawerParamsList = {
   };
   [routes.saleHubScreen]: {
     saleId: string;
-    selectedSale:any | null;
+    selectedSale: any | null;
+    fromAddSaleFlow?: boolean;
+  };
+  [routes.addNewSaleScreen]:
+    | {
+        saleId?: string;
+        selectedSale?: any | null;
+        mode?: 'add' | 'edit';
+      }
+    | undefined;
+  [routes.addSaleSettingsScreen]: {
+    saleId?: string;
+    selectedSale?: any | null;
+  };
+  [routes.addSaleTemplateScreen]: {
+    saleId?: string;
+    selectedSale?: any | null;
   };
   DashboardTabs: undefined; // New tab navigator entry
   [routes.catalogScreen]: undefined;

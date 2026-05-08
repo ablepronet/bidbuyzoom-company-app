@@ -1,14 +1,15 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React from 'react';
 import WebViewScreen from '../webview';
-import {vs} from '../../../utils/responsive';
 import {useAppSelector} from '../../../redux/hooks';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
+import {buildTableExportJavaScript} from '../../../utils/webViewTableExport';
 
 const BidBuyers = () => {
-  const {data, isLoading} = useGetUserProfile();
-  const {token, userId} = useAppSelector(state => state.auth);
+  const {data} = useGetUserProfile();
+  const {token} = useAppSelector(state => state.auth);
   const userData = data?.datas || null;
+  const tableExportJavaScript = buildTableExportJavaScript('bidders_data.csv');
   const injectedJavaScript = `
     (function() {
       try {
@@ -30,12 +31,15 @@ const BidBuyers = () => {
         return false;
       }
     })();
+    ${tableExportJavaScript}
     true;
   `;
   return (
     <View style={styles.innerContainer}>
       <WebViewScreen
-        url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/bidders?mobile=true`}
+        url={`https://staging.bidbuyzoom.com/${
+          userData?.companySlug || ''
+        }/bidders?mobile=true`}
         injectedJavaScript={injectedJavaScript}
         enableWebBack={true}
       />

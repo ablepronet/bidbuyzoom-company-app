@@ -1,13 +1,16 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React from 'react';
 import WebViewScreen from '../webview';
 import {useAppSelector} from '../../../redux/hooks';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
+import {buildTableExportJavaScript} from '../../../utils/webViewTableExport';
 
 const Consignors = () => {
-  const {data, isLoading} = useGetUserProfile();
-  const {token, userId} = useAppSelector(state => state.auth);
+  const {data} = useGetUserProfile();
+  const {token} = useAppSelector(state => state.auth);
   const userData = data?.datas || null;
+  const tableExportJavaScript =
+    buildTableExportJavaScript('consignors_data.csv');
   const injectedJavaScript = `
     (function() {
       try {
@@ -29,6 +32,7 @@ const Consignors = () => {
         return false;
       }
     })();
+    ${tableExportJavaScript}
     true;
   `;
   return (

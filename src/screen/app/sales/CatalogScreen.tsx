@@ -7,7 +7,6 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Image,
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
@@ -47,9 +46,7 @@ const CatalogScreen = () => {
   const [perPage, setPerPage] = useState(20);
   const [searchText, setSearchText] = useState('');
   const debouncedSearch = useDebounce(searchText, 500);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(
-    undefined,
-  ); // empty for now
+  const selectedTemplate = sale?.templateId;
 
   // Use the real hook
   const {data, isLoading, isFetching, error, refetch} = useGetCatalogDetails({
@@ -68,7 +65,7 @@ const CatalogScreen = () => {
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [file, setFile] = useState<FilePickerResult | null>(null);
-  const [image, setImage] = useState<ImagePickerResult | null>(null);
+  const [image] = useState<ImagePickerResult | null>(null);
   const {mutate: uploadCSV, isPending} = useUploadLotCSV();
   const {mutate: mobileBulkUpload, isPending: isUploadingImages} =
     useImportImages();
@@ -528,9 +525,9 @@ const ImportModalContent = ({
   file,
   isLoading,
   onSubmit,
-  image,
+  image: _image,
   onPickImage,
-  onUploadImage,
+  onUploadImage: _onUploadImage,
 }: ImportModalProps) => {
   return (
     <View style={styles.modalWrapper}>
