@@ -17,6 +17,7 @@ const getRequestPreview = (payload: any) => {
 const getResponsePreview = (data: any) => ({
   status: data?.status,
   message: data?.message,
+  error: data?.error,
   dataType: Array.isArray(data?.data) ? 'array' : typeof data?.data,
   dataLength: Array.isArray(data?.data) ? data.data.length : undefined,
   datasType: Array.isArray(data?.datas) ? 'array' : typeof data?.datas,
@@ -27,6 +28,7 @@ export const post = async (url: string, formData: any, type = 0) => {
   const token = store.getState().auth.token;
 
   logs('token', token ? '[available]' : '[missing]');
+  console.log('Request', BASE_URL + url)
   const options: any = {
     headers: {
       Accept: type ? 'multipart/form-data' : 'application/json',
@@ -47,6 +49,11 @@ export const post = async (url: string, formData: any, type = 0) => {
     })
     .catch(function (error: any) {
       const status = error?.response?.status;
+      console.log('API Error', BASE_URL + url, {
+        status,
+        data: error?.response?.data,
+        message: error?.message,
+      });
       if (status === 401) {
         store.dispatch(setUserLogout());
       }

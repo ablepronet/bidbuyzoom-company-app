@@ -271,7 +271,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
       await Share.open(shareOptions);
     } catch (error) {
-      console.error('Error exporting CSV:', error);
     }
   };
 

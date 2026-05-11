@@ -279,4 +279,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(18),
     paddingVertical: vs(12),
   },
+  dateTimePicker: {
+    backgroundColor: colors.white,
+    height: vs(216),
+  },
 });

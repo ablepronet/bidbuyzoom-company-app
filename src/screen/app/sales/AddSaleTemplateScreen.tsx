@@ -2,6 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -13,26 +14,27 @@ import {AppText} from '../../../components/AppText';
 import {colors} from '../../../constants';
 import {routes} from '../../../navigation/route';
 import {ms, scale, vs} from '../../../utils/responsive';
-import {useGetTemplete} from '../../../services/queries/app/sales/useGetTemplete';
-
-const templateOptions = [
-  'Online Changed',
-  'lop',
-  'abbjd nbs',
-  'tytyy',
-  'rains',
-  'rtyuiop',
-  'fdst',
-  'Online 2',
-];
+import {
+  TemplateListItem,
+  useGetTemplete,
+  useUpdateSaleTemplate,
+} from '../../../services/queries/app/sales/useGetTemplete';
+import Loader from '../../../components/loader';
+import AppToast from '../../../components/toaster';
 
 const AddSaleTemplateScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const saleId = route.params?.saleId;
   const selectedSale = route.params?.selectedSale || null;
-  const {data: templateListResponse} = useGetTemplete(saleId);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const currentSaleId = saleId || selectedSale?._id || selectedSale?.saleId;
+  const {
+    data: templateListResponse,
+    isLoading: isTemplateLoading,
+    isError: isTemplateError,
+  } = useGetTemplete(currentSaleId);
+  const updateSaleTemplateMutation = useUpdateSaleTemplate();
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
@@ -41,18 +43,61 @@ const AddSaleTemplateScreen = () => {
     }
   }, [templateListResponse]);
 
+  useEffect(() => {
+    if (!selectedSale?.templateId) return;
+
+    navigation.replace(routes.catalogScreen, {
+      sale: {
+        ...selectedSale,
+        saleId: currentSaleId,
+        templateId: selectedSale.templateId,
+      },
+    });
+  }, [currentSaleId, navigation, selectedSale]);
+
+  const templateOptions = useMemo<TemplateListItem[]>(
+    () => templateListResponse?.data || [],
+    [templateListResponse?.data],
+  );
+
+  const selectedTemplate = useMemo(
+    () => templateOptions.find(item => item._id === selectedTemplateId),
+    [selectedTemplateId, templateOptions],
+  );
+
   const hubSale = useMemo(
     () => ({
       ...(selectedSale || {}),
-      saleId: saleId || selectedSale?._id || selectedSale?.saleId,
-      templateName: selectedTemplate,
+      saleId: currentSaleId,
+      templateId: selectedTemplateId || selectedSale?.templateId,
+      templateName: selectedTemplate?.templateName,
     }),
-    [saleId, selectedSale, selectedTemplate],
+    [currentSaleId, selectedSale, selectedTemplate, selectedTemplateId],
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!currentSaleId) {
+      AppToast.error('Sale id is missing');
+      return;
+    }
+    if (!selectedTemplateId) {
+      AppToast.error('Please select template');
+      return;
+    }
+
+    try {
+      const response = await updateSaleTemplateMutation.mutateAsync({
+        saleId: currentSaleId,
+        templateId: selectedTemplateId,
+      });
+      console.log(response, 'response=================================');
+    } catch (error) {
+      console.log('Update sale template failed', error);
+      return;
+    }
+
     navigation.navigate(routes.saleHubScreen, {
-      saleId: hubSale.saleId,
+      saleId: currentSaleId,
       selectedSale: hubSale,
       fromAddSaleFlow: true,
     });
@@ -74,9 +119,9 @@ const AddSaleTemplateScreen = () => {
             style={styles.select}
             onPress={() => setPickerVisible(true)}>
             <AppText
-              title={selectedTemplate || 'Select Template'}
+              title={selectedTemplate?.templateName || 'Select Template'}
               fontySize="px14"
-              color={selectedTemplate ? 'textPrimary' : 'textSecondary'}
+              color={selectedTemplateId ? 'textPrimary' : 'textSecondary'}
             />
             <Icon
               name="chevron-down"
@@ -89,9 +134,12 @@ const AddSaleTemplateScreen = () => {
             activeOpacity={0.85}
             style={[
               styles.submitButton,
-              !selectedTemplate && styles.submitButtonDisabled,
+              (!selectedTemplateId || updateSaleTemplateMutation.isPending) &&
+                styles.submitButtonDisabled,
             ]}
-            disabled={!selectedTemplate}
+            disabled={
+              !selectedTemplateId || updateSaleTemplateMutation.isPending
+            }
             onPress={handleSubmit}>
             <AppText
               title="Submit"
@@ -118,24 +166,52 @@ const AddSaleTemplateScreen = () => {
               fontFamily="bold"
               marginBottom={vs(12)}
             />
-            {templateOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                activeOpacity={0.85}
-                style={styles.optionRow}
-                onPress={() => {
-                  setSelectedTemplate(option);
-                  setPickerVisible(false);
-                }}>
-                <AppText title={option} fontySize="px14" />
-                {selectedTemplate === option ? (
-                  <Icon name="checkmark" size={ms(20)} color={colors.primary} />
-                ) : null}
-              </TouchableOpacity>
-            ))}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {isTemplateLoading ? (
+                <AppText
+                  title="Loading templates..."
+                  fontySize="px14"
+                  color="textSecondary"
+                />
+              ) : templateOptions.length ? (
+                templateOptions.map(option => (
+                  <TouchableOpacity
+                    key={option._id}
+                    activeOpacity={0.85}
+                    style={styles.optionRow}
+                    onPress={() => {
+                      setSelectedTemplateId(option._id);
+                      setPickerVisible(false);
+                    }}>
+                    <AppText title={option.templateName} fontySize="px14" />
+                    {selectedTemplateId === option._id ? (
+                      <Icon
+                        name="checkmark"
+                        size={ms(20)}
+                        color={colors.primary}
+                      />
+                    ) : null}
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <AppText
+                  title={
+                    isTemplateError
+                      ? 'Unable to load templates'
+                      : 'No templates available'
+                  }
+                  fontySize="px14"
+                  color={isTemplateError ? 'error' : 'textSecondary'}
+                />
+              )}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
+      <Loader
+        isLoading={isTemplateLoading || updateSaleTemplateMutation.isPending}
+        transparent={!isTemplateLoading}
+      />
     </View>
   );
 };

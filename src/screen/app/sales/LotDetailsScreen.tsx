@@ -58,7 +58,6 @@ const LotDetailsScreen = () => {
   const {data: lotDetailsData, isLoading} = useGetCatalogDataDetails({
     id: lotId,
   });
-  console.log('dataaaaaaaaa', lotDetailsData);
   
   const {mutateAsync: updateCatalogItem, isPending: isUpdating} =
     useUpdateCatalogDataDetails();

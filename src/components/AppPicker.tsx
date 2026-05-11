@@ -78,12 +78,12 @@ const AppPicker = <T,>({
               isTr={false}
             />
           ) : (
-            options.map(item => {
+            options.map((item, index) => {
               const isSelected = value === item.value;
 
               return (
                 <AppPressable
-                  key={String(item.value)}
+                  key={`${String(item.value)}-${index}`}
                   onPress={() => {
                     onSelect(item.value, item);
                     onClose();

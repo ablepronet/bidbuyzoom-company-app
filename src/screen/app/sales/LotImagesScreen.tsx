@@ -187,7 +187,6 @@ const LotImagesScreen = () => {
         addImageToSlot(result.uri);
       }
     } catch (error) {
-      console.error(error);
       AppToast.error('Failed to pick image from library');
     }
   };
@@ -204,7 +203,6 @@ const LotImagesScreen = () => {
         addImageToSlot(result.uri);
       }
     } catch (error) {
-      console.error(error);
       AppToast.error('Failed to take photo');
     }
   };

@@ -192,7 +192,6 @@ export const requestImagePermissions = async (): Promise<boolean> => {
     // For iOS, permissions are handled by the library automatically
     return true;
   } catch (error) {
-    console.error('Permission request failed:', error);
     return false;
   }
 };

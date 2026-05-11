@@ -195,8 +195,37 @@ const SalesHub = () => {
     }
 
     if (item.title === 'Catalog') {
-      navigation.navigate(routes.catalogScreen, {
-        sale: hubSale,
+      setIsNavigating(true);
+      let selectedSales = hubSale;
+
+      try {
+        const latestSalesResponse = await refetchSalesListing();
+        const sales =
+          latestSalesResponse.data?.data || salesListingData?.data || [];
+        selectedSales =
+          sales.find(
+            (saleItem: SalesListingItem) =>
+              saleItem?._id === hubSaleId || saleItem?.saleId === hubSaleId,
+          ) || hubSale;
+      } catch {}
+
+      const catalogSaleId =
+        selectedSales?._id || selectedSales?.saleId || hubSaleId;
+      const catalogSale = {
+        ...selectedSales,
+        saleId: catalogSaleId,
+      };
+
+      if (catalogSale?.templateId) {
+        navigation.navigate(routes.catalogScreen, {
+          sale: catalogSale,
+        });
+        return;
+      }
+
+      navigation.navigate(routes.addSaleTemplateScreen, {
+        saleId: catalogSaleId,
+        selectedSale: catalogSale,
       });
     } else {
       //@ts-ignore

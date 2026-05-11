@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Modal,
   Platform,
@@ -205,6 +205,25 @@ const AddNewSaleScreen = () => {
       : editSale.category?.map((item: any) => item?._id).filter(Boolean) || [];
 
     setStep(1);
+    setSelectConfig(null);
+    setPickerConfig(null);
+    setPickerValue(new Date());
+    setImages([]);
+    setUploadFiles([]);
+    setDateSectionError('');
+    setSaleDateRows([
+      {id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM'},
+    ]);
+    setRangeDates({
+      startDate: '',
+      endDate: '',
+      startTime: '12:00 AM',
+      endTime: '12:00 AM',
+    });
+    setOnlineDates({
+      startDate: '',
+      endDate: '',
+    });
     setCreatedSaleId(editSaleId || '');
     setValues(
       {
@@ -307,6 +326,8 @@ const AddNewSaleScreen = () => {
       .map((item: SalesListingItem) => item.title);
   }, [salesListingData?.data]);
   const selectedListingSale = useMemo(() => {
+    if (!isEditMode) return null;
+
     const sales = salesListingData?.data || [];
     const selectedSaleTitle = form.sale.trim().toLowerCase();
 
@@ -314,9 +335,11 @@ const AddNewSaleScreen = () => {
       (item: SalesListingItem) =>
         item.title?.trim().toLowerCase() === selectedSaleTitle,
     );
-  }, [form.sale, salesListingData?.data]);
+  }, [form.sale, isEditMode, salesListingData?.data]);
   const selectedListingSaleId =
-    editSaleId || selectedListingSale?._id || createdSaleId;
+    (isEditMode
+      ? editSaleId || selectedListingSale?._id || selectedListingSale?.saleId
+      : createdSaleId) || '';
 
   const saleTypeOptions = useMemo(() => {
     const saleTypes = saleTypesData?.datas || [];
@@ -387,14 +410,6 @@ const AddNewSaleScreen = () => {
     return values;
   }, [availableCities, form.city]);
 
-  useEffect(() => {
-    if (isEditMode) return;
-    if (!form.sale && saleOptions.length) {
-      setFieldValue('sale', saleOptions[0], false);
-      setFieldTouched('sale', false, false);
-    }
-  }, [form.sale, isEditMode, saleOptions, setFieldTouched, setFieldValue]);
-
   const updateField = (key: keyof FormState, value: string | boolean) => {
     if (key === 'sale') {
       setCreatedSaleId('');
@@ -449,7 +464,7 @@ const AddNewSaleScreen = () => {
   const markInformationTouched = () => {
     setTouched(
       {
-        sale: true,
+        sale: isEditMode,
         businessName: true,
         title: true,
         saleType: true,
@@ -476,6 +491,9 @@ const AddNewSaleScreen = () => {
   const validateInformation = async () => {
     markInformationTouched();
     const nextErrors = await validateForm();
+    if (!isEditMode) {
+      delete nextErrors.sale;
+    }
     const isDateValid = validateDateSection();
     return Object.keys(nextErrors).length === 0 && isDateValid;
   };
@@ -565,6 +583,25 @@ const AddNewSaleScreen = () => {
     } as any);
   };
 
+  const appendJsonField = (formData: FormData, key: string, value: any) => {
+    formData.append(key, JSON.stringify(value));
+  };
+
+  const logPayload = (label: string, payload: any) => {
+    const parts = (payload as any)?._parts;
+    const decodedPayload = Array.isArray(parts)
+      ? parts.reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
+          acc[key] = value;
+          return acc;
+        }, {})
+      : payload;
+
+    console.log(label, {
+      formData: payload,
+      decodedPayload,
+    });
+  };
+
   const getSaleIdFromResponse = (response: any) => {
     if (typeof response?.data === 'string') return response.data;
     if (typeof response?.datas === 'string') return response.datas;
@@ -593,29 +630,34 @@ const AddNewSaleScreen = () => {
   const buildInformationPayload = () => {
     const payload = new FormData();
 
+    payload.append('bussinessName', form.businessName);
     payload.append('state', form.state);
-    payload.append('businessName', form.businessName);
     payload.append('title', form.title);
     payload.append('saleType', form.saleType);
     payload.append('shortDescription', form.shortDescription);
     payload.append('fullDescription', form.fullDescription);
-    payload.append('multiStartDate', JSON.stringify(getMultiStartDate()));
+    appendJsonField(payload, 'multiStartDate', getMultiStartDate());
     payload.append('slaeTypeTimeCheck', getSaleTypeTimeCheck());
-    payload.append('categoryIds', JSON.stringify(form.categories));
+    appendJsonField(payload, 'categoryIds', form.categories);
     payload.append('fileTitle', form.uploadTitle);
     payload.append('city', form.city);
     payload.append('address', form.address);
     payload.append('zipCode', form.zipCode);
     payload.append('isSameAddress', String(form.sameAsCompanyAddress));
-    payload.append(
-      'currentTimeZone',
-      JSON.stringify({value: getTimeZoneValue(form.userTimeZone)}),
-    );
-    payload.append(
-      'saleTimeZone',
-      JSON.stringify({value: getTimeZoneValue(form.saleTimeZone)}),
-    );
-    payload.append('id', selectedListingSaleId);
+
+    const userTZValue = getTimeZoneValue(form.userTimeZone);
+    const saleTZValue = getTimeZoneValue(form.saleTimeZone);
+
+    appendJsonField(payload, 'currentTimeZone', {
+      value: userTZValue,
+    });
+    appendJsonField(payload, 'saleTimeZone', {
+      value: saleTZValue,
+    });
+
+    if (isEditMode && selectedListingSaleId) {
+      payload.append('id', selectedListingSaleId);
+    }
 
     uploadFiles.forEach(file => appendFile(payload, 'filesUploads', file));
 
@@ -623,23 +665,36 @@ const AddNewSaleScreen = () => {
   };
 
   const submitInformation = async () => {
-    const response = await addSaleInformationMutation.mutateAsync({
-      payload: buildInformationPayload(),
-    });
-    const nextSaleId = getSaleIdFromResponse(response);
+    const payload = buildInformationPayload();
 
-    if (!nextSaleId) {
-      AppToast.error('Sale information saved, but sale id was not returned');
+    console.log('Add sale information FormData', payload);
+
+    try {
+      const response = await addSaleInformationMutation.mutateAsync({
+        payload,
+      });
+      const nextSaleId = getSaleIdFromResponse(response);
+
+      if (!nextSaleId) {
+        AppToast.error('Sale information saved, but sale id was not returned');
+        return false;
+      }
+
+      setCreatedSaleId(nextSaleId);
+      AppToast.success('Sale information saved successfully');
+      return true;
+    } catch (error) {
+      console.log('Add sale information failed', error);
       return false;
     }
-
-    setCreatedSaleId(nextSaleId);
-    AppToast.success('Sale information saved successfully');
-    return true;
   };
 
   const submitImages = async () => {
     if (!images.length) {
+      console.log('Add sale images payload', {
+        id: createdSaleId || selectedListingSaleId,
+        images: [],
+      });
       AppToast.success('Sale images step completed');
       return true;
     }
@@ -654,18 +709,35 @@ const AddNewSaleScreen = () => {
     payload.append('id', saleId);
     images.forEach(image => appendFile(payload, 'images', image));
 
-    await addSaleImagesMutation.mutateAsync({payload});
-    AppToast.success('Sale images uploaded successfully');
-    return true;
+    logPayload('Add sale images payload', payload);
+
+    try {
+      await addSaleImagesMutation.mutateAsync({payload});
+      AppToast.success('Sale images uploaded successfully');
+      return true;
+    } catch (error) {
+      console.log('Add sale images failed', error);
+      return false;
+    }
   };
 
   const submitFinalize = async () => {
+    console.log('Add sale finalize payload', {
+      id: createdSaleId || selectedListingSaleId,
+      mode: isEditMode ? 'edit' : 'add',
+      title: form.title,
+    });
     AppToast.success('Sale finalized successfully');
     return true;
   };
 
-  const resetAddSaleState = () => {
-    resetForm();
+  const resetAddSaleState = useCallback(() => {
+    resetForm({
+      values: {
+        ...initialForm,
+        businessName: companySlug,
+      },
+    });
     setStep(1);
     setSelectConfig(null);
     setPickerConfig(null);
@@ -687,7 +759,13 @@ const AddNewSaleScreen = () => {
       startDate: '',
       endDate: '',
     });
-  };
+  }, [companySlug, resetForm]);
+
+  useEffect(() => {
+    if (isEditMode) return;
+
+    resetAddSaleState();
+  }, [isEditMode, resetAddSaleState, route.params]);
 
   const handleFinalize = async () => {
     if (!(await submitFinalize())) return;
@@ -1592,7 +1670,7 @@ const AddNewSaleScreen = () => {
     addSaleInformationMutation.isPending || addSaleImagesMutation.isPending;
   const isInitialLoading =
     isProfileLoading ||
-    isSalesListingLoading ||
+    (isEditMode && isSalesListingLoading) ||
     isSaleTypesLoading ||
     isCategoriesLoading;
 
@@ -1613,6 +1691,7 @@ const AddNewSaleScreen = () => {
         extraScrollHeight={80}
         extraHeight={120}>
         {step === 1 &&
+          isEditMode &&
           renderSelect(
             'sale',
             'Sales',
@@ -1678,6 +1757,10 @@ const AddNewSaleScreen = () => {
             value={pickerValue}
             mode={pickerConfig.mode}
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            themeVariant="light"
+            textColor={colors.textPrimary}
+            accentColor={colors.primary}
+            style={styles.dateTimePicker}
             onChange={handleDateTimeChange}
           />
         </View>
@@ -1699,9 +1782,9 @@ const AddNewSaleScreen = () => {
               marginBottom={vs(12)}
             />
             <ScrollView keyboardShouldPersistTaps="handled">
-              {selectConfig?.options.map(option => (
+              {selectConfig?.options.map((option, index) => (
                 <TouchableOpacity
-                  key={option}
+                  key={`${selectConfig.key}-${option}-${index}`}
                   activeOpacity={0.8}
                   style={styles.optionRow}
                   onPress={() => {

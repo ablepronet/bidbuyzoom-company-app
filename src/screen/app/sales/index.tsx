@@ -93,7 +93,11 @@ const Sales = ({route}: {route: any}) => {
           break;
 
         case 'ADD_NEW_SALE_PRESSED':
-          navigation.navigate(routes.addNewSaleScreen);
+          navigation.navigate(routes.addNewSaleScreen, {
+            mode: 'add',
+            saleId: undefined,
+            selectedSale: null,
+          });
           break;
 
         default:

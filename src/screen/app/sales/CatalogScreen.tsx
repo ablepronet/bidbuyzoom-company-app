@@ -71,7 +71,6 @@ const CatalogScreen = () => {
     useImportImages();
 
   const lots = data?.data || [];
-  console.log('lotssssssssssss', lots);
   
   const pagination = data?.pagination;
   const totalItems = pagination?.totalItems || 0;

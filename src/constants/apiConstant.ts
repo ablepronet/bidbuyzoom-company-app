@@ -31,6 +31,7 @@ const apiEndPoints = {
   defaultSetting: 'default-setting',
   saleSetting: 'sale-setting',
   templateList: 'template-list',
+  updateSaleTemplate: 'update-sale-template',
 };
 
 export default apiEndPoints;
