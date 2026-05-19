@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import {DrawerActions, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useGetUserProfile} from '../../../services/queries/app/Profile';
 import Loader from '../../../components/loader';
 import {AppText} from '../../../components/AppText';
@@ -86,10 +86,6 @@ const HomeDashBoard = () => {
   const completedStepsCount = setup?.completedCount ?? 0;
   const totalSteps = setup?.totalSteps ?? 6;
   const progressPercentage = (completedStepsCount / totalSteps) * 100;
-
-  const handleOpenDrawer = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
-  };
 
   const handleLogout = () => {
     setProfileModalVisible(false);
@@ -195,10 +191,20 @@ const HomeDashBoard = () => {
             currentSales.map((sale: any) => {
               const startDate = formatDate(sale.multiStartDate[0]?.startDate);
               const endDate = formatDate(sale.multiStartDate[1]?.startDate);
-              const disabled = !sale?.isDisabledData || !sale?.isPublished;
-              const saleId = sale._id;
               return (
-                <View key={sale._id} style={styles.saleItem}>
+                <TouchableOpacity
+                  key={sale._id}
+                  activeOpacity={0.85}
+                  style={styles.saleItem}
+                  onPress={() =>
+                    navigation.navigate(routes.saleHubScreen, {
+                      saleId: sale._id || sale.saleId,
+                      selectedSale: {
+                        ...sale,
+                        saleId: sale._id || sale.saleId,
+                      },
+                    })
+                  }>
                   <View style={styles.saleHeader}>
                     <AppText
                       title={sale.title}
@@ -242,7 +248,7 @@ const HomeDashBoard = () => {
                     />
                   </View>
 
-                  <View style={styles.saleActionRow}>
+                  {/* <View style={styles.saleActionRow}>
                     <TouchableOpacity
                       style={[
                         styles.saleActionBtn,
@@ -258,12 +264,7 @@ const HomeDashBoard = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.saleActionBtn, styles.manageBtn]}
-                      onPress={() =>
-                        navigation.navigate(routes.salesTab, {
-                          from: 'manage',
-                          saleId: saleId,
-                        })
-                      }>
+                      onPress={() => navigation.navigate(routes.salesTab)}>
                       <AppText
                         title="Manage"
                         fontySize="px12"
@@ -283,8 +284,8 @@ const HomeDashBoard = () => {
                         color={!disabled ? 'primary' : 'textSecondary'}
                       />
                     </TouchableOpacity>
-                  </View>
-                </View>
+                  </View> */}
+                </TouchableOpacity>
               );
             })
           ) : (

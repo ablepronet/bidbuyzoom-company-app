@@ -90,7 +90,6 @@ const AddSaleTemplateScreen = () => {
         saleId: currentSaleId,
         templateId: selectedTemplateId,
       });
-      console.log(response, 'response=================================');
     } catch (error) {
       console.log('Update sale template failed', error);
       return;
