@@ -155,12 +155,12 @@
 //   },
 // });
 
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
 import WebView from 'react-native-webview';
 import Loader from '../../../components/loader';
-import {colors} from '../../../constants';
-import {scale, vs} from '../../../utils/responsive';
+import { colors } from '../../../constants';
+import { scale, vs } from '../../../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
 import RNPrint from 'react-native-print';
 import RNFS from 'react-native-fs';
@@ -237,14 +237,14 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   };
 
   const handleError = (syntheticEvent: any) => {
-    const {nativeEvent} = syntheticEvent;
+    const { nativeEvent } = syntheticEvent;
     console.log('WebView Error:', nativeEvent);
     stopLoading();
     customOnError?.(nativeEvent);
   };
 
   const handleHttpError = (syntheticEvent: any) => {
-    const {nativeEvent} = syntheticEvent;
+    const { nativeEvent } = syntheticEvent;
     console.log('HTTP Error:', nativeEvent.statusCode);
     stopLoading();
   };
@@ -280,15 +280,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       console.log('📱 WebView Message Received:', messageData.type);
 
       if (messageData.type === 'PRINT_HTML') {
-        const {html} = messageData.data;
+        const { html } = messageData.data;
         if (html) {
-          await RNPrint.print({html});
+          await RNPrint.print({ html });
         }
         return;
       }
 
       if (messageData.type === 'EXPORT_CSV') {
-        const {filename, content} = messageData.data;
+        const { filename, content } = messageData.data;
         if (filename && content) {
           await handleExportCSV(filename, content);
         }
@@ -573,8 +573,8 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         allowsBackForwardNavigationGestures={true}
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
-        // Timeout for loading state
-        // renderLoading={() => <Loader isLoading={true} />}
+      // Timeout for loading state
+      // renderLoading={() => <Loader isLoading={true} />}
       />
       {showLoader && <Loader isLoading={isLoading} />}
     </View>

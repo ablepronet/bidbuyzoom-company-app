@@ -6,6 +6,10 @@ import { colors } from '../constants';
 import { ImageComponent } from './AppImage';
 import { AppText } from './AppText';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { routes } from '../navigation/route';
+import { useGetNotifications } from '../services/queries/app/notifications';
+import { useGetMessages } from '../services/queries/app/messages';
 
 interface AppHeaderProps {
   title?: string;
@@ -18,6 +22,7 @@ interface AppHeaderProps {
   backgroundColor?: string;
   titleColor?: keyof typeof colors;
   showBorder?: boolean;
+  showNotification?: boolean;
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -31,8 +36,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   backgroundColor = colors.white,
   titleColor = 'primary',
   showBorder = true,
+  showNotification = true,
 }) => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
+  const { data } = useGetNotifications();
+  const unreadCount = data?.unreadCount || 0;
+  const { data: messagesData } = useGetMessages();
+  const unreadMessagesCount = messagesData?.unreadCount || 0;
 
   return (
     <View
@@ -78,7 +89,27 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           <View style={styles.centerContainer}>{centerContent}</View>
         )}
 
-        <View style={styles.rightContainer}>{rightContent}</View>
+        <View style={styles.rightContainer}>
+          {rightContent}
+          {showNotification && (
+            <>
+              <TouchableOpacity
+                style={styles.notificationBtn}
+                onPress={() => navigation.navigate(routes.messageScreen)}
+              >
+                <Icon name="chatbubble-ellipses-outline" size={ms(24)} color={colors.textPrimary} />
+                {unreadMessagesCount > 0 && <View style={styles.badge} />}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.notificationBtn}
+                onPress={() => navigation.navigate(routes.notificationScreen)}
+              >
+                <Icon name="notifications-outline" size={ms(24)} color={colors.textPrimary} />
+                {unreadCount > 0 && <View style={styles.badge} />}
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -118,6 +149,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     zIndex: 1,
+  },
+  notificationBtn: {
+    marginLeft: ms(12),
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: ms(8),
+    height: ms(8),
+    borderRadius: ms(4),
+    backgroundColor: 'red',
   },
 });
 

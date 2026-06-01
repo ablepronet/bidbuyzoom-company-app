@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,24 +7,24 @@ import {
   Dimensions,
   Linking,
 } from 'react-native';
-import {DrawerContentScrollView} from '@react-navigation/drawer';
-import {useNavigation, useNavigationState} from '@react-navigation/native';
-import {colors} from '../../constants';
-import {AppText} from '../../components/AppText';
-import {ImageComponent} from '../../components/AppImage';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { colors } from '../../constants';
+import { AppText } from '../../components/AppText';
+import { ImageComponent } from '../../components/AppImage';
 import appImages from '../../constants/appImages';
-import {ms, scale, vs} from '../../utils/responsive';
+import { ms, scale, vs } from '../../utils/responsive';
 import AppButton from '../../components/appButton';
-import {useAppDispatch, useAppSelector} from '../../redux/hooks';
-import {setUserLogout} from '../../redux/slices/auth';
-import {persister} from '../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { setUserLogout } from '../../redux/slices/auth';
+import { persister } from '../../redux/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import {routes} from '../route';
-import {useGetUserProfile} from '../../services/queries/app/Profile';
+import { routes } from '../route';
+import { useGetUserProfile } from '../../services/queries/app/Profile';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import {HELP} from '../../constants/apiConstant';
-import {useQueryClient} from '@tanstack/react-query';
+import { HELP } from '../../constants/apiConstant';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Types
 type MenuItemType = {
@@ -98,6 +98,12 @@ const menuItems: MenuItemType[] = [
   //   badge: 3,
   // },
   {
+    id: '11',
+    title: 'Recent Messages',
+    icon: 'chatbubble-ellipses-outline',
+    route: routes.messageScreen,
+  },
+  {
     id: '9',
     title: 'Settings',
     icon: 'settings-outline',
@@ -109,8 +115,8 @@ const menuItems: MenuItemType[] = [
 export const CustomDrawerContent = (props: any) => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
-  const {user} = useAppSelector(state => state.auth);
-  const {data, isLoading} = useGetUserProfile();
+  const { user } = useAppSelector(state => state.auth);
+  const { data, isLoading } = useGetUserProfile();
   const queryClient = useQueryClient();
 
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
@@ -133,7 +139,7 @@ export const CustomDrawerContent = (props: any) => {
   const handleNavigate = (item: MenuItemType) => {
     if (item.tabScreen) {
       // @ts-ignore
-      navigation.navigate(item.route, {screen: item.tabScreen});
+      navigation.navigate(item.route, { screen: item.tabScreen });
     } else if (item.route) {
       // @ts-ignore
       navigation.navigate(item.route);
@@ -193,6 +199,7 @@ export const CustomDrawerContent = (props: any) => {
     //   url: `https://staging.bidbuyzoom.com/help`,
     // });
     try {
+      // await Linking.openURL(`https://staging.bidbuyzoom.com/help`);
       await Linking.openURL(`https://staging.bidbuyzoom.com/help`);
     } catch (error) {
       console.log('Error opening link:', error);
@@ -227,7 +234,7 @@ export const CustomDrawerContent = (props: any) => {
             title={userData?.email || 'test@company.com'}
             color="white"
             fontySize="px12"
-            style={{opacity: 0.8}}
+            style={{ opacity: 0.8 }}
           />
         </View>
       </View>
@@ -289,7 +296,7 @@ export const CustomDrawerContent = (props: any) => {
   );
 };
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

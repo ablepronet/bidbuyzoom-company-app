@@ -1,7 +1,7 @@
-import {useMutation} from '@tanstack/react-query';
-import {post} from '../../../api';
-import {apiEndPoints} from '../../../../constants';
-import {Platform} from 'react-native';
+import { useMutation } from '@tanstack/react-query';
+import { post } from '../../../api';
+import { apiEndPoints } from '../../../../constants';
+import { Platform } from 'react-native';
 import AppToast from '../../../../components/toaster';
 import HandleApiCatch from '../../../../helper/handleCatch';
 
@@ -25,6 +25,7 @@ export const useLogin = () => {
     },
 
     onError: (error: any) => {
+      console.log(error, 'errorororooror 12321');
       const err =
         error?.response?.data?.error ||
         error?.response?.data?.message ||

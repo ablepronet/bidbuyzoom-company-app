@@ -1,6 +1,6 @@
-import {RouteProp} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {routes} from './route';
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { routes } from './route';
 
 export type authStackParamsList = {
   [routes.WelcomeScreen]: undefined;
@@ -39,12 +39,12 @@ export type drawerParamsList = {
     fromAddSaleFlow?: boolean;
   };
   [routes.addNewSaleScreen]:
-    | {
-        saleId?: string;
-        selectedSale?: any | null;
-        mode?: 'add' | 'edit';
-      }
-    | undefined;
+  | {
+    saleId?: string;
+    selectedSale?: any | null;
+    mode?: 'add' | 'edit';
+  }
+  | undefined;
   [routes.addSaleSettingsScreen]: {
     saleId?: string;
     selectedSale?: any | null;
@@ -60,6 +60,8 @@ export type drawerParamsList = {
   [routes.lotDetailsScreen]: {
     lot?: any;
   };
+  [routes.notificationScreen]: undefined;
+  [routes.messageScreen]: undefined;
 };
 
 export type bottomTabParamsList = {

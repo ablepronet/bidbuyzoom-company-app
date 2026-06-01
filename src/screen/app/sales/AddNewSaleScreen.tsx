@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Platform,
@@ -6,22 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
+  Image,
+  Alert,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {useFormik} from 'formik';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFormik } from 'formik';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker, {
-  DateTimePickerEvent,
+  DateTimePickerChangeEvent,
 } from '@react-native-community/datetimepicker';
-import {pick, types} from '@react-native-documents/picker';
-import {City, State} from 'country-state-city';
+import { pick, types } from '@react-native-documents/picker';
+import { City, State } from 'country-state-city';
 import moment from 'moment-timezone';
 import AppHeader from '../../../components/appHeader';
-import {AppText} from '../../../components/AppText';
+import { AppText } from '../../../components/AppText';
 import Loader from '../../../components/loader';
-import {colors} from '../../../constants';
-import {ms, scale, vs} from '../../../utils/responsive';
+import { colors, IMAGE_BASE_URL } from '../../../constants';
+import { ms, scale, vs } from '../../../utils/responsive';
 import GooglePlaceAutoComplete, {
   GooglePlaceResult,
 } from '../../../components/GooglePlaceAutoComplete';
@@ -41,8 +44,8 @@ import {
   useAddSaleImages,
   useAddSaleInformation,
 } from '../../../services/queries/app/sales/useAddSaleFlow';
-import {showImagePickerAlert, validateImage} from '../../../utils/imagePicker';
-import {ValidationSchemas} from '../../../helper/validation';
+import { showImagePickerAlert, validateImage, takePhotoWithCamera } from '../../../utils/imagePicker';
+import { ValidationSchemas } from '../../../helper/validation';
 import AppToast from '../../../components/toaster';
 import {
   CheckboxRow,
@@ -64,9 +67,9 @@ import {
   dateModeOptions,
   timeZoneLabelMap,
 } from './addNewSaleTypes';
-import {styles} from './styles';
-import {useGetUserProfile} from '../../../services/queries/app/Profile';
-import {routes} from '../../../navigation/route';
+import { styles } from './styles';
+import { useGetUserProfile } from '../../../services/queries/app/Profile';
+import { routes } from '../../../navigation/route';
 
 const formatGmtOffset = (zoneName: string) =>
   moment
@@ -96,15 +99,14 @@ const getTimeZoneOptionFromValue = (value?: string) => {
   try {
     const parsed = JSON.parse(value);
     zoneName = parsed?.value || value;
-  } catch {}
+  } catch { }
 
   const normalizedZone = normalizeZoneName(zoneName);
   return (
     (Object.entries(timeZoneLabelMap).find(
       ([key]) => normalizeZoneName(key) === normalizedZone,
     )?.[1] &&
-      `(GMT${formatGmtOffset(normalizedZone)}) ${
-        timeZoneLabelMap[normalizedZone]
+      `(GMT${formatGmtOffset(normalizedZone)}) ${timeZoneLabelMap[normalizedZone]
       }`) ||
     timeZoneOptions[0]
   );
@@ -123,7 +125,7 @@ const getDateModeFromSaleTypeCheck = (value?: string): DateMode => {
 };
 
 const formatSaleDate = (date?: string) =>
-  date ? moment(date).format('MM/DD/YYYY') : '';
+  date ? moment(date).format('DD/MM/YYYY') : '';
 
 const formatSaleTime = (time?: string) =>
   time ? moment(time, ['HH:mm', 'hh:mm A']).format('hh:mm A') : '12:00 AM';
@@ -156,8 +158,8 @@ const AddNewSaleScreen = () => {
   const editSale = route.params?.selectedSale;
   const editSaleId = route.params?.saleId || editSale?._id || editSale?.saleId;
   const isEditMode = route.params?.mode === 'edit' && Boolean(editSale);
-  const {addNewSaleValidation} = ValidationSchemas();
-  const {data: profileData, isLoading: isProfileLoading} = useGetUserProfile();
+  const { addNewSaleValidation } = ValidationSchemas();
+  const { data: profileData, isLoading: isProfileLoading } = useGetUserProfile();
   const profile = profileData?.datas;
   const companySlug = profileData?.datas?.companySlug || '';
   const addSaleInformationMutation = useAddSaleInformation();
@@ -193,6 +195,9 @@ const AddNewSaleScreen = () => {
     }
   }, [companySlug, form.businessName, setFieldTouched, setFieldValue]);
 
+  console.log('form', form);
+
+
   useEffect(() => {
     if (!isEditMode || !editSale) return;
 
@@ -206,13 +211,44 @@ const AddNewSaleScreen = () => {
 
     setStep(1);
     setSelectConfig(null);
-    setPickerConfig(null);
-    setPickerValue(new Date());
-    setImages([]);
+    const existingImages: SelectedFile[] = [];
+    const rawImages = editSale.images || editSale.Photos || editSale.photos || editSale.saleImages || editSale.media || [];
+
+    if (Array.isArray(rawImages)) {
+      rawImages.forEach((img: any, index: number) => {
+        if (!img) return;
+
+        let imgUri = '';
+        let name = '';
+
+        if (typeof img === 'string') {
+          imgUri = img;
+          name = img.split('/').pop() || `image-${index}.jpg`;
+        } else if (typeof img === 'object') {
+          imgUri = img.uri || img.path || img.url || '';
+          name = img.name || img.filename || imgUri.split('/').pop() || `image-${index}.jpg`;
+        }
+
+        if (imgUri) {
+          const isAbsolute = imgUri.startsWith('http') || imgUri.startsWith('file://') || imgUri.startsWith('content://');
+          const absoluteUri = isAbsolute ? imgUri : `${IMAGE_BASE_URL}${imgUri}`;
+
+          existingImages.push({
+            uri: absoluteUri,
+            name: name,
+            isExisting: true,
+            originalPath: imgUri,
+          } as any);
+        }
+      });
+    }
+
+    setImages(existingImages);
+    setRemovedImages([]);
     setUploadFiles([]);
     setDateSectionError('');
     setSaleDateRows([
-      {id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM'},
+      { id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM' },
     ]);
     setRangeDates({
       startDate: '',
@@ -286,11 +322,12 @@ const AddNewSaleScreen = () => {
   const [pickerConfig, setPickerConfig] = useState<PickerConfig | null>(null);
   const [pickerValue, setPickerValue] = useState(new Date());
   const [images, setImages] = useState<SelectedFile[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
   const [uploadFiles, setUploadFiles] = useState<SelectedFile[]>([]);
   const [createdSaleId, setCreatedSaleId] = useState('');
   const [dateSectionError, setDateSectionError] = useState('');
   const [saleDateRows, setSaleDateRows] = useState<SaleDateRow[]>([
-    {id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM'},
+    { id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM' },
   ]);
   const [rangeDates, setRangeDates] = useState({
     startDate: '',
@@ -355,6 +392,7 @@ const AddNewSaleScreen = () => {
 
   const categoryOptions = useMemo(() => {
     const categories = categoriesData?.data || [];
+    console.log('categoriesData', categoriesData);
 
     return categories.filter(
       (item: CategoryItem) =>
@@ -394,8 +432,8 @@ const AddNewSaleScreen = () => {
     () =>
       selectedStateIsoCode
         ? City.getCitiesOfState('US', selectedStateIsoCode).map(
-            city => city.name,
-          )
+          city => city.name,
+        )
         : [],
     [selectedStateIsoCode],
   );
@@ -499,7 +537,7 @@ const AddNewSaleScreen = () => {
   };
 
   const toApiDate = (value: string) => {
-    const parsed = moment(value, 'MM/DD/YYYY', true);
+    const parsed = moment(value, 'DD/MM/YYYY', true);
     return parsed.isValid() ? parsed.format('YYYY-MM-DD') : value;
   };
 
@@ -591,9 +629,9 @@ const AddNewSaleScreen = () => {
     const parts = (payload as any)?._parts;
     const decodedPayload = Array.isArray(parts)
       ? parts.reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
-          acc[key] = value;
-          return acc;
-        }, {})
+        acc[key] = value;
+        return acc;
+      }, {})
       : payload;
 
     console.log(label, {
@@ -690,7 +728,7 @@ const AddNewSaleScreen = () => {
   };
 
   const submitImages = async () => {
-    if (!images.length) {
+    if (!images.length && !removedImages.length) {
       console.log('Add sale images payload', {
         id: createdSaleId || selectedListingSaleId,
         images: [],
@@ -707,13 +745,23 @@ const AddNewSaleScreen = () => {
 
     const payload = new FormData();
     payload.append('id', saleId);
-    images.forEach(image => appendFile(payload, 'images', image));
+
+    // Only upload new images (not existing remote ones)
+    const newImages = images.filter(image => !image.isExisting);
+    newImages.forEach(image => appendFile(payload, 'images', image));
+
+    // Send deleted image paths
+    if (isEditMode && removedImages.length > 0) {
+      payload.append('removedImages', JSON.stringify(removedImages));
+      payload.append('removedPhotos', JSON.stringify(removedImages));
+      payload.append('deletedImages', JSON.stringify(removedImages));
+    }
 
     logPayload('Add sale images payload', payload);
 
     try {
-      await addSaleImagesMutation.mutateAsync({payload});
-      AppToast.success('Sale images uploaded successfully');
+      await addSaleImagesMutation.mutateAsync({ payload });
+      AppToast.success('Sale images updated successfully');
       return true;
     } catch (error) {
       console.log('Add sale images failed', error);
@@ -743,11 +791,12 @@ const AddNewSaleScreen = () => {
     setPickerConfig(null);
     setPickerValue(new Date());
     setImages([]);
+    setRemovedImages([]);
     setUploadFiles([]);
     setCreatedSaleId('');
     setDateSectionError('');
     setSaleDateRows([
-      {id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM'},
+      { id: '1', date: '', startTime: '12:00 AM', endTime: '12:00 AM' },
     ]);
     setRangeDates({
       startDate: '',
@@ -774,7 +823,7 @@ const AddNewSaleScreen = () => {
 
     navigation.navigate('DashboardTabs', {
       screen: routes.salesTab,
-      params: {refreshAt: Date.now()},
+      params: { refreshAt: Date.now() },
     });
   };
 
@@ -822,11 +871,7 @@ const AddNewSaleScreen = () => {
   };
 
   const formatDate = (date: Date) =>
-    date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-    });
+    moment(date).format('DD/MM/YYYY');
 
   const formatTime = (date: Date) =>
     date.toLocaleTimeString('en-US', {
@@ -852,7 +897,7 @@ const AddNewSaleScreen = () => {
     const storedValue = String(getPickerStoredValue(config) || '');
     const parsed =
       config.mode === 'date'
-        ? moment(storedValue, 'MM/DD/YYYY', true)
+        ? moment(storedValue, 'DD/MM/YYYY', true)
         : moment(storedValue, 'hh:mm A', true);
 
     return parsed.isValid() ? parsed.toDate() : new Date();
@@ -863,15 +908,19 @@ const AddNewSaleScreen = () => {
     setPickerConfig(config);
   };
 
+  const handlePickerDismiss = () => {
+    setPickerConfig(null);
+  };
+
   const handleDateTimeChange = (
-    event: DateTimePickerEvent,
-    selectedDate?: Date,
+    event: DateTimePickerChangeEvent,
+    selectedDate: Date,
   ) => {
     if (Platform.OS === 'android') {
       setPickerConfig(null);
     }
 
-    if (event.type === 'dismissed' || !selectedDate || !pickerConfig) return;
+    if (!selectedDate || !pickerConfig) return;
 
     setPickerValue(selectedDate);
 
@@ -889,7 +938,7 @@ const AddNewSaleScreen = () => {
       setSaleDateRows(prev =>
         prev.map(row =>
           row.id === pickerConfig.id
-            ? {...row, [pickerConfig.key]: value}
+            ? { ...row, [pickerConfig.key]: value }
             : row,
         ),
       );
@@ -898,12 +947,12 @@ const AddNewSaleScreen = () => {
     }
 
     if (pickerConfig.target === 'range') {
-      setRangeDates(prev => ({...prev, [pickerConfig.key]: value}));
+      setRangeDates(prev => ({ ...prev, [pickerConfig.key]: value }));
       setDateSectionError('');
       return;
     }
 
-    setOnlineDates(prev => ({...prev, [pickerConfig.key]: value}));
+    setOnlineDates(prev => ({ ...prev, [pickerConfig.key]: value }));
     setDateSectionError('');
   };
   const addSaleDateRow = () => {
@@ -973,26 +1022,93 @@ const AddNewSaleScreen = () => {
   };
 
   const handlePickImage = async () => {
-    if (images.length >= 15) return;
-
-    const result = await showImagePickerAlert();
-    const validation = validateImage(result);
-
-    if (!validation.isValid || !result.uri) {
-      if (result.error) console.log('Image picker error', result.error);
+    const remainingLimit = 15 - images.length;
+    if (remainingLimit <= 0) {
+      AppToast.error('Maximum 15 photos reached');
       return;
     }
 
-    const imageUri = result.uri;
-    setImages(prev => [
-      ...prev,
-      {
-        uri: imageUri,
-        name: result.fileName || `Listing image ${prev.length + 1}`,
-        type: result.type,
-        size: result.fileSize,
-      },
-    ]);
+    Alert.alert(
+      'Select Photos',
+      `You can add up to ${remainingLimit} more photos. Choose gallery to select multiple at once.`,
+      [
+        {
+          text: 'Camera',
+          onPress: async () => {
+            const result = await takePhotoWithCamera({ mediaType: 'photo' });
+            const validation = validateImage(result);
+            if (!validation.isValid || !result.uri) {
+              if (result.error) AppToast.error(result.error);
+              return;
+            }
+            setImages(prev => [
+              ...prev,
+              {
+                uri: result.uri!,
+                name: result.fileName || `Listing image ${prev.length + 1}`,
+                type: result.type,
+                size: result.fileSize,
+              },
+            ]);
+            AppToast.success('Photo added');
+          },
+        },
+        {
+          text: 'Gallery',
+          onPress: () => {
+            launchImageLibrary(
+              {
+                mediaType: 'photo',
+                selectionLimit: remainingLimit,
+                quality: 0.8,
+              },
+              response => {
+                if (response.didCancel) return;
+                if (response.errorCode) {
+                  AppToast.error(response.errorMessage || 'Failed to open gallery');
+                  return;
+                }
+                if (response.assets && response.assets.length > 0) {
+                  const newPicked: SelectedFile[] = [];
+                  response.assets.forEach((asset, idx) => {
+                    if (asset.uri) {
+                      if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+                        AppToast.error(`${asset.fileName || 'Image'} is larger than 5MB limit`);
+                        return;
+                      }
+                      newPicked.push({
+                        uri: asset.uri,
+                        name: asset.fileName || `Listing image ${images.length + idx + 1}`,
+                        type: asset.type,
+                        size: asset.fileSize,
+                      });
+                    }
+                  });
+                  if (newPicked.length > 0) {
+                    setImages(prev => [...prev, ...newPicked]);
+                    AppToast.success(`Added ${newPicked.length} photos`);
+                  }
+                }
+              }
+            );
+          },
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const removedItem = images[index];
+    if (removedItem.isExisting && removedItem.originalPath) {
+      setRemovedImages(prev => [...prev, removedItem.originalPath!]);
+    }
+    setImages(prev => prev.filter((_, idx) => idx !== index));
+    AppToast.success('Image removed');
   };
 
   const renderSelect = (
@@ -1008,7 +1124,7 @@ const AddNewSaleScreen = () => {
       placeholder={placeholder}
       required={required}
       error={getFieldError(key)}
-      onPress={() => setSelectConfig({key, title: label, options})}
+      onPress={() => setSelectConfig({ key, title: label, options })}
     />
   );
 
@@ -1083,7 +1199,7 @@ const AddNewSaleScreen = () => {
                 {renderPickerField(
                   index === 0 ? 'Sale dates' : 'Date',
                   row.date,
-                  'mm/dd/yyyy',
+                  'dd/mm/yyyy',
                   'date',
                   () =>
                     openPicker({
@@ -1157,7 +1273,7 @@ const AddNewSaleScreen = () => {
             {renderPickerField(
               'Start Date',
               rangeDates.startDate,
-              'mm/dd/yyyy',
+              'dd/mm/yyyy',
               'date',
               () =>
                 openPicker({
@@ -1183,7 +1299,7 @@ const AddNewSaleScreen = () => {
             {renderPickerField(
               'End Date',
               rangeDates.endDate,
-              'mm/dd/yyyy',
+              'dd/mm/yyyy',
               'date',
               () =>
                 openPicker({
@@ -1218,7 +1334,7 @@ const AddNewSaleScreen = () => {
             {renderPickerField(
               'Start Date',
               onlineDates.startDate,
-              'mm/dd/yyyy',
+              'dd/mm/yyyy',
               'date',
               () =>
                 openPicker({
@@ -1230,7 +1346,7 @@ const AddNewSaleScreen = () => {
             {renderPickerField(
               'End Date',
               onlineDates.endDate,
-              'mm/dd/yyyy',
+              'dd/mm/yyyy',
               'date',
               () =>
                 openPicker({
@@ -1251,9 +1367,9 @@ const AddNewSaleScreen = () => {
         {renderPickerField(
           'Sale dates',
           form.saleDate,
-          'mm/dd/yyyy',
+          'dd/mm/yyyy',
           'date',
-          () => openPicker({target: 'form', key: 'saleDate', mode: 'date'}),
+          () => openPicker({ target: 'form', key: 'saleDate', mode: 'date' }),
           true,
           getFieldError('saleDate'),
         )}
@@ -1263,10 +1379,10 @@ const AddNewSaleScreen = () => {
             form.startTime,
             '12:00 AM',
             'time',
-            () => openPicker({target: 'form', key: 'startTime', mode: 'time'}),
+            () => openPicker({ target: 'form', key: 'startTime', mode: 'time' }),
           )}
           {renderPickerField('End time', form.endTime, '12:00 AM', 'time', () =>
-            openPicker({target: 'form', key: 'endTime', mode: 'time'}),
+            openPicker({ target: 'form', key: 'endTime', mode: 'time' }),
           )}
         </View>
         {renderTimeZones()}
@@ -1301,8 +1417,8 @@ const AddNewSaleScreen = () => {
         isSaleTypesLoading
           ? 'Loading sale types...'
           : isSaleTypesError
-          ? 'Unable to load sale types'
-          : '-- Select Sale Type --',
+            ? 'Unable to load sale types'
+            : '-- Select Sale Type --',
         true,
       )}
 
@@ -1447,14 +1563,19 @@ const AddNewSaleScreen = () => {
         />
       </TouchableOpacity>
       {images.length ? (
-        <View style={styles.imageList}>
-          {images.map(image => (
-            <View key={image.uri} style={styles.imageChip}>
-              <Icon name="image-outline" size={ms(14)} color={colors.primary} />
-              <AppText
-                title={image.name}
-                fontySize="px12"
-                color="textPrimary"
+        <View style={styles.imageCardGrid}>
+          {images.map((image, index) => (
+            <View key={`${image.uri}-${index}`} style={styles.imageCard}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.deleteImageButton}
+                onPress={() => handleRemoveImage(index)}>
+                <Icon name="close" size={ms(12)} color={colors.white} />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: image.uri }}
+                style={styles.imageCardPreview}
+                resizeMode="cover"
               />
             </View>
           ))}
@@ -1471,7 +1592,7 @@ const AddNewSaleScreen = () => {
   );
 
   const formatPreviewDate = (date: string) => {
-    const parsed = moment(date, 'MM/DD/YYYY', true);
+    const parsed = moment(date, 'DD/MM/YYYY', true);
     return parsed.isValid() ? parsed.format('MMM DD, YYYY') : date;
   };
 
@@ -1524,25 +1645,77 @@ const AddNewSaleScreen = () => {
   const renderFinalizeStep = () => {
     const previewDates = getFinalizePreviewDates();
 
+    if (images.length > 0) {
+      console.log('Image path:', images[0].uri);
+    }
+
     return (
       <View>
         <View style={styles.previewTop}>
-          <View style={styles.previewImage}>
-            <Icon
-              name="image-outline"
-              size={ms(34)}
-              color={colors.textSecondary}
-            />
-            <View style={styles.imageCountBadge}>
-              <Icon name="images-outline" size={ms(12)} color={colors.white} />
-              <AppText
-                title={`${Math.max(images.length, 1)} images`}
-                fontySize="px10"
-                color="textLight"
-                marginLeft={scale(4)}
+          {images.length === 0 ? (
+            <View style={styles.previewImage}>
+              <Icon
+                name="image-outline"
+                size={ms(34)}
+                color={colors.textSecondary}
               />
+              <View style={styles.imageCountBadge}>
+                <Icon name="images-outline" size={ms(12)} color={colors.white} />
+                <AppText
+                  title="0 images"
+                  fontySize="px10"
+                  color="textLight"
+                  marginLeft={scale(4)}
+                />
+              </View>
             </View>
-          </View>
+          ) : images.length === 1 ? (
+            <View style={styles.previewImage}>
+              <Image
+                source={{ uri: images[0].uri }}
+                style={{ width: '100%', height: '100%', borderRadius: ms(8) }}
+                resizeMode="cover"
+              />
+              <View style={styles.imageCountBadge}>
+                <Icon name="images-outline" size={ms(12)} color={colors.white} />
+                <AppText
+                  title="1 images"
+                  fontySize="px10"
+                  color="textLight"
+                  marginLeft={scale(4)}
+                />
+              </View>
+            </View>
+          ) : (
+            <View style={[styles.previewImage, { alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: 'transparent' }]}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: scale(10) }}>
+                {images.map((image, index) => (
+                  <Image
+                    key={`${image.uri}-${index}`}
+                    source={{ uri: image.uri }}
+                    style={{
+                      width: scale(270),
+                      height: '100%',
+                      borderRadius: ms(8),
+                    }}
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+              <View style={styles.imageCountBadge}>
+                <Icon name="images-outline" size={ms(12)} color={colors.white} />
+                <AppText
+                  title={`${images.length} images`}
+                  fontySize="px10"
+                  color="textLight"
+                  marginLeft={scale(4)}
+                />
+              </View>
+            </View>
+          )}
           <View style={styles.previewInfo}>
             <AppText
               title={form.title || form.sale}
@@ -1699,8 +1872,8 @@ const AddNewSaleScreen = () => {
             isSalesListingLoading
               ? 'Loading sales...'
               : isSalesListingError
-              ? 'Unable to load sales'
-              : 'Select Sale',
+                ? 'Unable to load sales'
+                : 'Select Sale',
           )}
         <StepTabs currentStep={step} onPress={handleStepPress} />
         {step === 1 && renderInformationStep()}
@@ -1761,7 +1934,9 @@ const AddNewSaleScreen = () => {
             textColor={colors.textPrimary}
             accentColor={colors.primary}
             style={styles.dateTimePicker}
-            onChange={handleDateTimeChange}
+            onValueChange={handleDateTimeChange}
+            onDismiss={handlePickerDismiss}
+            onNeutralButtonPress={handlePickerDismiss}
           />
         </View>
       ) : null}
@@ -1823,10 +1998,10 @@ const StepTabs = ({
   currentStep: Step;
   onPress: (step: Step) => void;
 }) => {
-  const steps: {id: Step; title: string}[] = [
-    {id: 1, title: 'Information'},
-    {id: 2, title: 'Add image'},
-    {id: 3, title: 'Finalize'},
+  const steps: { id: Step; title: string }[] = [
+    { id: 1, title: 'Information' },
+    { id: 2, title: 'Add image' },
+    { id: 3, title: 'Finalize' },
   ];
 
   return (

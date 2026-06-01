@@ -283,4 +283,36 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.white,
     height: vs(216),
   },
+  imageCardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: scale(10),
+    marginTop: vs(14),
+  },
+  imageCard: {
+    width: (scale(375) - scale(28) - scale(20)) / 3, // dynamically sized for 3 columns on a standard scale 375 screen
+    height: vs(95),
+    borderRadius: ms(8),
+    backgroundColor: '#F2F3F5',
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  imageCardPreview: {
+    width: '100%',
+    height: '100%',
+  },
+  deleteImageButton: {
+    position: 'absolute',
+    top: vs(4),
+    right: scale(4),
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: ms(10),
+    width: ms(20),
+    height: ms(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
 });

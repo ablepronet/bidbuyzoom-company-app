@@ -151,6 +151,8 @@ export type SelectedFile = {
   name: string;
   type?: string;
   size?: number;
+  isExisting?: boolean;
+  originalPath?: string;
 };
 
 export type SaleDateRow = {

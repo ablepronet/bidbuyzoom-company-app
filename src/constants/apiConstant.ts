@@ -32,6 +32,11 @@ const apiEndPoints = {
   saleSetting: 'sale-setting',
   templateList: 'template-list',
   updateSaleTemplate: 'update-sale-template',
+  notifications: 'notifications',
+  readNotification: (id: string) => `notifications/${id}/read`,
+  markAllRead: 'notifications/mark-all-read',
+  messages: 'messages',
+  readMessage: (id: string) => `messages/${id}/read`,
 };
 
 export default apiEndPoints;

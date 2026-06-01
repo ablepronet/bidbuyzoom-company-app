@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, StyleProp, ViewStyle, StyleSheet, Platform} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {scale, vs} from '../utils/responsive';
+import { View, StyleProp, ViewStyle, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scale, vs } from '../utils/responsive';
 
 interface Props {
   children: React.ReactNode;
@@ -40,7 +40,7 @@ export default HeaderContainer;
 const styles = StyleSheet.create({
   container: {
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,

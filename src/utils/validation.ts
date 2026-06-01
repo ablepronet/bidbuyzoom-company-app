@@ -191,22 +191,41 @@ export const validateCategory = (category: string): ValidationResult => {
 /**
  * Validate complete lot form
  */
-export const validateLotForm = (formData: {
-  lotNumber: string;
-  title: string;
-  description: string;
-  quantity: string;
-  startPrice: string;
-  buyNowPrice: string;
-  reserve: string;
-}): ValidationResult => {
-  // Validate required fields
-  const validations = [
-    validateLotNumber(formData.lotNumber),
-    validateTitle(formData.title),
-    validateQuantity(formData.quantity),
-    validatePrice(formData.startPrice, 'Start price'),
-  ];
+export const validateLotForm = (
+  formData: {
+    lotNumber: string;
+    title: string;
+    description: string;
+    quantity: string;
+    startPrice: string;
+    buyNowPrice: string;
+    reserve: string;
+  },
+  activeFields?: {
+    lotNumber?: boolean;
+    title?: boolean;
+    description?: boolean;
+    quantity?: boolean;
+    startPrice?: boolean;
+    buyNowPrice?: boolean;
+    reserve?: boolean;
+  }
+): ValidationResult => {
+  // Validate required fields only if they are active
+  const validations: ValidationResult[] = [];
+  
+  if (!activeFields || activeFields.lotNumber) {
+    validations.push(validateLotNumber(formData.lotNumber));
+  }
+  if (!activeFields || activeFields.title) {
+    validations.push(validateTitle(formData.title));
+  }
+  if (!activeFields || activeFields.quantity) {
+    validations.push(validateQuantity(formData.quantity));
+  }
+  if (!activeFields || activeFields.startPrice) {
+    validations.push(validatePrice(formData.startPrice, 'Start price'));
+  }
 
   // Check if any validation failed
   for (const validation of validations) {
@@ -215,37 +234,39 @@ export const validateLotForm = (formData: {
     }
   }
 
-  // Validate optional fields if provided
-  if (formData.buyNowPrice) {
+  // Validate optional fields if provided and active
+  if (formData.buyNowPrice && (!activeFields || activeFields.buyNowPrice)) {
     const buyNowValidation = validatePrice(formData.buyNowPrice, 'Buy now price');
     if (!buyNowValidation.isValid) {
       return buyNowValidation;
     }
   }
 
-  if (formData.reserve) {
+  if (formData.reserve && (!activeFields || activeFields.reserve)) {
     const reserveValidation = validatePrice(formData.reserve, 'Reserve price');
     if (!reserveValidation.isValid) {
       return reserveValidation;
     }
   }
 
-  // Validate description if provided
-  if (formData.description) {
+  // Validate description if provided and active
+  if (formData.description && (!activeFields || activeFields.description)) {
     const descValidation = validateDescription(formData.description);
     if (!descValidation.isValid) {
       return descValidation;
     }
   }
 
-  // Validate price relationships
-  const priceRelationshipValidation = validatePriceRelationships(
-    formData.startPrice,
-    formData.buyNowPrice,
-    formData.reserve
-  );
-  if (!priceRelationshipValidation.isValid) {
-    return priceRelationshipValidation;
+  // Validate price relationships only if the involved fields are active
+  if (!activeFields || (activeFields.startPrice && (activeFields.buyNowPrice || activeFields.reserve))) {
+    const priceRelationshipValidation = validatePriceRelationships(
+      formData.startPrice,
+      formData.buyNowPrice,
+      formData.reserve
+    );
+    if (!priceRelationshipValidation.isValid) {
+      return priceRelationshipValidation;
+    }
   }
 
   return { isValid: true };

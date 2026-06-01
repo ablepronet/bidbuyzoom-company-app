@@ -1,8 +1,8 @@
-import React, {useCallback, useMemo, useState} from 'react';
-import {StyleSheet, View, TouchableOpacity, ScrollView} from 'react-native';
-import {AppText} from '../../../../components/AppText';
-import {colors} from '../../../../constants';
-import {ms, vs} from '../../../../utils/responsive';
+import React, { useCallback, useMemo, useState } from 'react';
+import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { AppText } from '../../../../components/AppText';
+import { colors } from '../../../../constants';
+import { ms, vs } from '../../../../utils/responsive';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   RouteProp,
@@ -12,9 +12,9 @@ import {
 } from '@react-navigation/native';
 import globalStyles from '../../../../styles/globalStyles';
 import AppHeader from '../../../../components/appHeader';
-import {getSaleDates} from '../../../../helper/getTodayDate';
-import {useGetUserProfile} from '../../../../services/queries/app/Profile';
-import {routes} from '../../../../navigation/route';
+import { getSaleDates } from '../../../../helper/getTodayDate';
+import { useGetUserProfile } from '../../../../services/queries/app/Profile';
+import { routes } from '../../../../navigation/route';
 import Loader from '../../../../components/loader';
 import {
   SalesListingItem,
@@ -32,14 +32,14 @@ const webBaseUrl = 'https://staging.bidbuyzoom.com';
 const SalesHub = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-  const {saleId, selectedSale, fromAddSaleFlow} = route.params || {};
+  const { saleId, selectedSale, fromAddSaleFlow } = route.params || {};
   const [isNavigating, setIsNavigating] = useState(false);
   const {
     data: salesListingData,
     refetch: refetchSalesListing,
     isFetching: isSalesListingFetching,
   } = useGetSalesListing();
-  const {data} = useGetUserProfile();
+  const { data } = useGetUserProfile();
   const userData = data?.datas || null;
 
   useFocusEffect(
@@ -54,19 +54,18 @@ const SalesHub = () => {
       subtitle: 'Edit sale details',
       icon: 'clipboard-text-outline',
       color: '#AD2429',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/sales-information?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/sales-information?id=${saleId}?mobile=true`,
     },
+
     {
       id: '2',
       title: 'Settings',
       subtitle: 'Sale configuration',
       icon: 'cog-outline',
       color: '#3B82F6',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/settings?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/settings?id=${saleId}?mobile=true`,
     },
     {
       id: '3',
@@ -83,9 +82,8 @@ const SalesHub = () => {
       subtitle: 'Live bid tracking',
       icon: 'chart-line',
       color: '#F59E0B',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/monitor/summary?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/monitor/summary?id=${saleId}?mobile=true`,
     },
     {
       id: '5',
@@ -93,9 +91,8 @@ const SalesHub = () => {
       subtitle: 'Billing & payments',
       icon: 'file-document-outline',
       color: '#8B5CF6',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/invoice?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/invoice?id=${saleId}?mobile=true`,
     },
     {
       id: '6',
@@ -103,9 +100,8 @@ const SalesHub = () => {
       subtitle: 'Consignor payouts',
       icon: 'handshake-outline',
       color: '#0D9488',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/settlement?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/settlement?id=${saleId}?mobile=true`,
     },
     {
       id: '7',
@@ -113,9 +109,8 @@ const SalesHub = () => {
       subtitle: 'Sale analytics',
       icon: 'chart-bar',
       color: '#6366F1',
-      navigateUrl: `${webBaseUrl}/${
-        userData?.companySlug || ''
-      }/reports/summary?id=${saleId}?mobile=true`,
+      navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
+        }/reports/summary?id=${saleId}?mobile=true`,
     },
     // {
     //   id: '8',
@@ -131,7 +126,7 @@ const SalesHub = () => {
     if (fromAddSaleFlow) {
       navigation.navigate('DashboardTabs', {
         screen: routes.salesTab,
-        params: {refreshAt: Date.now()},
+        params: { refreshAt: Date.now() },
       });
       return;
     }
@@ -168,7 +163,7 @@ const SalesHub = () => {
     if (item.title === 'Sale Info') {
       setIsNavigating(true);
       let selectedSales = hubSale;
-
+      console.log('selectedSalehubhub', hubSale);
       try {
         const latestSalesResponse = await refetchSalesListing();
         const sales =
@@ -176,7 +171,7 @@ const SalesHub = () => {
         selectedSales =
           sales.find((saleItem: SalesListingItem) => saleItem?._id === hubSaleId) ||
           hubSale;
-      } catch {}
+      } catch { }
 
       navigation.navigate(routes.addNewSaleScreen, {
         saleId: hubSaleId,
@@ -207,7 +202,7 @@ const SalesHub = () => {
             (saleItem: SalesListingItem) =>
               saleItem?._id === hubSaleId || saleItem?.saleId === hubSaleId,
           ) || hubSale;
-      } catch {}
+      } catch { }
 
       const catalogSaleId =
         selectedSales?._id || selectedSales?.saleId || hubSaleId;
@@ -228,7 +223,6 @@ const SalesHub = () => {
         selectedSale: catalogSale,
       });
     } else {
-      //@ts-ignore
       navigation.navigate(routes.commonWebView, {
         title: item?.title,
         url: item.navigateUrl,
@@ -290,11 +284,12 @@ const SalesHub = () => {
                 styles.gridItem,
                 item.highlighted && styles.highlightedItem,
               ]}
-              onPress={() => handleNavigation(item)}>
+              onPress={() => handleNavigation(item)}
+            >
               <View
                 style={[
                   styles.iconBackground,
-                  {backgroundColor: item.color + '10'}, // 10% opacity
+                  { backgroundColor: item.color + '10' }, // 10% opacity
                 ]}>
                 <Icon name={item.icon} size={ms(26)} color={item.color} />
               </View>
@@ -374,7 +369,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
@@ -419,7 +414,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,

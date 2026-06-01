@@ -232,16 +232,16 @@ export const ValidationSchemas = () => {
       firstName: yup
         .string()
         .trim()
-        .min(3, appString.validationError.nameMin)
-        .matches(/^[a-zA-Z ]+$/, appString.validationError.nameInvalid)
-        .required(appString.validationError.nameRequired),
+        .min(3, appString.validationError.firstNameMin)
+        .matches(/^[a-zA-Z ]+$/, appString.validationError.firstNameInvalid)
+        .required(appString.validationError.firstNameRequired),
 
       lastName: yup
         .string()
         .trim()
-        .min(3, appString.validationError.nameMin)
-        .matches(/^[a-zA-Z ]+$/, appString.validationError.nameInvalid)
-        .required(appString.validationError.nameRequired),
+        .min(3, appString.validationError.lastNameMin)
+        .matches(/^[a-zA-Z ]+$/, appString.validationError.lastNameInvalid)
+        .required(appString.validationError.lastNameRequired),
 
       companyName: yup
         .string()

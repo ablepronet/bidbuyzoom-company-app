@@ -1,4 +1,4 @@
-import React, {Suspense} from 'react';
+import React, { Suspense } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { CustomDrawerContent } from './CustomDrawerContent';
 import { StatusBar, StyleSheet, View } from 'react-native';
@@ -38,6 +38,12 @@ const AddSaleSettingsScreen = React.lazy(
 const AddSaleTemplateScreen = React.lazy(
   () => import('../../screen/app/sales/AddSaleTemplateScreen'),
 );
+const NotificationScreen = React.lazy(
+  () => import('../../screen/app/notifications'),
+);
+const MessagesScreen = React.lazy(
+  () => import('../../screen/app/messages'),
+);
 
 const AddNewSaleRoute = (props: any) => (
   <Suspense fallback={<LazyScreenLoader />}>
@@ -54,6 +60,18 @@ const AddSaleSettingsRoute = (props: any) => (
 const AddSaleTemplateRoute = (props: any) => (
   <Suspense fallback={<LazyScreenLoader />}>
     <AddSaleTemplateScreen {...props} />
+  </Suspense>
+);
+
+const NotificationRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <NotificationScreen {...props} />
+  </Suspense>
+);
+
+const MessageRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <MessagesScreen {...props} />
   </Suspense>
 );
 
@@ -79,7 +97,7 @@ const AppDrawer = () => {
         screenOptions={{
           headerShown: false,
           drawerType: 'slide',
-        
+
         }}
         drawerContent={renderDrawerContent}
       >
@@ -100,6 +118,8 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.addNewLotScreen} component={AddNewLotScreen} />
         <Drawer.Screen name={routes.lotImagesScreen} component={LotImagesScreen} />
         <Drawer.Screen name={routes.lotDetailsScreen} component={LotDetailsScreen} />
+        <Drawer.Screen name={routes.notificationScreen} component={NotificationRoute} />
+        <Drawer.Screen name={routes.messageScreen} component={MessageRoute} />
       </Drawer.Navigator>
     </>
   );

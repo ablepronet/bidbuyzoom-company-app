@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -8,20 +8,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AppHeader from '../../../components/appHeader';
-import {AppText} from '../../../components/AppText';
+import { AppText } from '../../../components/AppText';
 import Loader from '../../../components/loader';
 import AppToast from '../../../components/toaster';
-import {colors} from '../../../constants';
-import {routes} from '../../../navigation/route';
-import {ms, scale, vs} from '../../../utils/responsive';
+import { colors } from '../../../constants';
+import { routes } from '../../../navigation/route';
+import { ms, scale, vs } from '../../../utils/responsive';
 import {
   DefaultSetting,
   useGetDefaultSetting,
 } from '../../../services/queries/app/sales/useGetDefaultSetting';
-import {useSaveSaleSetting} from '../../../services/queries/app/sales/useAddSaleFlow';
+import { useSaveSaleSetting } from '../../../services/queries/app/sales/useAddSaleFlow';
 import {
   SalesListingItem,
   useGetSalesListing,
@@ -107,6 +107,13 @@ const topFields: SettingField[] = [
     payloadModeKey: 'internationalBiddersDefault',
   },
   {
+    key: 'bidHistory',
+    label: 'Bid History',
+    valueKey: 'bidHistory',
+    payloadModeKey: 'bidHistoryDefault',
+    payloadValueKey: 'bidHistory',
+  },
+  {
     key: 'phone',
     label: 'Phone',
     valueKey: 'defaultPhoneNo',
@@ -133,13 +140,6 @@ const topFields: SettingField[] = [
     valueKey: 'requireBidApprovalAmount',
     payloadModeKey: 'defaultRequireBidApprovalAmount',
     payloadValueKey: 'requireBidApprovalAmount',
-  },
-  {
-    key: 'bidHistory',
-    label: 'Bid History',
-    valueKey: 'bidHistory',
-    payloadModeKey: 'bidHistoryDefault',
-    payloadValueKey: 'bidHistory',
   },
 ];
 
@@ -291,7 +291,7 @@ const AddSaleSettingsScreen = () => {
   const route = useRoute<any>();
   const saleId = route.params?.saleId;
   const selectedSale = route.params?.selectedSale || null;
-  const {data, isLoading, isError} = useGetDefaultSetting();
+  const { data, isLoading, isError } = useGetDefaultSetting();
   const {
     data: salesListingData,
     refetch: refetchSalesListing,
@@ -333,7 +333,7 @@ const AddSaleSettingsScreen = () => {
   const selectField = allFields.find(field => field.key === selectKey);
 
   const updateMode = (key: string, mode: Mode) => {
-    setModes(prev => ({...prev, [key]: mode}));
+    setModes(prev => ({ ...prev, [key]: mode }));
 
     if (mode === 'Default') {
       const field = allFields.find(item => item.key === key);
@@ -472,7 +472,7 @@ const AddSaleSettingsScreen = () => {
             editable={isEditable}
             multiline={field.multiline}
             onChangeText={text =>
-              setValues(prev => ({...prev, [field.key]: text}))
+              setValues(prev => ({ ...prev, [field.key]: text }))
             }
             placeholder={field.label}
             placeholderTextColor={colors.textSecondary}
@@ -544,22 +544,41 @@ const AddSaleSettingsScreen = () => {
         ) : null}
 
         <View style={styles.section}>
-          <AppText
-            title="Sale Settings"
-            fontySize="px18"
-            fontFamily="bold"
-            marginBottom={vs(12)}
-          />
-          {topFields.map(renderField)}
+          <View style={styles.sectionHeaderContainer}>
+            <Icon name="hammer-outline" size={ms(16)} color={colors.primary} />
+            <AppText
+              title="General Fees & Commissions"
+              fontySize="px14"
+              fontFamily="bold"
+              marginLeft={ms(8)}
+            />
+          </View>
+          {topFields.slice(0, 8).map(renderField)}
         </View>
 
         <View style={styles.section}>
-          <AppText
-            title="Increments"
-            fontySize="px18"
-            fontFamily="bold"
-            marginBottom={vs(12)}
-          />
+          <View style={styles.sectionHeaderContainer}>
+            <Icon name="hammer-outline" size={ms(16)} color={colors.primary} />
+            <AppText
+              title="Bidder Management"
+              fontySize="px14"
+              fontFamily="bold"
+              marginLeft={ms(8)}
+            />
+          </View>
+          {topFields.slice(8).map(renderField)}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderContainer}>
+            <Icon name="hammer-outline" size={ms(16)} color={colors.primary} />
+            <AppText
+              title="Advanced Commissions & Increments"
+              fontySize="px14"
+              fontFamily="bold"
+              marginLeft={ms(8)}
+            />
+          </View>
           {increments.map((item, index) => (
             <View key={item._id || String(index)} style={styles.incrementRow}>
               <TextInput
@@ -719,6 +738,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: ms(12),
     marginBottom: vs(14),
+  },
+  sectionHeaderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: vs(12),
   },
   fieldCard: {
     marginBottom: vs(12),

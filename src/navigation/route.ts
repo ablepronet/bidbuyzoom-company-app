@@ -22,6 +22,8 @@ export const routes = {
   addNewSaleScreen: 'AddNewSaleScreen',
   addSaleSettingsScreen: 'AddSaleSettingsScreen',
   addSaleTemplateScreen: 'AddSaleTemplateScreen',
+  notificationScreen: 'NotificationScreen',
+  messageScreen: 'MessageScreen',
 
   // Bottom Tab Screens
   dashboardTab: 'DashboardTab',
