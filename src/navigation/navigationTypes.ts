@@ -60,6 +60,24 @@ export type drawerParamsList = {
   [routes.lotDetailsScreen]: {
     lot?: any;
   };
+  [routes.addEditClientScreen]:
+    | {
+        client?: any;
+        mode?: 'add' | 'edit';
+      }
+    | undefined;
+  [routes.clientProfileScreen]: {
+    client: any;
+  };
+  [routes.addEditBidderScreen]:
+    | {
+        bidder?: any;
+        mode?: 'add' | 'edit';
+      }
+    | undefined;
+  [routes.bidderProfileScreen]: {
+    bidder: any;
+  };
   [routes.notificationScreen]: undefined;
   [routes.messageScreen]: undefined;
 };

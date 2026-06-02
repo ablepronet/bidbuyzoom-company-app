@@ -45,6 +45,46 @@ const MessagesScreen = React.lazy(
   () => import('../../screen/app/messages'),
 );
 
+const AddEditClientScreen = React.lazy(
+  () => import('../../screen/app/Consignors/AddEditClientScreen'),
+);
+
+const ClientProfileScreen = React.lazy(
+  () => import('../../screen/app/Consignors/ClientProfileScreen'),
+);
+
+const AddEditBidderScreen = React.lazy(
+  () => import('../../screen/app/bidBuyers/AddEditBidderScreen'),
+);
+
+const BidderProfileScreen = React.lazy(
+  () => import('../../screen/app/bidBuyers/BidderProfileScreen'),
+);
+
+const AddEditClientRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddEditClientScreen {...props} />
+  </Suspense>
+);
+
+const ClientProfileRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <ClientProfileScreen {...props} />
+  </Suspense>
+);
+
+const AddEditBidderRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddEditBidderScreen {...props} />
+  </Suspense>
+);
+
+const BidderProfileRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <BidderProfileScreen {...props} />
+  </Suspense>
+);
+
 const AddNewSaleRoute = (props: any) => (
   <Suspense fallback={<LazyScreenLoader />}>
     <AddNewSaleScreen {...props} />
@@ -118,6 +158,10 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.addNewLotScreen} component={AddNewLotScreen} />
         <Drawer.Screen name={routes.lotImagesScreen} component={LotImagesScreen} />
         <Drawer.Screen name={routes.lotDetailsScreen} component={LotDetailsScreen} />
+        <Drawer.Screen name={routes.addEditClientScreen} component={AddEditClientRoute} />
+        <Drawer.Screen name={routes.clientProfileScreen} component={ClientProfileRoute} />
+        <Drawer.Screen name={routes.addEditBidderScreen} component={AddEditBidderRoute} />
+        <Drawer.Screen name={routes.bidderProfileScreen} component={BidderProfileRoute} />
         <Drawer.Screen name={routes.notificationScreen} component={NotificationRoute} />
         <Drawer.Screen name={routes.messageScreen} component={MessageRoute} />
       </Drawer.Navigator>

@@ -264,25 +264,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  pickerContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingBottom: vs(12),
-  },
-  pickerDone: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: scale(18),
-    paddingVertical: vs(12),
-  },
-  dateTimePicker: {
-    backgroundColor: colors.white,
-    height: vs(216),
-  },
   imageCardGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

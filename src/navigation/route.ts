@@ -37,4 +37,8 @@ export const routes = {
   addNewLotScreen: 'AddNewLotScreen',
   lotImagesScreen: 'LotImagesScreen',
   lotDetailsScreen: 'LotDetailsScreen',
+  addEditClientScreen: 'AddEditClientScreen',
+  clientProfileScreen: 'ClientProfileScreen',
+  addEditBidderScreen: 'AddEditBidderScreen',
+  bidderProfileScreen: 'BidderProfileScreen',
 };

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   TouchableOpacity,
@@ -14,11 +13,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useFormik } from 'formik';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/Ionicons';
-import DateTimePicker, {
-  DateTimePickerChangeEvent,
-} from '@react-native-community/datetimepicker';
+import AppDateTimePickerModal from '../../../components/AppDateTimePickerModal';
 import { pick, types } from '@react-native-documents/picker';
-import { City, State } from 'country-state-city';
+import State from 'country-state-city/lib/state';
 import moment from 'moment-timezone';
 import AppHeader from '../../../components/appHeader';
 import { AppText } from '../../../components/AppText';
@@ -195,7 +192,6 @@ const AddNewSaleScreen = () => {
     }
   }, [companySlug, form.businessName, setFieldTouched, setFieldValue]);
 
-  console.log('form', form);
 
 
   useEffect(() => {
@@ -392,7 +388,6 @@ const AddNewSaleScreen = () => {
 
   const categoryOptions = useMemo(() => {
     const categories = categoriesData?.data || [];
-    console.log('categoriesData', categoriesData);
 
     return categories.filter(
       (item: CategoryItem) =>
@@ -424,29 +419,11 @@ const AddNewSaleScreen = () => {
     () => usStates.map(state => state.name),
     [usStates],
   );
-  const selectedStateIsoCode = useMemo(
-    () => usStates.find(state => state.name === form.state)?.isoCode || '',
-    [form.state, usStates],
-  );
-  const availableCities = useMemo(
-    () =>
-      selectedStateIsoCode
-        ? City.getCitiesOfState('US', selectedStateIsoCode).map(
-          city => city.name,
-        )
-        : [],
-    [selectedStateIsoCode],
-  );
   const stateSelectOptions = useMemo(() => {
     const values = [...stateOptions];
     if (form.state && !values.includes(form.state)) values.unshift(form.state);
     return values;
   }, [form.state, stateOptions]);
-  const citySelectOptions = useMemo(() => {
-    const values = [...availableCities];
-    if (form.city && !values.includes(form.city)) values.unshift(form.city);
-    return values;
-  }, [availableCities, form.city]);
 
   const updateField = (key: keyof FormState, value: string | boolean) => {
     if (key === 'sale') {
@@ -634,10 +611,7 @@ const AddNewSaleScreen = () => {
       }, {})
       : payload;
 
-    console.log(label, {
-      formData: payload,
-      decodedPayload,
-    });
+   
   };
 
   const getSaleIdFromResponse = (response: any) => {
@@ -705,7 +679,6 @@ const AddNewSaleScreen = () => {
   const submitInformation = async () => {
     const payload = buildInformationPayload();
 
-    console.log('Add sale information FormData', payload);
 
     try {
       const response = await addSaleInformationMutation.mutateAsync({
@@ -912,33 +885,28 @@ const AddNewSaleScreen = () => {
     setPickerConfig(null);
   };
 
-  const handleDateTimeChange = (
-    event: DateTimePickerChangeEvent,
-    selectedDate: Date,
-  ) => {
-    if (Platform.OS === 'android') {
-      setPickerConfig(null);
-    }
-
+  const handleDateTimeConfirm = (selectedDate: Date) => {
     if (!selectedDate || !pickerConfig) return;
 
+    const activePickerConfig = pickerConfig;
+    setPickerConfig(null);
     setPickerValue(selectedDate);
 
     const value =
-      pickerConfig.mode === 'date'
+      activePickerConfig.mode === 'date'
         ? formatDate(selectedDate)
         : formatTime(selectedDate);
 
-    if (pickerConfig.target === 'form') {
-      updateField(pickerConfig.key, value);
+    if (activePickerConfig.target === 'form') {
+      updateField(activePickerConfig.key, value);
       return;
     }
 
-    if (pickerConfig.target === 'multi') {
+    if (activePickerConfig.target === 'multi') {
       setSaleDateRows(prev =>
         prev.map(row =>
-          row.id === pickerConfig.id
-            ? { ...row, [pickerConfig.key]: value }
+          row.id === activePickerConfig.id
+            ? { ...row, [activePickerConfig.key]: value }
             : row,
         ),
       );
@@ -946,13 +914,13 @@ const AddNewSaleScreen = () => {
       return;
     }
 
-    if (pickerConfig.target === 'range') {
-      setRangeDates(prev => ({ ...prev, [pickerConfig.key]: value }));
+    if (activePickerConfig.target === 'range') {
+      setRangeDates(prev => ({ ...prev, [activePickerConfig.key]: value }));
       setDateSectionError('');
       return;
     }
 
-    setOnlineDates(prev => ({ ...prev, [pickerConfig.key]: value }));
+    setOnlineDates(prev => ({ ...prev, [activePickerConfig.key]: value }));
     setDateSectionError('');
   };
   const addSaleDateRow = () => {
@@ -1543,7 +1511,7 @@ const AddNewSaleScreen = () => {
         />
       </View>
       {renderSelect('state', 'State', stateSelectOptions, 'Select State', true)}
-      {renderSelect('city', 'City', citySelectOptions, 'Select city', true)}
+      {renderInput('city', 'City', 'Enter city', true)}
       {renderInput('zipCode', 'Zip code', 'Zip code', true)}
     </View>
   );
@@ -1861,6 +1829,7 @@ const AddNewSaleScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid={true}
+        enableResetScrollToCoords={false}
         extraScrollHeight={80}
         extraHeight={120}>
         {step === 1 &&
@@ -1911,35 +1880,15 @@ const AddNewSaleScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {pickerConfig ? (
-        <View style={styles.pickerContainer}>
-          {Platform.OS === 'ios' ? (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.pickerDone}
-              onPress={() => setPickerConfig(null)}>
-              <AppText
-                title="Done"
-                fontySize="px14"
-                fontFamily="bold"
-                color="primary"
-              />
-            </TouchableOpacity>
-          ) : null}
-          <DateTimePicker
-            value={pickerValue}
-            mode={pickerConfig.mode}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            themeVariant="light"
-            textColor={colors.textPrimary}
-            accentColor={colors.primary}
-            style={styles.dateTimePicker}
-            onValueChange={handleDateTimeChange}
-            onDismiss={handlePickerDismiss}
-            onNeutralButtonPress={handlePickerDismiss}
-          />
-        </View>
-      ) : null}
+      <AppDateTimePickerModal
+        isVisible={!!pickerConfig}
+        mode={pickerConfig?.mode || 'date'}
+        date={pickerValue}
+        onConfirm={handleDateTimeConfirm}
+        onCancel={handlePickerDismiss}
+        confirmTextIOS="Confirm"
+        cancelTextIOS="Cancel"
+      />
 
       <Modal
         visible={!!selectConfig}

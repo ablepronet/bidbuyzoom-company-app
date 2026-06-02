@@ -37,6 +37,16 @@ const apiEndPoints = {
   markAllRead: 'notifications/mark-all-read',
   messages: 'messages',
   readMessage: (id: string) => `messages/${id}/read`,
+  allClient: 'all-client',
+  addClient: 'add-client',
+  updateClient: 'update-client',
+  deleteClient: 'client/delete',
+  clientEmail: 'clients-send-email',
+  allBidders: 'all-bidders',
+  addBidders: 'add-bidders',
+  updateBidders: 'update-bidders',
+  deleteBidders: 'bidders/delete',
+  biddersEmail: 'bidders-send-email',
 };
 
 export default apiEndPoints;
