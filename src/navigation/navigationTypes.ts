@@ -27,12 +27,18 @@ export type drawerParamsList = {
   [routes.sale]: undefined;
   [routes.marketing]: undefined;
   [routes.setting]: undefined;
+  [routes.plansScreen]: undefined;
+  [routes.addCardScreen]: undefined;
+  [routes.manageCardsScreen]: undefined;
+  [routes.billingSubscriptionScreen]: undefined;
   [routes.consignmentRequests]: undefined;
   [routes.companyReport]: undefined;
   [routes.commonWebView]: {
     url: string;
     title: string;
   };
+  [routes.smsSecurityScreen]: undefined;
+  [routes.profileScreen]: undefined;
   [routes.saleHubScreen]: {
     saleId: string;
     selectedSale: any | null;

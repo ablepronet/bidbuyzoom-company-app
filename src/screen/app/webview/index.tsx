@@ -305,6 +305,11 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   // Handle navigation requests - prevent opening in external browser
   const onShouldStartLoadWithRequest = (event: any) => {
+    // Prevent WebView from trying to navigate to blob URLs natively
+    if (event.url.startsWith('blob:')) {
+      return false;
+    }
+
     // Only allow navigation within the same domain to prevent opening external browser
     const isSameDomain =
       event.url.includes('staging.bidbuyzoom.com') ||

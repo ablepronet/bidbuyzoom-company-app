@@ -47,6 +47,14 @@ const apiEndPoints = {
   updateBidders: 'update-bidders',
   deleteBidders: 'bidders/delete',
   biddersEmail: 'bidders-send-email',
+  toggle2FA: 'toggle-2fa',
+  toggleSmsSettings: 'toggle-sms-settings',
+  billingSummary: 'billing/summary',
+  pricing: '../pricing',
+  stripeConfig: 'billing/stripe-config',
+  addCardPayment: 'add-card-payment',
+  getPaymentCards: 'get-payment-cards',
+  deleteCard: 'delete-card',
 };
 
 export default apiEndPoints;

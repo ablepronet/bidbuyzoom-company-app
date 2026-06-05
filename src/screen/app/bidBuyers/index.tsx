@@ -70,32 +70,32 @@ const BidderCard = memo(
 
           <View style={styles.row}>
             <AppText title="ID CODE" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.idCode || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.idCode || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
             <AppText title="TYPE" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.type || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.type || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
             <AppText title="FIRST NAME" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.firstName || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.firstName || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
             <AppText title="LAST NAME" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.lastName || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.lastName || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
             <AppText title="CELL PHONE" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.cellPhone || item.phone || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.cellPhone || item.phone || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
             <AppText title="EMAIL" style={styles.labelCol} fontySize="px12" color="textSecondary" />
-            <AppText title={item.email || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
+            <AppText title={item?.email || '-'} style={styles.valueCol} fontySize="px14" color="textPrimary" />
           </View>
 
           <View style={styles.row}>
@@ -462,9 +462,9 @@ const BidBuyers = () => {
           <TouchableOpacity style={styles.secBtn} onPress={handleOpenSendEmailBulk}>
             <AppText title="Send Email" color="textPrimary" fontySize="px12" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.secBtn} onPress={() => AppToast.success('Import initiated')}>
+          {/* <TouchableOpacity style={styles.secBtn} onPress={() => AppToast.success('Import initiated')}>
             <AppText title="Import" color="textPrimary" fontySize="px12" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.secBtn} onPress={handleExportCSV}>
             <AppText title="Export" color="textPrimary" fontySize="px12" />
           </TouchableOpacity>

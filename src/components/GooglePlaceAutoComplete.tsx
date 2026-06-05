@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {AppText} from './AppText';
 import {colors} from '../constants';
 import {ms, scale, vs} from '../utils/responsive';
+import {useDebounce} from '../utils/debounce';
 
 const GOOGLE_PLACES_API_KEY = 'AIzaSyDvYUrMqUZcGivY2sBgNQ1r18YSdR4m6_w';
 
@@ -46,8 +47,10 @@ const GooglePlaceAutoComplete: React.FC<Props> = ({
   const [isFocused, setIsFocused] = useState(false);
   const requestIdRef = useRef(0);
 
+  const debouncedValue = useDebounce(value, 350);
+
   useEffect(() => {
-    if (!isFocused || value.trim().length < 3) {
+    if (!isFocused || debouncedValue.trim().length < 3) {
       setSuggestions([]);
       return;
     }
@@ -55,14 +58,14 @@ const GooglePlaceAutoComplete: React.FC<Props> = ({
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
-    const timer = setTimeout(async () => {
+    const fetchSuggestions = async () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
           'https://maps.googleapis.com/maps/api/place/autocomplete/json',
           {
             params: {
-              input: value,
+              input: debouncedValue,
               key: GOOGLE_PLACES_API_KEY,
               language: 'en',
               components: 'country:us',
@@ -83,10 +86,10 @@ const GooglePlaceAutoComplete: React.FC<Props> = ({
           setIsLoading(false);
         }
       }
-    }, 350);
+    };
 
-    return () => clearTimeout(timer);
-  }, [isFocused, value]);
+    fetchSuggestions();
+  }, [isFocused, debouncedValue]);
 
   const handleSelectPlace = async (suggestion: Suggestion) => {
     try {

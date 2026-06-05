@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,32 +6,32 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useGetUserProfile} from '../../../services/queries/app/Profile';
+import { useNavigation } from '@react-navigation/native';
+import { useGetUserProfile } from '../../../services/queries/app/Profile';
 import Loader from '../../../components/loader';
-import {AppText} from '../../../components/AppText';
-import {colors} from '../../../constants';
-import {ms, vs} from '../../../utils/responsive';
+import { AppText } from '../../../components/AppText';
+import { colors } from '../../../constants';
+import { ms, vs } from '../../../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
-import {useAppDispatch} from '../../../redux/hooks';
-import {setUserLogout} from '../../../redux/slices/auth';
+import { useAppDispatch } from '../../../redux/hooks';
+import { setUserLogout } from '../../../redux/slices/auth';
 import PerformanceAnalytics from '../../../components/PerformanceAnalytics';
 import AccountSetup from '../../../components/AccountSetup';
-import {useGetDashBoardData} from '../../../services/queries/app/dashboard';
-import {formatDate} from '../../../helper/getTodayDate';
+import { useGetDashBoardData } from '../../../services/queries/app/dashboard';
+import { formatDate } from '../../../helper/getTodayDate';
 
-import {routes} from '../../../navigation/route';
-import {store} from '../../../redux/store';
+import { routes } from '../../../navigation/route';
+import { store } from '../../../redux/store';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 // https://staging.bidbuyzoom.com/company-te/dashboard
 const HomeDashBoard = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const {data, isLoading} = useGetUserProfile();
+  const { data, isLoading } = useGetUserProfile();
   const [selectedYear, setSelectedYear] = useState('2026');
-  const {data: dashboardData, isLoading: isDashboardLoading} =
+  const { data: dashboardData, isLoading: isDashboardLoading } =
     useGetDashBoardData(selectedYear);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
 
@@ -42,12 +42,7 @@ const HomeDashBoard = () => {
 
   const token = store.getState().auth.token;
 
-  // Check planSelected and navigate to WebView dashboard if false
-  useEffect(() => {
-    if (userData && !userData.planSelected) {
-      navigation.replace(routes.WebViewDashboard);
-    }
-  }, [userData, navigation]);
+
 
   const accountSteps = [
     {
@@ -117,7 +112,7 @@ const HomeDashBoard = () => {
         contentContainerStyle={styles.scrollInner}>
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          <View style={[styles.statsCard, {backgroundColor: colors.primary}]}>
+          <View style={[styles.statsCard, { backgroundColor: colors.primary }]}>
             <View style={styles.statsCardContent}>
               <AppText title="Yearly Revenue" color="white" fontySize="px14" />
               <AppText
@@ -132,7 +127,7 @@ const HomeDashBoard = () => {
               <View style={styles.circleOverlay} />
             </View>
           </View>
-          <View style={[styles.statsCard, {backgroundColor: '#282a42'}]}>
+          <View style={[styles.statsCard, { backgroundColor: '#282a42' }]}>
             <View style={styles.statsCardContent}>
               <AppText title="Items Sold" color="white" fontySize="px14" />
               <AppText
@@ -147,7 +142,7 @@ const HomeDashBoard = () => {
               <View
                 style={[
                   styles.circleOverlay,
-                  {backgroundColor: 'rgba(255,255,255,0.08)'},
+                  { backgroundColor: 'rgba(255,255,255,0.08)' },
                 ]}
               />
             </View>
@@ -182,7 +177,7 @@ const HomeDashBoard = () => {
                 name="arrow-forward-outline"
                 size={ms(14)}
                 color={colors.primary}
-                style={{marginLeft: ms(4)}}
+                style={{ marginLeft: ms(4) }}
               />
             </TouchableOpacity>
           </View>
@@ -210,12 +205,12 @@ const HomeDashBoard = () => {
                       fontySize="px14"
                       fontFamily="bold"
                     />
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       {sale?.status?.toLowerCase() === 'live' ||
-                      sale?.isLive ||
-                      sale?.live ||
-                      sale?.status?.toLowerCase() === 'active' ||
-                      true ? (
+                        sale?.isLive ||
+                        sale?.live ||
+                        sale?.status?.toLowerCase() === 'active' ||
+                        true ? (
                         <View style={styles.liveBadge}>
                           <View style={styles.liveDot} />
                           <AppText
@@ -362,7 +357,7 @@ const HomeDashBoard = () => {
 
           <PerformanceAnalytics data={performanceData} year={selectedYear} />
         </View>
-        <View style={{height: vs(30)}} />
+        <View style={{ height: vs(30) }} />
       </ScrollView>
 
       {/* Profile Dropdown Modal */}
@@ -428,7 +423,7 @@ const HomeDashBoard = () => {
               color={colors.textSecondary}
             />
             <AppText
-              title="Payment Information"
+              title="Billing & Subscription"
               fontySize="px12"
               style={styles.modalItemText}
             />
@@ -661,7 +656,7 @@ const styles = StyleSheet.create({
     width: width * 0.65,
     padding: ms(15),
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
@@ -711,7 +706,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,

@@ -7,6 +7,10 @@ export const routes = {
   SignUp: 'SignUp',
   HomeScreen: 'HomeScreen',
   WebViewDashboard: 'WebViewDashboard',
+  plansScreen: 'PlansScreen',
+  addCardScreen: 'AddCardScreen',
+  manageCardsScreen: 'ManageCardsScreen',
+  billingSubscriptionScreen: 'BillingSubscriptionScreen',
 
   // Drawer Screens
   homeTab: 'HomeTab',
@@ -18,6 +22,8 @@ export const routes = {
   consignmentRequests: 'ConsignmentRequests',
   companyReport: 'CompanyReport',
   commonWebView: 'CommonWebView',
+  smsSecurityScreen: 'SmsSecurityScreen',
+  profileScreen: 'ProfileScreen',
   saleHubScreen: 'SaleHubScreen',
   addNewSaleScreen: 'AddNewSaleScreen',
   addSaleSettingsScreen: 'AddSaleSettingsScreen',

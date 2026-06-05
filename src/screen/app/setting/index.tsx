@@ -1,18 +1,18 @@
 import React from 'react';
-import {StyleSheet, View, ScrollView, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import AppHeader from '../../../components/appHeader';
-import {AppText} from '../../../components/AppText';
-import {colors} from '../../../constants';
-import {ms, vs} from '../../../utils/responsive';
+import { AppText } from '../../../components/AppText';
+import { colors } from '../../../constants';
+import { ms, vs } from '../../../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {DrawerActions, useNavigation} from '@react-navigation/native';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
 import Card from '../../../components/Card';
-import {useGetUserProfile} from '../../../services/queries/app/Profile';
-import {routes} from '../../../navigation/route';
+import { useGetUserProfile } from '../../../services/queries/app/Profile';
+import { routes } from '../../../navigation/route';
 
 const Setting = () => {
   const navigation = useNavigation<any>();
-  const {data} = useGetUserProfile();
+  const { data } = useGetUserProfile();
   const userData = data?.datas || null;
   const companySlug = userData?.companySlug || 'company-te';
 
@@ -21,10 +21,28 @@ const Setting = () => {
   };
 
   const handleNavigation = (title: string, path: string) => {
+    if (path === 'profile') {
+      navigation.navigate(routes.profileScreen);
+      return;
+    }
+    if (path === 'sms-security') {
+      navigation.navigate(routes.smsSecurityScreen);
+      return;
+    }
+    if (path === 'card-payment') {
+      navigation.navigate(routes.billingSubscriptionScreen);
+      return;
+    }
+    // if (path === 'card-payment/details') {
+    //   navigation.navigate(routes.manageCardsScreen);
+    //   return;
+    // }
     navigation.navigate(routes.commonWebView, {
       title: title,
       url: `https://staging.bidbuyzoom.com/${companySlug}/${path}?mobile=true`,
     });
+
+    console.log('path:', title)
   };
 
   const SettingItem = ({
@@ -92,11 +110,11 @@ const Setting = () => {
             path="card-payment/details"
           />
           <View style={styles.divider} />
-          <SettingItem icon="pricetag-outline" title="Plan" path="plans" />
+          {/* <SettingItem icon="pricetag-outline" title="Plan" path="plans" /> */}
           <View style={styles.divider} />
           <SettingItem
             icon="card-outline"
-            title="Payment Information"
+            title="Billing & Subscription"
             path="card-payment"
           />
           <View style={styles.divider} />

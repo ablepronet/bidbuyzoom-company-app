@@ -47,6 +47,7 @@ const SalesHub = () => {
       setIsNavigating(false);
     }, []),
   );
+
   const menuItems = [
     {
       id: '1',

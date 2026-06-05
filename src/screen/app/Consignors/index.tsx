@@ -18,7 +18,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { AppText } from '../../../components/AppText';
 import AppCheckbox from '../../../components/AppCheckbox';
@@ -434,9 +433,9 @@ const Consignors = () => {
           <TouchableOpacity style={styles.secBtn} onPress={handleOpenSendEmailBulk}>
             <AppText title="Send Email" color="textPrimary" fontySize="px12" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.secBtn} onPress={() => AppToast.success('Import initiated')}>
+          {/* <TouchableOpacity style={styles.secBtn} onPress={() => AppToast.success('Import initiated')}>
             <AppText title="Import" color="textPrimary" fontySize="px12" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.secBtn} onPress={handleExportCSV}>
             <AppText title="Export" color="textPrimary" fontySize="px12" />
           </TouchableOpacity>

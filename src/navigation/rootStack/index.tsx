@@ -31,7 +31,7 @@ const RootStack = () => {
   }
 
   // Show WebView dashboard if planSelected is false
-  if (isLogin && userData && !userData?.isPaid) {
+  if (isLogin && userData && !userData?.planSelected) {
     return (
       <NavigationContainer ref={navigationRef}>
         <StatusBar

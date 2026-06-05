@@ -611,7 +611,7 @@ const AddNewSaleScreen = () => {
       }, {})
       : payload;
 
-   
+
   };
 
   const getSaleIdFromResponse = (response: any) => {

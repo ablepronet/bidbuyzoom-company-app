@@ -115,6 +115,66 @@ const MessageRoute = (props: any) => (
   </Suspense>
 );
 
+const SmsSecurityScreen = React.lazy(
+  () => import('../../screen/app/setting/SmsSecurityScreen'),
+);
+
+const SmsSecurityRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <SmsSecurityScreen {...props} />
+  </Suspense>
+);
+
+const ProfileScreen = React.lazy(
+  () => import('../../screen/app/setting/ProfileScreen'),
+);
+
+const ProfileRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <ProfileScreen {...props} />
+  </Suspense>
+);
+
+const AddCardScreen = React.lazy(
+  () => import('../../screen/app/webviewDashboard/AddCardScreen'),
+);
+
+const AddCardRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddCardScreen {...props} />
+  </Suspense>
+);
+
+const ManageCardsScreen = React.lazy(
+  () => import('../../screen/app/webviewDashboard/ManageCardsScreen'),
+);
+
+const ManageCardsRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <ManageCardsScreen {...props} />
+  </Suspense>
+);
+
+const PlansScreen = React.lazy(
+  () => import('../../screen/app/webviewDashboard'),
+);
+
+const PlansRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <PlansScreen {...props} />
+  </Suspense>
+);
+
+const BillingSubscriptionScreen = React.lazy(
+  () => import('../../screen/app/setting/BillingSubscriptionScreen'),
+);
+
+const BillingSubscriptionRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <BillingSubscriptionScreen {...props} />
+  </Suspense>
+);
+
 const renderDrawerContent = (props: any) => <CustomDrawerContent {...props} />;
 
 const styles = StyleSheet.create({
@@ -150,6 +210,12 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.consignmentRequests} component={ConsignmentRequests} />
         <Drawer.Screen name={routes.companyReport} component={CompanyReport} />
         <Drawer.Screen name={routes.commonWebView} component={CommonWebView} />
+        <Drawer.Screen name={routes.smsSecurityScreen} component={SmsSecurityRoute} />
+        <Drawer.Screen name={routes.profileScreen} component={ProfileRoute} />
+        <Drawer.Screen name={routes.addCardScreen} component={AddCardRoute} />
+        <Drawer.Screen name={routes.manageCardsScreen} component={ManageCardsRoute} />
+        <Drawer.Screen name={routes.billingSubscriptionScreen} component={BillingSubscriptionRoute} />
+        <Drawer.Screen name={routes.plansScreen} component={PlansRoute} />
         <Drawer.Screen name={routes.saleHubScreen} component={SalesHub} />
         <Drawer.Screen name={routes.addNewSaleScreen} component={AddNewSaleRoute} />
         <Drawer.Screen name={routes.addSaleSettingsScreen} component={AddSaleSettingsRoute} />
