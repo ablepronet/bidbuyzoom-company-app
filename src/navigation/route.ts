@@ -47,4 +47,6 @@ export const routes = {
   clientProfileScreen: 'ClientProfileScreen',
   addEditBidderScreen: 'AddEditBidderScreen',
   bidderProfileScreen: 'BidderProfileScreen',
+  staffScreen: 'StaffScreen',
+  addEditStaffScreen: 'AddEditStaffScreen',
 };

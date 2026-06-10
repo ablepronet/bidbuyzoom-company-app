@@ -135,6 +135,26 @@ const ProfileRoute = (props: any) => (
   </Suspense>
 );
 
+const StaffScreen = React.lazy(
+  () => import('../../screen/app/setting/StaffScreen'),
+);
+
+const StaffRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <StaffScreen {...props} />
+  </Suspense>
+);
+
+const AddEditStaffScreen = React.lazy(
+  () => import('../../screen/app/setting/AddEditStaffScreen'),
+);
+
+const AddEditStaffRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <AddEditStaffScreen {...props} />
+  </Suspense>
+);
+
 const AddCardScreen = React.lazy(
   () => import('../../screen/app/webviewDashboard/AddCardScreen'),
 );
@@ -230,6 +250,8 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.bidderProfileScreen} component={BidderProfileRoute} />
         <Drawer.Screen name={routes.notificationScreen} component={NotificationRoute} />
         <Drawer.Screen name={routes.messageScreen} component={MessageRoute} />
+        <Drawer.Screen name={routes.staffScreen} component={StaffRoute} />
+        <Drawer.Screen name={routes.addEditStaffScreen} component={AddEditStaffRoute} />
       </Drawer.Navigator>
     </>
   );

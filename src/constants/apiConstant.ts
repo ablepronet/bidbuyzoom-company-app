@@ -55,6 +55,10 @@ const apiEndPoints = {
   addCardPayment: 'add-card-payment',
   getPaymentCards: 'get-payment-cards',
   deleteCard: 'delete-card',
+  allStaff: 'all-staff',
+  addStaff: 'add-staff',
+  updateStaff: 'update-staff',
+  updateStaffPermissions: 'update-staff-permissions',
 };
 
 export default apiEndPoints;

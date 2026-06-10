@@ -33,6 +33,10 @@ const Setting = () => {
       navigation.navigate(routes.billingSubscriptionScreen);
       return;
     }
+    if (path === 'staff') {
+      navigation.navigate(routes.staffScreen);
+      return;
+    }
     // if (path === 'card-payment/details') {
     //   navigation.navigate(routes.manageCardsScreen);
     //   return;

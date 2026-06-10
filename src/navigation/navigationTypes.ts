@@ -86,6 +86,8 @@ export type drawerParamsList = {
   };
   [routes.notificationScreen]: undefined;
   [routes.messageScreen]: undefined;
+  [routes.staffScreen]: undefined;
+  [routes.addEditStaffScreen]: { staff?: any; mode?: 'add' | 'edit' } | undefined;
 };
 
 export type bottomTabParamsList = {

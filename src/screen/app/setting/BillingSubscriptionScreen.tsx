@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Clipboard, Dimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import AppHeader from '../../../components/appHeader';
 import { AppText } from '../../../components/AppText';
 import Card from '../../../components/Card';

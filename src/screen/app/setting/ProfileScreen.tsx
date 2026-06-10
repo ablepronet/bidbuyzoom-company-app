@@ -38,6 +38,7 @@ interface FormState {
   alternativeEmail: string;
   ein: string;
   isLicNumber: string;
+  licNumber: string;
   address: string;
   addressAlternate: string;
   state: string;
@@ -54,8 +55,6 @@ const ProfileScreen = () => {
   const { data: profileData, isLoading: isProfileLoading } = useGetUserProfile();
   const updateProfileMutation = useUpdateUserProfile();
 
-  console.log(profileData, 'profile data =====asdf')
-
   const [form, setForm] = useState<FormState>({
     firstName: '',
     lastName: '',
@@ -66,6 +65,7 @@ const ProfileScreen = () => {
     alternativeEmail: '',
     ein: '',
     isLicNumber: 'No',
+    licNumber: '',
     address: '',
     addressAlternate: '',
     state: '',
@@ -98,7 +98,8 @@ const ProfileScreen = () => {
         email: datas.email || '',
         alternativeEmail: datas.alternativeEmail || '',
         ein: datas.ein || '',
-        isLicNumber: datas.isLicNumber || 'No',
+        isLicNumber: datas.isLicNumber === 'true' || datas.isLicNumber === true ? 'Yes' : 'No',
+        licNumber: datas.licNumber || '',
         address: datas.address || '',
         addressAlternate: datas.addressAlternate || '',
         state: datas.state || '',
@@ -151,6 +152,9 @@ const ProfileScreen = () => {
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
       nextErrors.email = 'Email is invalid';
     }
+    if (form.isLicNumber === 'Yes' && !form.licNumber.trim()) {
+      nextErrors.licNumber = 'License Number is required';
+    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -169,7 +173,8 @@ const ProfileScreen = () => {
     formData.append('email', form.email);
     formData.append('alternativeEmail', form.alternativeEmail);
     formData.append('ein', form.ein);
-    formData.append('isLicNumber', form.isLicNumber);
+    formData.append('isLicNumber', form.isLicNumber === 'Yes' ? 'true' : 'false');
+    formData.append('licNumber', form.isLicNumber === 'Yes' ? form.licNumber : '');
     formData.append('address', form.address);
     formData.append('addressAlternate', form.addressAlternate);
     formData.append('state', form.state);
@@ -255,48 +260,21 @@ const ProfileScreen = () => {
 
         {/* Header Branding Card */}
         <Card style={styles.card}>
-          <View style={styles.headerRow}>
-            <View style={styles.headerLeft}>
-              <AppText
-                title="Company Profile"
-                fontySize="px18"
-                fontFamily="bold"
-                color="textPrimary"
-              />
-              <AppText
-                title="Manage company information, branding, contact information and business settings."
-                fontySize="px12"
-                fontFamily="regular"
-                color="textSecondary"
-                marginTop={vs(4)}
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleLogoPick}
-              style={styles.logoContainer}>
-              {selectedLogo?.uri ? (
-                <FastImage
-                  source={{ uri: selectedLogo.uri }}
-                  style={styles.logoImage}
-                  resizeMode={FastImage.resizeMode.cover}
-                />
-              ) : (
-                <Icon name="image-outline" size={ms(24)} color={colors.textSecondary} />
-              )}
-              <View style={styles.logoBadge}>
-                <Icon name="camera" size={ms(10)} color={colors.white} />
-              </View>
-            </TouchableOpacity>
+          <View style={styles.headerLeftOnly}>
+            <AppText
+              title="Company Profile"
+              fontySize="px18"
+              fontFamily="bold"
+              color="textPrimary"
+            />
+            <AppText
+              title="Manage company information, branding, contact information and business settings."
+              fontySize="px12"
+              fontFamily="regular"
+              color="textSecondary"
+              marginTop={vs(4)}
+            />
           </View>
-          <AppText
-            title="Note: The file size should be between 0 KB and 1000 KB for optimal performance."
-            fontySize="px10"
-            fontFamily="regular"
-            color="textSecondary"
-            marginTop={vs(10)}
-          />
         </Card>
 
         {/* Company Information Card */}
@@ -386,7 +364,7 @@ const ProfileScreen = () => {
             <Icon name="ribbon-outline" size={ms(20)} color={colors.primary} style={styles.cardIcon} />
             <View>
               <AppText title="Licensing & Branding" fontySize="px14" fontFamily="bold" color="textPrimary" />
-              <AppText title="Auction license information used in your branded auction pages." fontySize="px12" color="textSecondary" />
+              <AppText title="Auction license information and company logo used in your branded auction pages." fontySize="px12" color="textSecondary" />
             </View>
           </View>
 
@@ -395,6 +373,49 @@ const ProfileScreen = () => {
             'isLicNumber',
             ['No', 'Yes']
           )}
+
+          {form.isLicNumber === 'Yes' && (
+            <AppInput
+              label="Lic. Number"
+              placeholder="Enter License Number"
+              value={form.licNumber}
+              onChangeText={t => updateField('licNumber', t)}
+              error={errors.licNumber}
+            />
+          )}
+
+          <View style={styles.fieldContainer}>
+            <View>
+              <AppText title="Upload Logo" fontFamily="medium" fontySize="px14" marginBottom={8} />
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleLogoPick}
+              style={styles.uploadLogoTrigger}>
+              {selectedLogo?.uri ? (
+                <View style={styles.uploadLogoContent}>
+                  <FastImage
+                    source={{ uri: selectedLogo.uri }}
+                    style={styles.logoThumbnail}
+                    resizeMode={FastImage.resizeMode.contain}
+                  />
+                  <AppText title="Change Logo" fontySize="px14" fontFamily="medium" color="primary" marginLeft={ms(12)} />
+                </View>
+              ) : (
+                <View style={styles.uploadLogoContent}>
+                  <AppText title="Select Logo" fontySize="px14" color="textSecondary" />
+                </View>
+              )}
+              <Icon name="cloud-upload-outline" size={ms(20)} color={colors.primary} />
+            </TouchableOpacity>
+            <AppText
+              title="Note: The file size should be between 0 KB and 1000 KB for optimal performance."
+              fontySize="px10"
+              fontFamily="regular"
+              color="dangerToastText"
+              marginTop={vs(6)}
+            />
+          </View>
         </Card>
 
         {/* Address Information Card */}
@@ -575,6 +596,30 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
     marginRight: ms(16),
+  },
+  headerLeftOnly: {
+    flex: 1,
+  },
+  uploadLogoTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: scale(5),
+    paddingHorizontal: scale(12),
+    height: vs(48),
+    backgroundColor: colors.white,
+  },
+  uploadLogoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  logoThumbnail: {
+    width: ms(32),
+    height: ms(32),
+    borderRadius: scale(4),
   },
   logoContainer: {
     width: ms(70),
