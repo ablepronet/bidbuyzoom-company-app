@@ -270,7 +270,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       };
 
       await Share.open(shareOptions);
-    } catch (error) {
+    } catch {
     }
   };
 
@@ -337,28 +337,70 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           '.site-header',
           '[role="banner"]'
         ];
-        
-        headerSelectors.forEach(selector => {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach(el => {
-            el.style.display = 'none';
-            el.style.visibility = 'hidden';
-            el.style.height = '0';
-            el.style.padding = '0';
-            el.style.margin = '0';
-            el.style.opacity = '0';
-            el.style.position = 'absolute';
-            el.style.zIndex = '-9999';
-          });
-        });
 
-        // Add mobile app specific styling
+        const hideHeaders = function() {
+          headerSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+              el.style.display = 'none';
+              el.style.visibility = 'hidden';
+              el.style.height = '0';
+              el.style.padding = '0';
+              el.style.margin = '0';
+              el.style.opacity = '0';
+              el.style.position = 'absolute';
+              el.style.zIndex = '-9999';
+            });
+          });
+        };
+
+        hideHeaders();
+
+        if (!window.__rnHeaderObserverInstalled) {
+          window.__rnHeaderObserverInstalled = true;
+          const observer = new MutationObserver(hideHeaders);
+          observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+          });
+        }
+
+        document.documentElement.style.paddingTop = '0';
+        document.documentElement.style.marginTop = '0';
+
+        if (document.body) {
+          document.body.style.paddingTop = '0';
+          document.body.style.marginTop = '0';
+        }
+
+        const removeMobileSafeAreaPadding = function() {
+          if (!document.body) return;
+          document.body.classList.add('mobile-app-container');
+          document.body.style.paddingTop = '0';
+          document.body.style.marginTop = '0';
+        };
+
+        removeMobileSafeAreaPadding();
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', removeMobileSafeAreaPadding);
+        }
+
+        // Add mobile app specific styling. The native AppHeader already applies
+        // safe-area spacing, so do not add env(safe-area-inset-top) inside WebView.
         const style = document.createElement('style');
-        style.innerHTML = 'body { padding-top: 0 !important; margin-top: 0 !important; } .mobile-app-container { padding-top: env(safe-area-inset-top) !important; } html, body { overflow-x: hidden !important; width: 100% !important; }';
+        style.innerHTML = 'html, body, .mobile-app-container { padding-top: 0 !important; margin-top: 0 !important; } html, body { overflow-x: hidden !important; width: 100% !important; }';
         document.head.appendChild(style);
 
-        // Add mobile app class to body
-        document.body.classList.add('mobile-app-container');
+        // Some SPA pages add header spacing after initial load.
+        window.setTimeout(function() {
+          hideHeaders();
+          removeMobileSafeAreaPadding();
+        }, 250);
+        window.setTimeout(function() {
+          hideHeaders();
+          removeMobileSafeAreaPadding();
+        }, 1000);
 
         return true;
       } catch (error) {
