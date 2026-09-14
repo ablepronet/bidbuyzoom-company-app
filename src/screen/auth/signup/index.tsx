@@ -56,10 +56,13 @@ const SignUp = () => {
     signUp(body, {
       onSuccess: res => {
         // Navigate to email verification screen
-        navigation.navigate(routes.OtpVerification, {
-          email: values.email,
-          isEmailVerification: true,
-        });
+
+        if (res?.status) {
+          navigation.navigate(routes.OtpVerification, {
+            email: values.email,
+            isEmailVerification: true,
+          });
+        }
       },
     });
   };

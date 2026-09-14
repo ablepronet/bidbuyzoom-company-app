@@ -218,7 +218,7 @@ export const CustomDrawerContent = (props: any) => {
         <View style={styles.profileContainer}>
           <View style={styles.avatarContainer}>
             <ImageComponent
-              uri={data?.datas.logo}
+              uri={data?.datas?.logo}
               style={styles.userImageStyle}
               resizeMode="cover"
             />

@@ -1,26 +1,26 @@
-import {StyleSheet, View} from 'react-native';
-import React, {useEffect, useMemo, useState} from 'react';
+import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
 import WebViewScreen from '../webview';
-import {useAppSelector} from '../../../redux/hooks';
-import {useGetUserProfile} from '../../../services/queries/app/Profile';
+import { useAppSelector } from '../../../redux/hooks';
+import { useGetUserProfile } from '../../../services/queries/app/Profile';
 
-import {routes} from '../../../navigation/route';
-import {useNavigation} from '@react-navigation/native';
+import { routes } from '../../../navigation/route';
+import { useNavigation } from '@react-navigation/native';
 
-const Sales = ({route}: {route: any}) => {
+const Sales = ({ route }: { route: any }) => {
   const navigation = useNavigation<any>();
-  const {from, saleId, refreshAt} = route.params || {};
+  const { from, saleId, refreshAt } = route.params || {};
   const [refreshKey, setRefreshKey] = useState(0);
-  const {data} = useGetUserProfile();
-  const {token} = useAppSelector(state => state.auth);
+  const { data } = useGetUserProfile();
+  const { token } = useAppSelector(state => state.auth);
   const userData = data?.datas || null;
   const injectedJavaScript = `
     (function() {
       try {
         localStorage.setItem("token", JSON.stringify("${token}"));
         localStorage.setItem("user", JSON.stringify(${JSON.stringify(
-          userData,
-        )}));
+    userData,
+  )}));
         localStorage.setItem("companyName", "${userData?.companySlug || ''}");
         const originalClear = localStorage.clear;
         localStorage.clear = function() {

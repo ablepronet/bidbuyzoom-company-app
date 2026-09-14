@@ -46,7 +46,6 @@ const Setting = () => {
       url: `https://staging.bidbuyzoom.com/${companySlug}/${path}?mobile=true`,
     });
 
-    console.log('path:', title)
   };
 
   const SettingItem = ({
