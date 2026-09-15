@@ -16,11 +16,11 @@ export default {
     privacy: 'https://global-ride.devtechnosys.tech/api/cms/privacy-policy',
   },
   staging: {
-    base_url: 'https://staging-api.bidbuyzoom.com/api/',
-    image_base_url: 'https://staging-api.bidbuyzoom.com/',
-    socketUrl: 'https://global-ride.devtechnosys.tech/',
+    base_url: 'https://api.bidbuyzoom.com/api/',
+    image_base_url: 'https://api.bidbuyzoom.com/',
+    socketUrl: 'https://api.bidbuyzoom.com/',
     tearm:
-      'https://global-ride.devtechnosys.tech/api/cms/terms-and-conditions',
-    privacy: 'https://global-ride.devtechnosys.tech/api/cms/privacy-policy',
+      'https://api.bidbuyzoom.com/api/cms/terms-and-conditions',
+    privacy: 'https://api.bidbuyzoom.com/api/cms/privacy-policy',
   },
 }['staging'];
