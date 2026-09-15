@@ -11,6 +11,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import RootStack from './src/navigation/rootStack';
+import AppToast from './src/components/toaster';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -29,6 +30,7 @@ const App = () => {
               {/* <KeyboardProvider> */}
               <BottomSheetModalProvider>
                 <RootStack />
+                <AppToast />
               </BottomSheetModalProvider>
               {/* </KeyboardProvider> */}
             </SafeAreaProvider>

@@ -68,8 +68,8 @@
 
 //     // Check if user navigated to the main landing page or login page (logged out)
 //     const isLandingPage =
-//       currentUrl === 'https://staging.bidbuyzoom.com' ||
-//       currentUrl === 'https://staging.bidbuyzoom.com/' ||
+//       currentUrl === 'https://bidbuyzoom.com' ||
+//       currentUrl === 'https://bidbuyzoom.com/' ||
 //       currentUrl.includes('/login');
 
 //     if (isLandingPage && !isLoading) {
@@ -115,7 +115,7 @@
 //         <WebView
 //           ref={webViewRef}
 //           source={{
-//             uri: 'https://staging.bidbuyzoom.com',
+//             uri: 'https://bidbuyzoom.com',
 //             headers: headers,
 //           }}
 //           style={styles.webview}
@@ -312,7 +312,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
     // Only allow navigation within the same domain to prevent opening external browser
     const isSameDomain =
-      event.url.includes('staging.bidbuyzoom.com') ||
       event.url.includes('bidbuyzoom.com') ||
       event.url.startsWith('about:blank');
 

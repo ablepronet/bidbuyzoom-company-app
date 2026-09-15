@@ -8,6 +8,7 @@ import {ImageComponent} from '../../../components/AppImage';
 import {scale, vs} from '../../../utils/responsive';
 import {DrawerActions, useNavigation} from '@react-navigation/native';
 import appImages from '../../../constants/appImages';
+import { WEB_BASE_URL } from '../../../constants';
 
 const ConsignmentRequests = () => {
   const {data} = useGetUserProfile();
@@ -59,7 +60,7 @@ const ConsignmentRequests = () => {
         showBorder={false}
       />
       <WebViewScreen
-        url={`https://staging.bidbuyzoom.com/${userData?.companySlug || ''}/consignment-requests?mobile=true`}
+        url={`${WEB_BASE_URL}/${userData?.companySlug || ''}/consignment-requests?mobile=true`}
         injectedJavaScript={injectedJavaScript}
       />
     </View>

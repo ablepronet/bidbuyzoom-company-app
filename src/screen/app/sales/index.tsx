@@ -6,6 +6,7 @@ import { useGetUserProfile } from '../../../services/queries/app/Profile';
 
 import { routes } from '../../../navigation/route';
 import { useNavigation } from '@react-navigation/native';
+import { WEB_BASE_URL } from '../../../constants';
 
 const Sales = ({ route }: { route: any }) => {
   const navigation = useNavigation<any>();
@@ -110,9 +111,9 @@ const Sales = ({ route }: { route: any }) => {
 
   const url = useMemo(() => {
     if (from === 'manage' && saleId) {
-      return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales-information?id=${saleId}?mobile=true`;
+      return `${WEB_BASE_URL}/${userData?.companySlug}/sales-information?id=${saleId}?mobile=true`;
     }
-    return `https://staging.bidbuyzoom.com/${userData?.companySlug}/sales?mobile=true`;
+    return `${WEB_BASE_URL}/${userData?.companySlug}/sales?mobile=true`;
   }, [saleId, userData?.companySlug, from]);
 
   useEffect(() => {

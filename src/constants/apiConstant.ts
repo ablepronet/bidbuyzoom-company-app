@@ -2,10 +2,11 @@ import config from '../utils/config';
 
 export const BASE_URL = config?.base_url;
 export const IMAGE_BASE_URL = config.image_base_url;
+export const WEB_BASE_URL = config?.web_base_url || 'https://bidbuyzoom.com';
 export const SOCKET_URL = config.socketUrl;
 export const TEARM_CONDITION = config.tearm;
 export const PRIVACY_POLICY = config.privacy;
-export const HELP = 'https://staging.bidbuyzoom.com/help'
+export const HELP = `${WEB_BASE_URL}/help`;
 
 const apiEndPoints = {
   login: 'login',

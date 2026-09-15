@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { AppText } from '../../../../components/AppText';
-import { colors } from '../../../../constants';
+import { colors, WEB_BASE_URL } from '../../../../constants';
 import { ms, vs } from '../../../../utils/responsive';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -27,7 +27,7 @@ type RouteParams = {
   fromAddSaleFlow?: boolean;
 };
 
-const webBaseUrl = 'https://staging.bidbuyzoom.com';
+const webBaseUrl = WEB_BASE_URL;
 
 const SalesHub = () => {
   const navigation = useNavigation<any>();

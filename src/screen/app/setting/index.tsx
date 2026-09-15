@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import AppHeader from '../../../components/appHeader';
 import { AppText } from '../../../components/AppText';
-import { colors } from '../../../constants';
+import { colors, WEB_BASE_URL } from '../../../constants';
 import { ms, vs } from '../../../utils/responsive';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
@@ -43,7 +43,7 @@ const Setting = () => {
     // }
     navigation.navigate(routes.commonWebView, {
       title: title,
-      url: `https://staging.bidbuyzoom.com/${companySlug}/${path}?mobile=true`,
+      url: `${WEB_BASE_URL}/${companySlug}/${path}?mobile=true`,
     });
 
   };

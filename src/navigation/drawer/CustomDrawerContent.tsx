@@ -196,11 +196,10 @@ export const CustomDrawerContent = (props: any) => {
     //@ts-ignore
     // navigation.navigate(routes.commonWebView, {
     //   title: 'Bidbuyzoom',
-    //   url: `https://staging.bidbuyzoom.com/help`,
+    //   url: HELP,
     // });
     try {
-      // await Linking.openURL(`https://staging.bidbuyzoom.com/help`);
-      await Linking.openURL(`https://staging.bidbuyzoom.com/help`);
+      await Linking.openURL(HELP);
     } catch (error) {
       console.log('Error opening link:', error);
     }

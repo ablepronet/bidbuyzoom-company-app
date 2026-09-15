@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '../../../api';
-import apiEndPoints from '../../../../constants/apiConstant';
+import apiEndPoints, { IMAGE_BASE_URL } from '../../../../constants/apiConstant';
 import AppToast from '../../../../components/toaster';
 
 export interface PlanFeature {
@@ -82,7 +82,7 @@ export const useGetPricing = () => {
 
       // Try absolute fallback URL at root /pricing (without api/ prefix)
       try {
-        const resAbsolute = await get('https://staging-api.bidbuyzoom.com/pricing');
+        const resAbsolute = await get(`${IMAGE_BASE_URL}pricing`);
         if (resAbsolute && resAbsolute.data) {
           return resAbsolute.data;
         }

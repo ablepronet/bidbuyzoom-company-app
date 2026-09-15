@@ -25,7 +25,7 @@ import { routes } from '../../../navigation/route';
 import { store } from '../../../redux/store';
 
 const { width } = Dimensions.get('window');
-// https://staging.bidbuyzoom.com/company-te/dashboard
+// https://bidbuyzoom.com/company-te/dashboard
 const HomeDashBoard = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
