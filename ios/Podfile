@@ -30,5 +30,18 @@ target 'EAuction' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Fix for lottie-react-native Bridging.h header collision with ReactCommon C++ headers
+    ['Target Support Files/lottie-react-native/lottie-react-native-umbrella.h',
+     'Headers/Public/lottie_react_native/lottie-react-native-umbrella.h'].each do |rel_path|
+      umbrella_path = File.join(installer.sandbox.root, rel_path)
+      if File.exist?(umbrella_path)
+        content = File.read(umbrella_path)
+        if content.include?('#import "Bridging.h"')
+          content.gsub!('#import "Bridging.h"', "#import <React/RCTViewManager.h>\n#import <React/RCTBridge.h>\n#import <React/RCTUIManager.h>\n#import <React/RCTView.h>")
+          File.write(umbrella_path, content)
+        end
+      end
+    end
   end
 end
