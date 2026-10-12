@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {StatusBar, View} from 'react-native';
+import {StatusBar} from 'react-native';
 import SplashScreen from '../../screen/splash';
 
 import {NavigationContainer} from '@react-navigation/native';
