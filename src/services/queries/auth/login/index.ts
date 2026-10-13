@@ -10,6 +10,8 @@ type LoginPayload = {
   password?: string;
   recaptchaToken?: null | undefined;
   customR?: string;
+  fcmToken?: string | null;
+  platform?: string;
 };
 
 export const useLogin = () => {

@@ -1,4 +1,4 @@
-import {StyleSheet, View, TextInput} from 'react-native';
+import {StyleSheet, View, TextInput, Platform} from 'react-native';
 import React, {useState, useRef, useEffect, useMemo} from 'react';
 
 import {ImageComponent} from '../../../components/AppImage';
@@ -23,6 +23,7 @@ import AppButton from '../../../components/appButton';
 import {useVerification} from '../../../services/queries/auth/verification';
 import {useVerifyEmailOtp} from '../../../services/queries/auth/verifyEmailOtp';
 import {useResendEmailOtp} from '../../../services/queries/auth/resendEmailOtp';
+import {getFCMToken} from '../../../services/notificationService';
 
 const OTP_LENGTH = 6;
 const RESEND_TIME = 120;
@@ -54,15 +55,19 @@ const Verification = () => {
 
   const otpValue = useMemo(() => otp.join(''), [otp]);
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     if (otpValue.length !== OTP_LENGTH) return;
+    const fcmToken = await getFCMToken();
 
     if (isEmailVerification) {
       // Email OTP verification
       const body = {
         email: email || '',
         otp: otpValue,
+        fcmToken: fcmToken || '',
+        platform: Platform.OS,
       };
+      console.log('📱 [Email OTP Verify Request Body]:', body);
 
       verifyEmailOtp(body, {
         onSuccess: res => {
@@ -85,7 +90,10 @@ const Verification = () => {
       const body = {
         code: otpValue,
         tempToken: userDetails?.tempToken,
+        fcmToken: fcmToken || '',
+        platform: Platform.OS,
       };
+      console.log('📱 [2FA Verify Request Body]:', body);
 
       VerificationOTP(body, {
         onSuccess: res => {

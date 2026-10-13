@@ -14,6 +14,7 @@ import { useAppDispatch } from '../../../redux/hooks';
 import { setUserLogout } from '../../../redux/slices/auth';
 import { persister } from '../../../redux/store';
 import { useQueryClient } from '@tanstack/react-query';
+import { unregisterDeviceToken } from '../../../services/notificationService';
 import { useNavigation } from '@react-navigation/native';
 import { routes } from '../../../navigation/route';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -104,6 +105,11 @@ const PlansScreen = () => {
   }, []);
 
   const handleLogout = useCallback(async () => {
+    try {
+      await unregisterDeviceToken();
+    } catch (e) {
+      console.log('Error unregistering device token on logout:', e);
+    }
     await persister.purge();
     queryClient.clear();
     dispatch(setUserLogout());

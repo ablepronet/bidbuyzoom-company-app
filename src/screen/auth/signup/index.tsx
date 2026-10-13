@@ -18,6 +18,7 @@ import AppPhoneInput from '../../../components/AppPhoneInput';
 import { useNavigation } from '@react-navigation/native';
 import { useSingUP } from '../../../services/queries/auth/singup';
 import { routes } from '../../../navigation/route';
+import { getFCMToken } from '../../../services/notificationService';
 
 const SignUp = () => {
   const navigation = useNavigation<any>();
@@ -34,7 +35,7 @@ const SignUp = () => {
     setCallingCode(country.dial_code.replace('+', '') || '');
   };
 
-  const onSignUpSubmit = (values: {
+  const onSignUpSubmit = async (values: {
     firstName: string;
     lastName: string;
     companyName: string;
@@ -43,6 +44,7 @@ const SignUp = () => {
     password: string;
   }) => {
     setSubmittedEmail(values.email);
+    const fcmToken = await getFCMToken();
     const body = {
       company_name: values.companyName,
       company_url: '',
@@ -52,7 +54,10 @@ const SignUp = () => {
       password: values.password,
       phone: values.phone,
       recaptchaToken: '',
+      fcmToken: fcmToken || '',
+      platform: Platform.OS,
     };
+    console.log('📱 [Signup Request Body]:', body);
     signUp(body, {
       onSuccess: res => {
         // Navigate to email verification screen

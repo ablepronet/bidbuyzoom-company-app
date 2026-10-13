@@ -15,6 +15,8 @@ import {
   requestNotificationPermission,
   setupNotificationListeners,
   getFCMToken,
+  setupTokenRefreshListener,
+  registerDeviceToken,
 } from './src/services/notificationService';
 
 const queryClient = new QueryClient({
@@ -36,9 +38,15 @@ const App = () => {
     };
     initNotifications();
 
-    const unsubscribe = setupNotificationListeners();
+    const unsubscribeListeners = setupNotificationListeners();
+    const unsubscribeTokenRefresh = setupTokenRefreshListener((newToken: string) => {
+      console.log('🔄 [FCM Token Refreshed]:', newToken);
+      registerDeviceToken(newToken);
+    });
+
     return () => {
-      unsubscribe();
+      unsubscribeListeners();
+      unsubscribeTokenRefresh();
     };
   }, []);
 

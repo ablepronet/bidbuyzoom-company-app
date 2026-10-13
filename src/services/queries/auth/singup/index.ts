@@ -1,6 +1,6 @@
-import {useMutation} from '@tanstack/react-query';
-import {post} from '../../../api';
-import {apiEndPoints} from '../../../../constants';
+import { useMutation } from '@tanstack/react-query';
+import { post } from '../../../api';
+import { apiEndPoints } from '../../../../constants';
 import AppToast from '../../../../components/toaster';
 import HandleApiCatch from '../../../../helper/handleCatch';
 
@@ -13,6 +13,8 @@ type SignupPayload = {
   password?: string;
   phone?: string;
   recaptchaToken?: string;
+  fcmToken?: string | null;
+  platform?: string;
 };
 
 export const useSingUP = () => {

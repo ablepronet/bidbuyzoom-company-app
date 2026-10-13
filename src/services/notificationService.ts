@@ -12,6 +12,9 @@ import {
 } from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { post, deleteApi } from './api';
+import { apiEndPoints } from '../constants';
+import { store } from '../redux/store';
 
 const DEFAULT_CHANNEL_ID = 'default_eauction_channel';
 const DEFAULT_CHANNEL_NAME = 'EAuction Notifications';
@@ -204,4 +207,70 @@ export function setupTokenRefreshListener(
       onTokenRefreshCallback(newToken);
     }
   });
+}
+
+/**
+ * Register or refresh FCM device token with backend
+ * POST /api/device-token
+ * Body: { "token": "<fcm token>", "platform": "ios" | "android" }
+ */
+export async function registerDeviceToken(fcmToken?: string | null) {
+  try {
+    const authToken = store.getState().auth.token;
+    if (!authToken) {
+      console.log('Skipping device-token register: User is not logged in');
+      return;
+    }
+
+    const token = fcmToken || (await getFCMToken());
+    if (!token) {
+      console.log('Skipping device-token register: No FCM token available');
+      return;
+    }
+
+    const body = {
+      token,
+      platform: Platform.OS,
+    };
+
+    console.log('📱 [POST /api/device-token Body]:', body);
+    const res = await post(apiEndPoints.deviceToken, body);
+    console.log('✅ [POST /api/device-token Response]:', res);
+    return res;
+  } catch (error) {
+    console.log('❌ Error registering device token to backend:', error);
+  }
+}
+
+/**
+ * Remove FCM device token from backend on logout
+ * DELETE /api/device-token
+ * Body: { "token": "<fcm token>" }
+ */
+export async function unregisterDeviceToken(fcmToken?: string | null) {
+  try {
+    const authToken = store.getState().auth.token;
+    if (!authToken) {
+      return;
+    }
+
+    const token =
+      fcmToken ||
+      cachedFcmToken ||
+      (await AsyncStorage.getItem(FCM_TOKEN_STORAGE_KEY));
+    if (!token) {
+      return;
+    }
+
+    const body = {
+      token,
+    };
+
+    console.log('📱 [DELETE /api/device-token Body]:', body);
+    const res = await deleteApi(apiEndPoints.deviceToken, body);
+    console.log('✅ [DELETE /api/device-token Response]:', res);
+    return res;
+  } catch (error) {
+    console.log('❌ Error removing device token from backend on logout:', error);
+  }
 }

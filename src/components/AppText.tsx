@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { Text, StyleSheet, TextStyle, ViewStyle, StyleProp } from 'react-native';
 
 import { fontSizes } from '../utils/metrics';
 import appFonts from '../constants/appFonts';
@@ -19,7 +19,7 @@ interface Props {
   marginLeft?: number;
   textAlign?: TextStyle['textAlign'];
   textTransform?: TextStyle['textTransform'];
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
 }
 
 export const AppText: React.FC<Props> = ({

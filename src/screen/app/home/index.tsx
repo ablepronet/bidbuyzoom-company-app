@@ -23,6 +23,7 @@ import { formatDate } from '../../../helper/getTodayDate';
 
 import { routes } from '../../../navigation/route';
 import { store } from '../../../redux/store';
+import { unregisterDeviceToken } from '../../../services/notificationService';
 
 const { width } = Dimensions.get('window');
 // https://bidbuyzoom.com/company-te/dashboard
@@ -81,8 +82,13 @@ const HomeDashBoard = () => {
   const totalSteps = setup?.totalSteps ?? 6;
   const progressPercentage = (completedStepsCount / totalSteps) * 100;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setProfileModalVisible(false);
+    try {
+      await unregisterDeviceToken();
+    } catch (e) {
+      console.log('Error unregistering device token on logout:', e);
+    }
     dispatch(setUserLogout());
   };
 

@@ -25,6 +25,7 @@ import { useGetUserProfile } from '../../services/queries/app/Profile';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { HELP } from '../../constants/apiConstant';
 import { useQueryClient } from '@tanstack/react-query';
+import { unregisterDeviceToken } from '../../services/notificationService';
 
 // Types
 type MenuItemType = {
@@ -187,6 +188,11 @@ export const CustomDrawerContent = (props: any) => {
   };
 
   const handleLogout = async () => {
+    try {
+      await unregisterDeviceToken();
+    } catch (e) {
+      console.log('Error unregistering device token on logout:', e);
+    }
     await persister.purge();
     queryClient.clear();
     dispatch(setUserLogout());

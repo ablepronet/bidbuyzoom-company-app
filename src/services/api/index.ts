@@ -121,7 +121,7 @@ export const get = async (
     });
 };
 
-export const deleteApi = async (url: string, _type = 0) => {
+export const deleteApi = async (url: string, data?: any, _type = 0) => {
   const options: any = {
     headers: {
       Accept: 'application/json',
@@ -130,6 +130,10 @@ export const deleteApi = async (url: string, _type = 0) => {
     },
   };
 
+  if (data !== undefined) {
+    options.data = data;
+  }
+
   const token = store.getState().auth.token;
 
   if (token) {
@@ -137,7 +141,7 @@ export const deleteApi = async (url: string, _type = 0) => {
   }
 
   options.headers.demo = `Bearer`;
-  logs('Request', BASE_URL + url);
+  logs('Request', BASE_URL + url, data);
   return instance
     .delete(url, options)
     .then(function (response: any) {

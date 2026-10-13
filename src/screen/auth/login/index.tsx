@@ -1,21 +1,21 @@
-import {Platform, StyleSheet, Text, View} from 'react-native';
-import React, {useRef} from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useRef } from 'react';
 import globalStyles from '../../../styles/globalStyles';
-import {scale, vs} from '../../../utils/responsive';
-import {appString, colors} from '../../../constants';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {ImageComponent} from '../../../components/AppImage';
+import { scale, vs } from '../../../utils/responsive';
+import { appString, colors } from '../../../constants';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { ImageComponent } from '../../../components/AppImage';
 import appImages from '../../../constants/appImages';
-import {Screen} from '../../../components/Screen';
-import {AppText} from '../../../components/AppText';
-import {Formik} from 'formik';
-import {ValidationSchemas} from '../../../helper/validation';
-import {AppInput} from '../../../components/AppInput';
+import { Screen } from '../../../components/Screen';
+import { AppText } from '../../../components/AppText';
+import { Formik } from 'formik';
+import { ValidationSchemas } from '../../../helper/validation';
+import { AppInput } from '../../../components/AppInput';
 import AppButton from '../../../components/appButton';
 import AppPressable from '../../../components/appPressable';
-import {useNavigation} from '@react-navigation/native';
-import {routes} from '../../../navigation/route';
-import {useLogin} from '../../../services/queries/auth/login';
+import { useNavigation } from '@react-navigation/native';
+import { routes } from '../../../navigation/route';
+import { useLogin } from '../../../services/queries/auth/login';
 import {
   setIsLogin,
   setRememberData,
@@ -23,28 +23,34 @@ import {
   setUserData,
   setUserId,
 } from '../../../redux/slices/auth';
-import {useAppDispatch, useAppSelector} from '../../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import AppCheckbox from '../../../components/AppCheckbox';
+import { getFCMToken } from '../../../services/notificationService';
+
 const Login = () => {
   const navigation = useNavigation<any>();
-  const {mutate: login, isPending} = useLogin();
-  const {loginValidation} = ValidationSchemas();
-  const {email, password, rememberMe} = useAppSelector(state => state.auth);
+  const { mutate: login, isPending } = useLogin();
+  const { loginValidation } = ValidationSchemas();
+  const { email, password, rememberMe } = useAppSelector(state => state.auth);
   const emailRef = useRef<any>(null);
-  const {token} = useAppSelector(state => state.auth);
+  const { token } = useAppSelector(state => state.auth);
   const passwordRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const onEmailSubmit = (values: {
+  const onEmailSubmit = async (values: {
     email: string;
     password: string;
     remember: boolean;
   }) => {
+    const fcmToken = await getFCMToken();
     const body = {
       email: values.email.trim(),
       password: values.password.trim(),
       recaptchaToken: null,
       customR: '',
+      fcmToken: fcmToken || '',
+      platform: Platform.OS,
     };
+    console.log('📱 [Login Request Body]:', body);
     login(body, {
       onSuccess: res => {
         if (res.status) {
@@ -85,7 +91,7 @@ const Login = () => {
         <Screen
           edges={['bottom']}
           backgroundColor={colors.background}
-          style={{justifyContent: 'center'}}>
+          style={{ justifyContent: 'center' }}>
           <View style={styles.headerContainer}>
             <ImageComponent
               source={appImages.splashLogo}
@@ -181,7 +187,7 @@ const Login = () => {
                   <AppButton
                     title={appString.login.continue}
                     onPress={handleSubmit}
-                    style={{marginTop: vs(20)}}
+                    style={{ marginTop: vs(20) }}
                     loading={isPending}
                   />
                 </>

@@ -7,6 +7,8 @@ import AppToast from '../../../../components/toaster';
 type VerifyEmailOtp = {
   email: string;
   otp: string;
+  fcmToken?: string | null;
+  platform?: string;
 };
 
 export const useVerifyEmailOtp = () => {

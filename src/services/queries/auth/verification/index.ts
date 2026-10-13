@@ -7,6 +7,8 @@ import AppToast from '../../../../components/toaster';
 type Verification = {
   code?: string;
   tempToken?: string;
+  fcmToken?: string | null;
+  platform?: string;
 };
 
 export const useVerification = () => {

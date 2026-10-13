@@ -12,10 +12,11 @@ import {useAppSelector} from '../../redux/hooks';
 import AppDrawer from '../drawer';
 import WebViewDashboard from '../../screen/app/webviewDashboard';
 import {useGetUserProfile} from '../../services/queries/app/Profile';
+import {registerDeviceToken} from '../../services/notificationService';
 
 const RootStack = () => {
   const insets = useSafeAreaInsets();
-  const {isLogin} = useAppSelector(state => state.auth);
+  const {isLogin, token} = useAppSelector(state => state.auth);
   const [showSplash, setShowSplash] = useState(true);
   const toastPosition = useMemo(() => insets.top, [insets.top]);
   const {data} = useGetUserProfile();
@@ -25,6 +26,12 @@ const RootStack = () => {
     const timer = setTimeout(() => setShowSplash(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (isLogin && token) {
+      registerDeviceToken();
+    }
+  }, [isLogin, token]);
 
   if (showSplash) {
     return <SplashScreen />;
