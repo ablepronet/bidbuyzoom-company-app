@@ -2,16 +2,16 @@
  * Which servers the app talks to. Use 'staging' for testing and switch to 'production'
  * only for App Store / Google Play release builds.
  */
-const APP_ENV: 'local' | 'staging' | 'production' = 'staging';
+const APP_ENV: 'local' | 'staging' | 'production' = 'production';
 
 const environments = {
   local: {
-    base_url: 'http://localhost:3004/api/',
-    image_base_url: 'http://localhost:3004/',
-    web_base_url: 'http://localhost:3000',
-    socketUrl: 'http://localhost:3004/',
-    tearm: 'http://localhost:3004/api/cms/terms-and-conditions',
-    privacy: 'http://localhost:3004/api/cms/privacy-policy',
+    base_url: 'http://172.16.2.27:3004/api/',
+    image_base_url: 'http://172.16.2.27:3004/',
+    web_base_url: 'http://172.16.2.27:3000',
+    socketUrl: 'http://172.16.2.27:3004/',
+    tearm: 'http://172.16.2.27:3004/api/cms/terms-and-conditions',
+    privacy: 'http://172.16.2.27:3004/api/cms/privacy-policy',
   },
   staging: {
     base_url: 'https://staging-api.bidbuyzoom.com/api/',
