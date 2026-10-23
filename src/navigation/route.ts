@@ -30,6 +30,7 @@ export const routes = {
   addSaleTemplateScreen: 'AddSaleTemplateScreen',
   notificationScreen: 'NotificationScreen',
   messageScreen: 'MessageScreen',
+  pendingBidsScreen: 'PendingBidsScreen',
 
   // Bottom Tab Screens
   dashboardTab: 'DashboardTab',

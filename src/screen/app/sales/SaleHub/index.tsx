@@ -56,7 +56,7 @@ const SalesHub = () => {
       icon: 'clipboard-text-outline',
       color: '#AD2429',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/sales-information?id=${saleId}?mobile=true`,
+        }/sales-information?id=${saleId}&mobile=true`,
     },
 
     {
@@ -66,7 +66,7 @@ const SalesHub = () => {
       icon: 'cog-outline',
       color: '#3B82F6',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/settings?id=${saleId}?mobile=true`,
+        }/settings?id=${saleId}&mobile=true`,
     },
     {
       id: '3',
@@ -84,7 +84,7 @@ const SalesHub = () => {
       icon: 'chart-line',
       color: '#F59E0B',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/monitor/summary?id=${saleId}?mobile=true`,
+        }/monitor/summary?id=${saleId}&mobile=true`,
     },
     {
       id: '5',
@@ -93,7 +93,7 @@ const SalesHub = () => {
       icon: 'file-document-outline',
       color: '#8B5CF6',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/invoice?id=${saleId}?mobile=true`,
+        }/invoice?id=${saleId}&mobile=true`,
     },
     {
       id: '6',
@@ -102,7 +102,15 @@ const SalesHub = () => {
       icon: 'handshake-outline',
       color: '#0D9488',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/settlement?id=${saleId}?mobile=true`,
+        }/settlement?id=${saleId}&mobile=true`,
+    },
+    {
+      id: '8',
+      title: 'Pending Bids',
+      subtitle: 'Approve or reject bids',
+      icon: 'gavel',
+      color: '#DC2626',
+      navigateUrl: '',
     },
     {
       id: '7',
@@ -111,7 +119,7 @@ const SalesHub = () => {
       icon: 'chart-bar',
       color: '#6366F1',
       navigateUrl: `${webBaseUrl}/${userData?.companySlug || ''
-        }/reports/summary?id=${saleId}?mobile=true`,
+        }/reports/summary?id=${saleId}&mobile=true`,
     },
     // {
     //   id: '8',
@@ -160,6 +168,14 @@ const SalesHub = () => {
       ...(selectedSale || {}),
       saleId: hubSaleId,
     };
+
+    if (item.title === 'Pending Bids') {
+      navigation.navigate(routes.pendingBidsScreen, {
+        saleId: hubSaleId,
+        saleTitle: selectedSale?.saleName || selectedSale?.title || '',
+      });
+      return;
+    }
 
     if (item.title === 'Sale Info') {
       setIsNavigating(true);

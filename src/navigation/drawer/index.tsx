@@ -4,13 +4,10 @@ import { CustomDrawerContent } from './CustomDrawerContent';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { colors } from '../../constants';
 import { drawerParamsList } from '../navigationTypes';
-import Company from '../../screen/app/compnay';
 import BidBuyers from '../../screen/app/bidBuyers';
-import Marketing from '../../screen/app/marketing';
 import Sales from '../../screen/app/sales';
 import Setting from '../../screen/app/setting';
 import ConsignmentRequests from '../../screen/app/consignmentRequests';
-import CompanyReport from '../../screen/app/companyReport';
 import CommonWebView from '../../screen/app/commonWebView';
 import SalesHub from '../../screen/app/sales/SaleHub';
 import CatalogScreen from '../../screen/app/sales/CatalogScreen';
@@ -155,6 +152,16 @@ const AddEditStaffRoute = (props: any) => (
   </Suspense>
 );
 
+const PendingBidsScreen = React.lazy(
+  () => import('../../screen/app/pendingBids'),
+);
+
+const PendingBidsRoute = (props: any) => (
+  <Suspense fallback={<LazyScreenLoader />}>
+    <PendingBidsScreen {...props} />
+  </Suspense>
+);
+
 const AddCardScreen = React.lazy(
   () => import('../../screen/app/webviewDashboard/AddCardScreen'),
 );
@@ -222,13 +229,10 @@ const AppDrawer = () => {
         drawerContent={renderDrawerContent}
       >
         <Drawer.Screen name="DashboardTabs" component={BottomTabNavigator} />
-        <Drawer.Screen name={routes.company} component={Company} />
         <Drawer.Screen name={routes.sale} component={Sales} />
         <Drawer.Screen name={routes.bidBuyser} component={BidBuyers} />
-        <Drawer.Screen name={routes.marketing} component={Marketing} />
         <Drawer.Screen name={routes.setting} component={Setting} />
         <Drawer.Screen name={routes.consignmentRequests} component={ConsignmentRequests} />
-        <Drawer.Screen name={routes.companyReport} component={CompanyReport} />
         <Drawer.Screen name={routes.commonWebView} component={CommonWebView} />
         <Drawer.Screen name={routes.smsSecurityScreen} component={SmsSecurityRoute} />
         <Drawer.Screen name={routes.profileScreen} component={ProfileRoute} />
@@ -250,6 +254,7 @@ const AppDrawer = () => {
         <Drawer.Screen name={routes.bidderProfileScreen} component={BidderProfileRoute} />
         <Drawer.Screen name={routes.notificationScreen} component={NotificationRoute} />
         <Drawer.Screen name={routes.messageScreen} component={MessageRoute} />
+        <Drawer.Screen name={routes.pendingBidsScreen} component={PendingBidsRoute} />
         <Drawer.Screen name={routes.staffScreen} component={StaffRoute} />
         <Drawer.Screen name={routes.addEditStaffScreen} component={AddEditStaffRoute} />
       </Drawer.Navigator>

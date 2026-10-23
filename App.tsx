@@ -18,6 +18,13 @@ import {
   setupTokenRefreshListener,
   registerDeviceToken,
 } from './src/services/notificationService';
+import {openFromNotification} from './src/services/notificationNavigation';
+import notifee from '@notifee/react-native';
+import {
+  getMessaging,
+  getInitialNotification,
+  onNotificationOpenedApp,
+} from '@react-native-firebase/messaging';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,7 +45,19 @@ const App = () => {
     };
     initNotifications();
 
-    const unsubscribeListeners = setupNotificationListeners();
+    // Tapping a notification opens the screen it is about.
+    const unsubscribeListeners = setupNotificationListeners(openFromNotification);
+    const messagingInstance = getMessaging();
+    const unsubscribeOpened = onNotificationOpenedApp(messagingInstance, remoteMessage =>
+      openFromNotification(remoteMessage?.data),
+    );
+    getInitialNotification(messagingInstance)
+      .then(remoteMessage => remoteMessage && openFromNotification(remoteMessage.data))
+      .catch(() => {});
+    notifee
+      .getInitialNotification()
+      .then(initial => initial && openFromNotification(initial.notification?.data))
+      .catch(() => {});
     const unsubscribeTokenRefresh = setupTokenRefreshListener((newToken: string) => {
       console.log('🔄 [FCM Token Refreshed]:', newToken);
       registerDeviceToken(newToken);
@@ -46,6 +65,7 @@ const App = () => {
 
     return () => {
       unsubscribeListeners();
+      unsubscribeOpened();
       unsubscribeTokenRefresh();
     };
   }, []);

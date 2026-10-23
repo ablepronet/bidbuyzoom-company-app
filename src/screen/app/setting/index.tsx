@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import AppHeader from '../../../components/appHeader';
 import { AppText } from '../../../components/AppText';
@@ -9,12 +9,44 @@ import { DrawerActions, useNavigation } from '@react-navigation/native';
 import Card from '../../../components/Card';
 import { useGetUserProfile } from '../../../services/queries/app/Profile';
 import { routes } from '../../../navigation/route';
+import ConfirmationModal from '../../../components/ConfirmationModal';
+import AppToast from '../../../components/toaster';
+import { post } from '../../../services/api';
+import apiEndPoints from '../../../constants/apiConstant';
+import { useAppDispatch } from '../../../redux/hooks';
+import { setUserLogout } from '../../../redux/slices/auth';
+import { persister } from '../../../redux/store';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Setting = () => {
   const navigation = useNavigation<any>();
   const { data } = useGetUserProfile();
   const userData = data?.datas || null;
   const companySlug = userData?.companySlug || 'company-te';
+
+  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // App Store / Google Play require in-app account deletion. The server removes this
+  // device's push tokens, so we only clear local state afterwards.
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const res = await post(apiEndPoints.deleteAccount, { confirm: 'DELETE' });
+      if (res?.status === false) throw new Error(res?.message);
+      setShowDeleteConfirm(false);
+      AppToast.success(res?.message || 'Your account has been deleted.');
+      await persister.purge();
+      queryClient.clear();
+      dispatch(setUserLogout());
+    } catch (error: any) {
+      AppToast.error(error?.response?.data?.message || error?.message || 'Failed to delete account. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleOpenDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -141,7 +173,42 @@ const Setting = () => {
           <View style={styles.divider} />
           <SettingItem icon="chatbubble-outline" title="SMS" path="sms" />
         </Card>
+
+        {/* Account Section */}
+        <AppText
+          title="Account"
+          fontySize="px12"
+          fontFamily="bold"
+          color="textSecondary"
+          style={styles.sectionTitle}
+        />
+        <Card style={styles.sectionCard}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => setShowDeleteConfirm(true)}>
+            <View style={styles.itemLeft}>
+              <View style={styles.iconWrapper}>
+                <Icon name="trash-outline" size={ms(18)} color={colors.red} />
+              </View>
+              <AppText
+                title="Delete Account"
+                fontySize="px14"
+                fontFamily="medium"
+                color="red"
+              />
+            </View>
+          </TouchableOpacity>
+        </Card>
       </ScrollView>
+      <ConfirmationModal
+        visible={showDeleteConfirm}
+        onClose={() => !deleting && setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteAccount}
+        isLoading={deleting}
+        title="Delete account?"
+        message="Owners: your company account is closed, logins are disabled and billing is cancelled. Staff: only your own login is removed. Sale and invoice records are kept for legal and tax purposes. This cannot be undone."
+        confirmText="Delete"
+      />
     </View>
   );
 };

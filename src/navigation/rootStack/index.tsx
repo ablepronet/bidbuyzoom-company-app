@@ -13,6 +13,7 @@ import AppDrawer from '../drawer';
 import WebViewDashboard from '../../screen/app/webviewDashboard';
 import {useGetUserProfile} from '../../services/queries/app/Profile';
 import {registerDeviceToken} from '../../services/notificationService';
+import {flushPendingNotification} from '../../services/notificationNavigation';
 
 const RootStack = () => {
   const insets = useSafeAreaInsets();
@@ -40,7 +41,7 @@ const RootStack = () => {
   // Show WebView dashboard if planSelected is false
   if (isLogin && userData && !userData?.planSelected) {
     return (
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} onReady={flushPendingNotification}>
         <StatusBar
           backgroundColor="#FFFFFF"
           barStyle="dark-content"
@@ -53,7 +54,7 @@ const RootStack = () => {
   }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} onReady={flushPendingNotification}>
       <StatusBar
         backgroundColor="#FFFFFF"
         barStyle="dark-content"

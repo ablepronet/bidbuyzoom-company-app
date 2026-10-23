@@ -61,6 +61,9 @@ const apiEndPoints = {
   addStaff: 'add-staff',
   updateStaff: 'update-staff',
   updateStaffPermissions: 'update-staff-permissions',
+  pendingBids: 'get-pending-bids',
+  approveBid: 'approve-bid',
+  deleteAccount: 'delete-account',
 };
 
 export default apiEndPoints;

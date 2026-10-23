@@ -23,7 +23,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { routes } from '../route';
 import { useGetUserProfile } from '../../services/queries/app/Profile';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { HELP } from '../../constants/apiConstant';
+import { HELP, WEB_BASE_URL } from '../../constants/apiConstant';
 import { useQueryClient } from '@tanstack/react-query';
 import { unregisterDeviceToken } from '../../services/notificationService';
 
@@ -35,6 +35,7 @@ type MenuItemType = {
   route?: string;
   tabScreen?: string; // Optional: target screen within DashboardTabs
   badge?: number;
+  webPath?: string; // Optional: company admin website page shown in the in-app web view
 };
 
 // Static menu data matching the screenshot
@@ -79,18 +80,24 @@ const menuItems: MenuItemType[] = [
     icon: 'mail-outline',
     route: routes.consignmentRequests,
   },
-  // {
-  //   id: '7',
-  //   title: 'Company Report',
-  //   icon: 'bar-chart-outline',
-  //   route: routes.companyReport,
-  // },
-  // {
-  //   id: '10',
-  //   title: 'Marketing',
-  //   icon: 'megaphone-outline',
-  //   route: routes.marketing,
-  // },
+  {
+    id: 'pending-bids',
+    title: 'Pending Bids',
+    icon: 'hourglass-outline',
+    route: routes.pendingBidsScreen,
+  },
+  {
+    id: '7',
+    title: 'Company Report',
+    icon: 'bar-chart-outline',
+    webPath: 'company-reports/summary',
+  },
+  {
+    id: '10',
+    title: 'Marketing',
+    icon: 'megaphone-outline',
+    webPath: 'marketing',
+  },
   // {
   //   id: '8',
   //   title: 'Notifications',
@@ -138,6 +145,15 @@ export const CustomDrawerContent = (props: any) => {
   });
 
   const handleNavigate = (item: MenuItemType) => {
+    if (item.webPath) {
+      const companySlug = data?.datas?.companySlug || (userData as any)?.companySlug || '';
+      // @ts-ignore
+      navigation.navigate(routes.commonWebView, {
+        title: item.title,
+        url: `${WEB_BASE_URL}/${companySlug}/${item.webPath}?mobile=true`,
+      });
+      return;
+    }
     if (item.tabScreen) {
       // @ts-ignore
       navigation.navigate(item.route, { screen: item.tabScreen });
