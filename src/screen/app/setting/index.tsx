@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import AppHeader from '../../../components/appHeader';
 import { AppText } from '../../../components/AppText';
 import { colors, WEB_BASE_URL } from '../../../constants';
@@ -29,14 +29,19 @@ const Setting = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // App Store / Google Play require in-app account deletion. The server removes this
-  // device's push tokens, so we only clear local state afterwards.
+  // App Store / Google Play require in-app account deletion. Staff logins are deleted straight
+  // away (the server removes their push tokens). An owner's request goes to BidBuyZoom support,
+  // which confirms before closing the business, so the owner stays logged in.
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
       const res = await post(apiEndPoints.deleteAccount, { confirm: 'DELETE' });
       if (res?.status === false) throw new Error(res?.message);
       setShowDeleteConfirm(false);
+      if (res?.deleted === false) {
+        Alert.alert('Deletion requested', res?.message || 'Your deletion request has been sent.');
+        return;
+      }
       AppToast.success(res?.message || 'Your account has been deleted.');
       await persister.purge();
       queryClient.clear();
@@ -206,7 +211,7 @@ const Setting = () => {
         onConfirm={handleDeleteAccount}
         isLoading={deleting}
         title="Delete account?"
-        message="Owners: your company account is closed, logins are disabled and billing is cancelled. Staff: only your own login is removed. Sale and invoice records are kept for legal and tax purposes. This cannot be undone."
+        message="Staff: your login is deleted right away. Owners: a deletion request is sent to BidBuyZoom, and we will contact you to confirm before closing the company account. Sale and invoice records are kept for legal and tax purposes."
         confirmText="Delete"
       />
     </View>
